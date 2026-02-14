@@ -1,10 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUserBalance } from '@/lib/queries/balance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Coins, Calendar, History } from 'lucide-react'
+import { Calendar, History } from 'lucide-react'
+import BalanceCard from '@/components/features/dashboard/BalanceCard'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+
+  // ユーザーの残高を取得
+  const balance = user ? await getUserBalance(user.id) : { available: 0, locked: 0, total: 0 }
 
   return (
     <div className="space-y-8">
@@ -14,20 +19,11 @@ export default async function DashboardPage() {
       </div>
 
       {/* コイン残高カード */}
-      <Card className="bg-gradient-to-br from-amber-400 to-amber-600 text-white">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Coins className="h-6 w-6" />
-            コイン残高
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-4xl font-bold">0 SC</div>
-          <div className="text-amber-100 mt-2">
-            <span className="text-sm">ロック中: 0 SC</span>
-          </div>
-        </CardContent>
-      </Card>
+      <BalanceCard
+        available={balance.available}
+        locked={balance.locked}
+        total={balance.total}
+      />
 
       {/* クイックアクション */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -56,7 +52,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* プレースホルダー: 直近の予約 */}
+      {/* 直近の予約 */}
       <Card>
         <CardHeader>
           <CardTitle>直近の予約</CardTitle>
