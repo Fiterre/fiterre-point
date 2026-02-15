@@ -117,20 +117,13 @@ export interface Trainer {
 export interface Reservation {
   id: string
   user_id: string
-  trainer_id: string
-  reserved_date: string
-  start_time: string
-  end_time: string
-  status: ReservationStatus
-  locked_coin_amount: number
-  cancel_deadline: string
-  cancelled_at: string | null
-  completed_at: string | null
-  check_in_at: string | null
-  user_notes: string | null
-  trainer_notes: string | null
-  created_at: string
-  updated_at: string
+  trainer_id: string | null
+  session_id: string | null
+  reserved_at: string | null
+  coins_used: number
+  status: ReservationStatus | null
+  created_at: string | null
+  updated_at: string | null
 }
 
 // ========================================
@@ -160,4 +153,38 @@ export interface ApiResponse<T> {
     code: string
     message: string
   }
+}
+
+// ========================================
+// Extended Types (with Relations)
+// ========================================
+
+// セッション種別
+export interface SessionType {
+  id: string
+  name: string
+  duration_minutes: number
+  coin_cost: number
+  description: string | null
+  is_active: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
+// トレーナー（拡張）
+export interface TrainerWithProfile extends Trainer {
+  profiles: {
+    display_name: string | null
+  }
+}
+
+// 予約（拡張）
+export interface ReservationWithDetails extends Reservation {
+  trainers: {
+    profiles: {
+      display_name: string | null
+    }
+  }
+  session_types: SessionType | null
 }

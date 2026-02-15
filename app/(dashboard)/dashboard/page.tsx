@@ -3,6 +3,7 @@ import { getUserBalance } from '@/lib/queries/balance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, History } from 'lucide-react'
 import BalanceCard from '@/components/features/dashboard/BalanceCard'
+import Link from 'next/link'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -27,29 +28,33 @@ export default async function DashboardPage() {
 
       {/* クイックアクション */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="p-3 bg-amber-100 rounded-full">
-              <Calendar className="h-6 w-6 text-amber-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold">予約する</h3>
-              <p className="text-sm text-gray-600">トレーニングを予約</p>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/dashboard/reservations">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="p-3 bg-amber-100 rounded-full">
+                <Calendar className="h-6 w-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">予約する</h3>
+                <p className="text-sm text-gray-600">トレーニングを予約</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="p-3 bg-amber-100 rounded-full">
-              <History className="h-6 w-6 text-amber-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold">履歴を見る</h3>
-              <p className="text-sm text-gray-600">取引履歴を確認</p>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/dashboard/history">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="p-3 bg-amber-100 rounded-full">
+                <History className="h-6 w-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">履歴を見る</h3>
+                <p className="text-sm text-gray-600">取引履歴を確認</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* 直近の予約 */}

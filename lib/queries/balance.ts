@@ -32,7 +32,7 @@ export async function getUserTransactions(userId: string, limit: number = 10) {
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
