@@ -256,3 +256,41 @@ export interface RecurringReservationWithDetails extends RecurringReservation {
     coin_cost: number
   }
 }
+
+// ========================================
+// 権限Tier
+// ========================================
+
+export interface RoleTier {
+  id: string
+  tier_level: number
+  tier_name: string
+  description: string | null
+  permissions: TierPermissions
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface TierPermissions {
+  users: { view: boolean; edit: boolean; delete: boolean }
+  coins: { view: boolean; grant: boolean; adjust: boolean }
+  mentors: { view: boolean; edit: boolean; manage_all: boolean }
+  shifts: { view: boolean; edit_own: boolean; edit_all: boolean }
+  reservations: { view_all?: boolean; view_own?: boolean; edit_all?: boolean; edit_own?: boolean; cancel: boolean }
+  recurring: { view: boolean; edit: boolean; execute: boolean }
+  fitest: { view: boolean; input: boolean; manage: boolean }
+  records: { view_all?: boolean; view_own?: boolean; edit_all?: boolean; edit_own?: boolean }
+  settings: { view: boolean; edit: boolean }
+  analytics: { view: boolean }
+}
+
+export interface UserRoleWithTier {
+  id: string
+  user_id: string
+  role: 'admin' | 'manager' | 'mentor' | 'user'
+  tier_id: string | null
+  granted_by: string | null
+  granted_at: string
+  role_tiers: RoleTier | null
+}
