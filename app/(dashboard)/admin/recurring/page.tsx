@@ -94,7 +94,7 @@ export default async function AdminRecurringPage() {
                           {res.profiles?.display_name || res.profiles?.email || '顧客'}
                         </p>
                         <p className="text-gray-400 text-xs">
-                          担当: {res.trainers?.profiles?.display_name || 'トレーナー'}
+                          担当: {res.mentors?.profiles?.display_name || 'メンター'}
                         </p>
                       </div>
                     ))}

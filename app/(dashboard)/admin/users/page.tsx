@@ -10,7 +10,7 @@ export default async function AdminUsersPage() {
     const colors: Record<string, string> = {
       admin: 'bg-red-100 text-red-800',
       manager: 'bg-purple-100 text-purple-800',
-      trainer: 'bg-blue-100 text-blue-800',
+      mentor: 'bg-blue-100 text-blue-800',
       user: 'bg-gray-100 text-gray-800',
     }
     return colors[role] || colors.user

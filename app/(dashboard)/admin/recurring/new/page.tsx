@@ -1,4 +1,4 @@
-import { getTrainers, getSessionTypes } from '@/lib/queries/reservations'
+import { getMentors, getSessionTypes } from '@/lib/queries/reservations'
 import { getAllUsers } from '@/lib/queries/users'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
@@ -6,8 +6,8 @@ import Link from 'next/link'
 import RecurringReservationForm from '@/components/features/admin/RecurringReservationForm'
 
 export default async function NewRecurringPage() {
-  const [trainers, sessionTypes, users] = await Promise.all([
-    getTrainers(),
+  const [mentors, sessionTypes, users] = await Promise.all([
+    getMentors(),
     getSessionTypes(),
     getAllUsers()
   ])
@@ -30,7 +30,7 @@ export default async function NewRecurringPage() {
         </CardHeader>
         <CardContent>
           <RecurringReservationForm
-            trainers={trainers}
+            mentors={mentors}
             sessionTypes={sessionTypes}
             users={users}
           />

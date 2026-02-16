@@ -14,9 +14,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '権限がありません' }, { status: 403 })
     }
 
-    const { trainerId, days, startTime, endTime } = await request.json()
+    const { mentorId, days, startTime, endTime } = await request.json()
 
-    if (!trainerId || !days || days.length === 0 || !startTime || !endTime) {
+    if (!mentorId || !days || days.length === 0 || !startTime || !endTime) {
       return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 })
     }
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
     // 各曜日のシフトを作成
     const shifts = days.map((day: number) => ({
-      trainer_id: trainerId,
+      mentor_id: mentorId,
       day_of_week: day,
       start_time: startTime,
       end_time: endTime,
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     }))
 
     const { data, error } = await supabase
-      .from('trainer_shifts')
+      .from('mentor_shifts')
       .insert(shifts)
       .select()
 

@@ -14,9 +14,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '権限がありません' }, { status: 403 })
     }
 
-    const { userId, trainerId, sessionTypeId, dayOfWeek, startTime, endTime, notes } = await request.json()
+    const { userId, mentorId, sessionTypeId, dayOfWeek, startTime, endTime, notes } = await request.json()
 
-    if (!userId || !trainerId || !sessionTypeId || dayOfWeek === undefined || !startTime || !endTime) {
+    if (!userId || !mentorId || !sessionTypeId || dayOfWeek === undefined || !startTime || !endTime) {
       return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 })
     }
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       .from('recurring_reservations')
       .insert({
         user_id: userId,
-        trainer_id: trainerId,
+        mentor_id: mentorId,
         session_type_id: sessionTypeId,
         day_of_week: dayOfWeek,
         start_time: startTime,

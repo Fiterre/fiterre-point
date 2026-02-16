@@ -1,5 +1,5 @@
-import { getTrainerShifts, DAY_OF_WEEK_LABELS } from '@/lib/queries/shifts'
-import { getTrainers } from '@/lib/queries/reservations'
+import { getMentorShifts, DAY_OF_WEEK_LABELS } from '@/lib/queries/shifts'
+import { getMentors } from '@/lib/queries/reservations'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -7,15 +7,15 @@ import { Plus } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function AdminShiftsPage() {
-  const [shifts, trainers] = await Promise.all([
-    getTrainerShifts(),
-    getTrainers()
+  const [shifts, mentors] = await Promise.all([
+    getMentorShifts(),
+    getMentors()
   ])
 
-  // トレーナーごとにシフトをグループ化
-  const shiftsByTrainer = trainers.map(trainer => ({
-    trainer,
-    shifts: shifts.filter(s => s.trainer_id === trainer.id)
+  // メンターごとにシフトをグループ化
+  const shiftsByMentor = mentors.map(mentor => ({
+    mentor,
+    shifts: shifts.filter(s => s.mentor_id === mentor.id)
   }))
 
   return (
@@ -23,7 +23,7 @@ export default async function AdminShiftsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">シフト管理</h1>
-          <p className="text-gray-600">トレーナーの勤務シフトを管理</p>
+          <p className="text-gray-600">メンターの勤務シフトを管理</p>
         </div>
         <Link href="/admin/shifts/new">
           <Button>
@@ -33,13 +33,13 @@ export default async function AdminShiftsPage() {
         </Link>
       </div>
 
-      {/* トレーナー別シフト一覧 */}
-      {shiftsByTrainer.map(({ trainer, shifts }) => (
-        <Card key={trainer.id}>
+      {/* メンター別シフト一覧 */}
+      {shiftsByMentor.map(({ mentor, shifts }) => (
+        <Card key={mentor.id}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {trainer.profiles?.display_name || '名前未設定'}
-              <Badge variant="outline">{trainer.specialty || 'トレーナー'}</Badge>
+              {mentor.profiles?.display_name || '名前未設定'}
+              <Badge variant="outline">{mentor.specialty || 'メンター'}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -72,10 +72,10 @@ export default async function AdminShiftsPage() {
         </Card>
       ))}
 
-      {trainers.length === 0 && (
+      {mentors.length === 0 && (
         <Card>
           <CardContent className="py-8 text-center text-gray-500">
-            トレーナーが登録されていません
+            メンターが登録されていません
           </CardContent>
         </Card>
       )}

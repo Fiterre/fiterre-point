@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 
-interface Trainer {
+interface Mentor {
   id: string
   profiles: {
     display_name: string | null
@@ -14,7 +14,7 @@ interface Trainer {
 }
 
 interface Props {
-  trainers: Trainer[]
+  mentors: Mentor[]
 }
 
 const DAY_LABELS = ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜']
@@ -23,8 +23,8 @@ const TIME_OPTIONS = [
   '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00'
 ]
 
-export default function ShiftForm({ trainers }: Props) {
-  const [trainerId, setTrainerId] = useState('')
+export default function ShiftForm({ mentors }: Props) {
+  const [mentorId, setMentorId] = useState('')
   const [selectedDays, setSelectedDays] = useState<number[]>([])
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('18:00')
@@ -43,11 +43,11 @@ export default function ShiftForm({ trainers }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!trainerId || selectedDays.length === 0) {
+    if (!mentorId || selectedDays.length === 0) {
       toast({
         variant: 'destructive',
         title: 'エラー',
-        description: 'トレーナーと曜日を選択してください',
+        description: 'メンターと曜日を選択してください',
       })
       return
     }
@@ -59,7 +59,7 @@ export default function ShiftForm({ trainers }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          trainerId,
+          mentorId,
           days: selectedDays,
           startTime,
           endTime,
@@ -92,21 +92,21 @@ export default function ShiftForm({ trainers }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* トレーナー選択 */}
+      {/* メンター選択 */}
       <div className="space-y-2">
-        <Label>トレーナー</Label>
+        <Label>メンター</Label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {trainers.map(trainer => (
+          {mentors.map(mentor => (
             <div
-              key={trainer.id}
-              onClick={() => setTrainerId(trainer.id)}
+              key={mentor.id}
+              onClick={() => setMentorId(mentor.id)}
               className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                trainerId === trainer.id
+                mentorId === mentor.id
                   ? 'border-amber-500 bg-amber-50'
                   : 'hover:border-gray-300'
               }`}
             >
-              <p className="font-medium">{trainer.profiles?.display_name || '名前未設定'}</p>
+              <p className="font-medium">{mentor.profiles?.display_name || '名前未設定'}</p>
             </div>
           ))}
         </div>
@@ -170,7 +170,7 @@ export default function ShiftForm({ trainers }: Props) {
         </div>
       )}
 
-      <Button type="submit" className="w-full" disabled={loading || !trainerId || selectedDays.length === 0}>
+      <Button type="submit" className="w-full" disabled={loading || !mentorId || selectedDays.length === 0}>
         {loading ? '登録中...' : 'シフトを登録する'}
       </Button>
     </form>

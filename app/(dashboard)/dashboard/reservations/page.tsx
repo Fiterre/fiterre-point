@@ -88,7 +88,7 @@ export default async function ReservationsPage() {
                         <Badge className={badge.style}>{badge.label}</Badge>
                       </div>
                       <p className="text-sm text-gray-600">
-                        トレーナー: {res.trainers?.profiles?.display_name || '未設定'}
+                        メンター: {res.mentors?.profiles?.display_name || '未設定'}
                       </p>
                       <p className="text-sm text-amber-600 font-medium">
                         {res.coins_used.toLocaleString()} SC
@@ -123,7 +123,7 @@ export default async function ReservationsPage() {
                     <div>
                       <p className="font-medium">{dateStr} {timeStr}</p>
                       <p className="text-sm text-gray-500">
-                        {res.trainers?.profiles?.display_name || '未設定'}
+                        {res.mentors?.profiles?.display_name || '未設定'}
                       </p>
                     </div>
                     <Badge className={badge.style}>{badge.label}</Badge>

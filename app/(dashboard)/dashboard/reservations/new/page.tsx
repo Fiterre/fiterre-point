@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { getSessionTypes, getTrainers } from '@/lib/queries/reservations'
+import { getSessionTypes, getMentors } from '@/lib/queries/reservations'
 import { getUserBalance } from '@/lib/queries/balance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
@@ -12,9 +12,9 @@ export default async function NewReservationPage() {
 
   if (!user) return null
 
-  const [sessionTypes, trainers, balance] = await Promise.all([
+  const [sessionTypes, mentors, balance] = await Promise.all([
     getSessionTypes(),
-    getTrainers(),
+    getMentors(),
     getUserBalance(user.id)
   ])
 
@@ -51,7 +51,7 @@ export default async function NewReservationPage() {
         <CardContent>
           <ReservationForm
             sessionTypes={sessionTypes}
-            trainers={trainers}
+            mentors={mentors}
             availableBalance={balance.available}
           />
         </CardContent>

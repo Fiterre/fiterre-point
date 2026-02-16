@@ -4,14 +4,14 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // 曜日の日本語ラベル
 export const DAY_OF_WEEK_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
-export async function getTrainerShifts(trainerId?: string) {
+export async function getMentorShifts(mentorId?: string) {
   const supabase = await createClient()
 
   let query = supabase
-    .from('trainer_shifts')
+    .from('mentor_shifts')
     .select(`
       *,
-      trainers (
+      mentors (
         id,
         profiles (
           display_name
@@ -22,8 +22,8 @@ export async function getTrainerShifts(trainerId?: string) {
     .order('day_of_week')
     .order('start_time')
 
-  if (trainerId) {
-    query = query.eq('trainer_id', trainerId)
+  if (mentorId) {
+    query = query.eq('mentor_id', mentorId)
   }
 
   const { data, error } = await query
@@ -36,14 +36,14 @@ export async function getTrainerShifts(trainerId?: string) {
   return data ?? []
 }
 
-export async function getAvailableTrainers(dayOfWeek: number, time: string) {
+export async function getAvailableMentors(dayOfWeek: number, time: string) {
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('trainer_shifts')
+    .from('mentor_shifts')
     .select(`
-      trainer_id,
-      trainers (
+      mentor_id,
+      mentors (
         id,
         specialty,
         profiles (
@@ -57,20 +57,20 @@ export async function getAvailableTrainers(dayOfWeek: number, time: string) {
     .gte('end_time', time)
 
   if (error) {
-    console.error('Error fetching available trainers:', error)
+    console.error('Error fetching available mentors:', error)
     return []
   }
 
   // 重複を除去
-  const uniqueTrainers = data?.reduce((acc, shift) => {
-    const trainer = shift.trainers as unknown as { id: string; specialty: string; profiles: { display_name: string }[] } | null
-    if (trainer && !acc.find(t => t.id === trainer.id)) {
-      acc.push(trainer)
+  const uniqueMentors = data?.reduce((acc, shift) => {
+    const mentor = shift.mentors as unknown as { id: string; specialty: string; profiles: { display_name: string }[] } | null
+    if (mentor && !acc.find(t => t.id === mentor.id)) {
+      acc.push(mentor)
     }
     return acc
   }, [] as any[])
 
-  return uniqueTrainers ?? []
+  return uniqueMentors ?? []
 }
 
 export async function getRecurringReservations() {
@@ -84,7 +84,7 @@ export async function getRecurringReservations() {
         display_name,
         email
       ),
-      trainers (
+      mentors (
         profiles (
           display_name
         )

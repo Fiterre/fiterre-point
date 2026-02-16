@@ -1,11 +1,11 @@
-import { getTrainers } from '@/lib/queries/reservations'
+import { getMentors } from '@/lib/queries/reservations'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import ShiftForm from '@/components/features/admin/ShiftForm'
 
 export default async function NewShiftPage() {
-  const trainers = await getTrainers()
+  const mentors = await getMentors()
 
   return (
     <div className="space-y-6">
@@ -15,7 +15,7 @@ export default async function NewShiftPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">シフト追加</h1>
-          <p className="text-gray-600">トレーナーのシフトを登録</p>
+          <p className="text-gray-600">メンターのシフトを登録</p>
         </div>
       </div>
 
@@ -24,7 +24,7 @@ export default async function NewShiftPage() {
           <CardTitle>シフト情報</CardTitle>
         </CardHeader>
         <CardContent>
-          <ShiftForm trainers={trainers} />
+          <ShiftForm mentors={mentors} />
         </CardContent>
       </Card>
     </div>

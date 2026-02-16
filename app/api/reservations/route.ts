@@ -13,9 +13,9 @@ export async function POST(request: Request) {
     }
 
     // リクエストボディ
-    const { sessionTypeId, trainerId, date, startTime } = await request.json()
+    const { sessionTypeId, mentorId, date, startTime } = await request.json()
 
-    if (!sessionTypeId || !trainerId || !date || !startTime) {
+    if (!sessionTypeId || !mentorId || !date || !startTime) {
       return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 })
     }
 
@@ -32,16 +32,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'セッション種別が見つかりません' }, { status: 400 })
     }
 
-    // トレーナー確認
-    const { data: trainer, error: trainerError } = await adminClient
-      .from('trainers')
+    // メンター確認
+    const { data: mentor, error: mentorError } = await adminClient
+      .from('mentors')
       .select('*')
-      .eq('id', trainerId)
+      .eq('id', mentorId)
       .eq('is_active', true)
       .single()
 
-    if (trainerError || !trainer) {
-      return NextResponse.json({ error: 'トレーナーが見つかりません' }, { status: 400 })
+    if (mentorError || !mentor) {
+      return NextResponse.json({ error: 'メンターが見つかりません' }, { status: 400 })
     }
 
     // 残高確認
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     const { data: trainingSession, error: trainingSessionError } = await adminClient
       .from('training_sessions')
       .insert({
-        trainer_id: trainerId,
+        mentor_id: mentorId,
         session_date: date,
         start_time: startTime,
         end_time: endTime,
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
       .from('reservations')
       .insert({
         user_id: user.id,
-        trainer_id: trainerId,
+        mentor_id: mentorId,
         session_id: trainingSession.id,
         coins_used: sessionType.coin_cost,
         reserved_at: reservedAtTimestamp,

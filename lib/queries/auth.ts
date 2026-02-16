@@ -28,7 +28,7 @@ export async function isAdmin(userId: string) {
   return role === 'admin' || role === 'manager'
 }
 
-export async function isTrainer(userId: string) {
+export async function isMentor(userId: string) {
   const role = await getUserRole(userId)
-  return role === 'admin' || role === 'manager' || role === 'trainer'
+  return role === 'admin' || role === 'manager' || role === 'mentor'
 }

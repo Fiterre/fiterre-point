@@ -16,7 +16,7 @@ interface SessionType {
   description: string | null
 }
 
-interface Trainer {
+interface Mentor {
   id: string
   specialty: string | null
   profiles: {
@@ -26,20 +26,20 @@ interface Trainer {
 
 interface Props {
   sessionTypes: SessionType[]
-  trainers: Trainer[]  // 初期表示用（全トレーナー）
+  mentors: Mentor[]  // 初期表示用（全メンター）
   availableBalance: number
 }
 
 const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
-export default function ReservationForm({ sessionTypes, trainers: allTrainers, availableBalance }: Props) {
+export default function ReservationForm({ sessionTypes, mentors: allMentors, availableBalance }: Props) {
   const [sessionTypeId, setSessionTypeId] = useState('')
-  const [trainerId, setTrainerId] = useState('')
+  const [mentorId, setMentorId] = useState('')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [loading, setLoading] = useState(false)
-  const [loadingTrainers, setLoadingTrainers] = useState(false)
-  const [availableTrainers, setAvailableTrainers] = useState<Trainer[]>([])
+  const [loadingMentors, setLoadingMentors] = useState(false)
+  const [availableMentors, setAvailableMentors] = useState<Mentor[]>([])
   const [selectedDayLabel, setSelectedDayLabel] = useState('')
   const router = useRouter()
   const { toast } = useToast()
@@ -57,35 +57,35 @@ export default function ReservationForm({ sessionTypes, trainers: allTrainers, a
   maxDate.setDate(maxDate.getDate() + 14)
   const maxDateStr = maxDate.toISOString().split('T')[0]
 
-  // 日付または時間が変更されたらトレーナーを再取得
+  // 日付または時間が変更されたらメンターを再取得
   useEffect(() => {
     if (date && time) {
-      fetchAvailableTrainers()
+      fetchAvailableMentors()
     } else {
-      setAvailableTrainers([])
-      setTrainerId('')
+      setAvailableMentors([])
+      setMentorId('')
     }
   }, [date, time])
 
-  const fetchAvailableTrainers = async () => {
-    setLoadingTrainers(true)
-    setTrainerId('')  // トレーナー選択をリセット
+  const fetchAvailableMentors = async () => {
+    setLoadingMentors(true)
+    setMentorId('')  // メンター選択をリセット
 
     try {
-      const response = await fetch(`/api/trainers/available?date=${date}&time=${time}`)
+      const response = await fetch(`/api/mentors/available?date=${date}&time=${time}`)
       const data = await response.json()
 
       if (response.ok) {
-        setAvailableTrainers(data.trainers)
+        setAvailableMentors(data.mentors)
         setSelectedDayLabel(DAY_LABELS[data.dayOfWeek])
       } else {
-        setAvailableTrainers([])
+        setAvailableMentors([])
       }
     } catch (error) {
-      console.error('Error fetching trainers:', error)
-      setAvailableTrainers([])
+      console.error('Error fetching mentors:', error)
+      setAvailableMentors([])
     } finally {
-      setLoadingTrainers(false)
+      setLoadingMentors(false)
     }
   }
 
@@ -109,7 +109,7 @@ export default function ReservationForm({ sessionTypes, trainers: allTrainers, a
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionTypeId,
-          trainerId,
+          mentorId,
           date,
           startTime: time,
         }),
@@ -170,7 +170,7 @@ export default function ReservationForm({ sessionTypes, trainers: allTrainers, a
         </div>
       </div>
 
-      {/* 日付・時間（トレーナーより先に選択） */}
+      {/* 日付・時間（メンターより先に選択） */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="date">日付</Label>
@@ -210,10 +210,10 @@ export default function ReservationForm({ sessionTypes, trainers: allTrainers, a
         </div>
       </div>
 
-      {/* トレーナー（日時選択後に表示） */}
+      {/* メンター（日時選択後に表示） */}
       <div className="space-y-3">
         <Label>
-          トレーナー
+          メンター
           {selectedDayLabel && (
             <span className="ml-2 text-sm text-gray-500">
               （{selectedDayLabel}曜 {time} に対応可能）
@@ -223,31 +223,31 @@ export default function ReservationForm({ sessionTypes, trainers: allTrainers, a
 
         {!date || !time ? (
           <p className="text-sm text-gray-500 p-4 bg-gray-50 rounded-lg">
-            日付と時間を選択すると、対応可能なトレーナーが表示されます
+            日付と時間を選択すると、対応可能なメンターが表示されます
           </p>
-        ) : loadingTrainers ? (
+        ) : loadingMentors ? (
           <div className="flex items-center justify-center p-4">
             <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
-            <span className="ml-2 text-gray-500">トレーナーを検索中...</span>
+            <span className="ml-2 text-gray-500">メンターを検索中...</span>
           </div>
-        ) : availableTrainers.length === 0 ? (
+        ) : availableMentors.length === 0 ? (
           <div className="p-4 bg-red-50 rounded-lg text-red-600 text-sm">
-            この日時に対応可能なトレーナーがいません。別の日時を選択してください。
+            この日時に対応可能なメンターがいません。別の日時を選択してください。
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {availableTrainers.map((trainer) => (
+            {availableMentors.map((mentor) => (
               <div
-                key={trainer.id}
-                onClick={() => setTrainerId(trainer.id)}
+                key={mentor.id}
+                onClick={() => setMentorId(mentor.id)}
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                  trainerId === trainer.id
+                  mentorId === mentor.id
                     ? 'border-amber-500 bg-amber-50'
                     : 'hover:border-gray-300'
                 }`}
               >
-                <p className="font-medium">{trainer.profiles?.display_name || '名前未設定'}</p>
-                <p className="text-sm text-gray-500">{trainer.specialty || ''}</p>
+                <p className="font-medium">{mentor.profiles?.display_name || '名前未設定'}</p>
+                <p className="text-sm text-gray-500">{mentor.specialty || ''}</p>
               </div>
             ))}
           </div>
@@ -274,7 +274,7 @@ export default function ReservationForm({ sessionTypes, trainers: allTrainers, a
       <Button
         type="submit"
         className="w-full"
-        disabled={loading || !sessionTypeId || !trainerId || !date || !time || !canAfford}
+        disabled={loading || !sessionTypeId || !mentorId || !date || !time || !canAfford}
       >
         {loading ? '予約中...' : '予約する'}
       </Button>

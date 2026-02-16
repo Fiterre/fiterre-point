@@ -123,7 +123,7 @@ export async function POST(request: Request) {
           const { data: session, error: sessionError } = await supabase
             .from('training_sessions')
             .insert({
-              trainer_id: recurring.trainer_id,
+              mentor_id: recurring.mentor_id,
               session_type_id: recurring.session_type_id,
               scheduled_at: `${targetDate}T${recurring.start_time}:00`,
               duration_minutes: recurring.session_types?.duration_minutes ?? 60,
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
             .insert({
               user_id: recurring.user_id,
               session_id: session.id,
-              trainer_id: recurring.trainer_id,
+              mentor_id: recurring.mentor_id,
               coins_used: coinCost,
               status: 'confirmed',
               reserved_at: `${targetDate}T${recurring.start_time}:00`,

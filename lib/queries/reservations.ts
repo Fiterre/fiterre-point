@@ -17,11 +17,11 @@ export async function getSessionTypes() {
   return data ?? []
 }
 
-export async function getTrainers() {
+export async function getMentors() {
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('trainers')
+    .from('mentors')
     .select(`
       *,
       profiles (
@@ -32,7 +32,7 @@ export async function getTrainers() {
     .order('created_at')
 
   if (error) {
-    console.error('Error fetching trainers:', error)
+    console.error('Error fetching mentors:', error)
     return []
   }
 
@@ -46,7 +46,7 @@ export async function getUserReservations(userId: string) {
     .from('reservations')
     .select(`
       *,
-      trainers (
+      mentors (
         id,
         user_id,
         profiles (
@@ -74,7 +74,7 @@ export async function getUpcomingReservations(userId: string) {
     .from('reservations')
     .select(`
       *,
-      trainers (
+      mentors (
         id,
         user_id,
         profiles (

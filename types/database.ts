@@ -2,7 +2,7 @@
 // ENUM Types
 // ========================================
 
-export type UserRole = 'admin' | 'manager' | 'trainer' | 'user'
+export type UserRole = 'admin' | 'manager' | 'mentor' | 'user'
 export type AccountStatus = 'active' | 'locked' | 'suspended' | 'deleted'
 export type MemberRank = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'
 export type LedgerStatus = 'active' | 'used_up' | 'expired' | 'locked'
@@ -104,7 +104,7 @@ export interface Transaction {
   created_at: string
 }
 
-export interface Trainer {
+export interface Mentor {
   id: string
   user_id: string
   specialty: string | null
@@ -117,7 +117,7 @@ export interface Trainer {
 export interface Reservation {
   id: string
   user_id: string
-  trainer_id: string | null
+  mentor_id: string | null
   session_id: string | null
   reserved_at: string | null
   coins_used: number
@@ -172,8 +172,8 @@ export interface SessionType {
   updated_at: string
 }
 
-// トレーナー（拡張）
-export interface TrainerWithProfile extends Trainer {
+// メンター（拡張）
+export interface MentorWithProfile extends Mentor {
   profiles: {
     display_name: string | null
   }
@@ -181,7 +181,7 @@ export interface TrainerWithProfile extends Trainer {
 
 // 予約（拡張）
 export interface ReservationWithDetails extends Reservation {
-  trainers: {
+  mentors: {
     profiles: {
       display_name: string | null
     }
@@ -189,10 +189,10 @@ export interface ReservationWithDetails extends Reservation {
   session_types: SessionType | null
 }
 
-// トレーナーシフト
-export interface TrainerShift {
+// メンターシフト
+export interface MentorShift {
   id: string
-  trainer_id: string
+  mentor_id: string
   day_of_week: number  // 0=日曜, 1=月曜, ..., 6=土曜
   start_time: string
   end_time: string
@@ -207,7 +207,7 @@ export interface TrainerShift {
 export interface RecurringReservation {
   id: string
   user_id: string
-  trainer_id: string
+  mentor_id: string
   session_type_id: string
   day_of_week: number
   start_time: string
@@ -230,9 +230,9 @@ export interface RecurringReservationLog {
   created_at: string
 }
 
-// シフト拡張型（トレーナー情報付き）
-export interface TrainerShiftWithProfile extends TrainerShift {
-  trainers: {
+// シフト拡張型（メンター情報付き）
+export interface MentorShiftWithProfile extends MentorShift {
+  mentors: {
     id: string
     profiles: {
       display_name: string | null
@@ -246,7 +246,7 @@ export interface RecurringReservationWithDetails extends RecurringReservation {
     display_name: string | null
     email: string
   }
-  trainers: {
+  mentors: {
     profiles: {
       display_name: string | null
     }

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 
-interface Trainer {
+interface Mentor {
   id: string
   profiles: { display_name: string | null }
 }
@@ -26,7 +26,7 @@ interface User {
 }
 
 interface Props {
-  trainers: Trainer[]
+  mentors: Mentor[]
   sessionTypes: SessionType[]
   users: User[]
 }
@@ -37,9 +37,9 @@ const TIME_OPTIONS = [
   '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
 ]
 
-export default function RecurringReservationForm({ trainers, sessionTypes, users }: Props) {
+export default function RecurringReservationForm({ mentors, sessionTypes, users }: Props) {
   const [userId, setUserId] = useState('')
-  const [trainerId, setTrainerId] = useState('')
+  const [mentorId, setMentorId] = useState('')
   const [sessionTypeId, setSessionTypeId] = useState('')
   const [dayOfWeek, setDayOfWeek] = useState<number | null>(null)
   const [startTime, setStartTime] = useState('')
@@ -70,7 +70,7 @@ export default function RecurringReservationForm({ trainers, sessionTypes, users
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!userId || !trainerId || !sessionTypeId || dayOfWeek === null || !startTime) {
+    if (!userId || !mentorId || !sessionTypeId || dayOfWeek === null || !startTime) {
       toast({
         variant: 'destructive',
         title: 'エラー',
@@ -87,7 +87,7 @@ export default function RecurringReservationForm({ trainers, sessionTypes, users
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          trainerId,
+          mentorId,
           sessionTypeId,
           dayOfWeek,
           startTime,
@@ -168,19 +168,19 @@ export default function RecurringReservationForm({ trainers, sessionTypes, users
         </div>
       </div>
 
-      {/* トレーナー */}
+      {/* メンター */}
       <div className="space-y-2">
-        <Label>担当トレーナー</Label>
+        <Label>担当メンター</Label>
         <div className="grid grid-cols-2 gap-2">
-          {trainers.map(trainer => (
+          {mentors.map(mentor => (
             <div
-              key={trainer.id}
-              onClick={() => setTrainerId(trainer.id)}
+              key={mentor.id}
+              onClick={() => setMentorId(mentor.id)}
               className={`p-3 border rounded-lg cursor-pointer ${
-                trainerId === trainer.id ? 'border-amber-500 bg-amber-50' : 'hover:border-gray-300'
+                mentorId === mentor.id ? 'border-amber-500 bg-amber-50' : 'hover:border-gray-300'
               }`}
             >
-              {trainer.profiles?.display_name || '名前未設定'}
+              {mentor.profiles?.display_name || '名前未設定'}
             </div>
           ))}
         </div>

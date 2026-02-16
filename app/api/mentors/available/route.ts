@@ -16,12 +16,12 @@ export async function GET(request: Request) {
 
     const supabase = await createClient()
 
-    // その曜日・時間にシフトがあるトレーナーを取得
+    // その曜日・時間にシフトがあるメンターを取得
     const { data: shifts, error } = await supabase
-      .from('trainer_shifts')
+      .from('mentor_shifts')
       .select(`
-        trainer_id,
-        trainers (
+        mentor_id,
+        mentors (
           id,
           specialty,
           profiles (
@@ -35,24 +35,24 @@ export async function GET(request: Request) {
       .gte('end_time', time + ':00')
 
     if (error) {
-      console.error('Error fetching available trainers:', error)
-      return NextResponse.json({ error: 'トレーナー取得に失敗しました' }, { status: 500 })
+      console.error('Error fetching available mentors:', error)
+      return NextResponse.json({ error: 'メンター取得に失敗しました' }, { status: 500 })
     }
 
-    // 重複を除去してトレーナーリストを作成
-    const trainersMap = new Map()
+    // 重複を除去してメンターリストを作成
+    const mentorsMap = new Map()
     shifts?.forEach(shift => {
-      const trainer = shift.trainers as unknown as { id: string; specialty: string; profiles: { display_name: string }[] } | null
-      if (trainer && !trainersMap.has(trainer.id)) {
-        trainersMap.set(trainer.id, trainer)
+      const mentor = shift.mentors as unknown as { id: string; specialty: string; profiles: { display_name: string }[] } | null
+      if (mentor && !mentorsMap.has(mentor.id)) {
+        mentorsMap.set(mentor.id, mentor)
       }
     })
 
-    const trainers = Array.from(trainersMap.values())
+    const mentors = Array.from(mentorsMap.values())
 
-    return NextResponse.json({ trainers, dayOfWeek })
+    return NextResponse.json({ mentors, dayOfWeek })
   } catch (error) {
-    console.error('Available trainers API error:', error)
+    console.error('Available mentors API error:', error)
     return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })
   }
 }
