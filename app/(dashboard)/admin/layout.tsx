@@ -3,7 +3,7 @@ import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { getUserTier } from '@/lib/queries/permissions'
 import TierBadge from '@/components/features/auth/TierBadge'
 import Link from 'next/link'
-import { Users, Coins, Settings, LayoutDashboard, Clock, CalendarClock, UserCog } from 'lucide-react'
+import { Users, Coins, Settings, LayoutDashboard, Clock, CalendarClock, UserCog, BarChart3 } from 'lucide-react'
 
 export default async function AdminLayout({
   children,
@@ -31,6 +31,7 @@ export default async function AdminLayout({
     { href: '/admin/coins', label: 'コイン管理', icon: Coins },
     { href: '/admin/shifts', label: 'シフト管理', icon: Clock },
     { href: '/admin/recurring', label: '固定予約', icon: CalendarClock },
+    { href: '/admin/analytics', label: '分析', icon: BarChart3 },
     { href: '/admin/settings', label: '設定', icon: Settings },
   ]
 
