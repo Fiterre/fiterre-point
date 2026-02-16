@@ -188,3 +188,71 @@ export interface ReservationWithDetails extends Reservation {
   }
   session_types: SessionType | null
 }
+
+// トレーナーシフト
+export interface TrainerShift {
+  id: string
+  trainer_id: string
+  day_of_week: number  // 0=日曜, 1=月曜, ..., 6=土曜
+  start_time: string
+  end_time: string
+  is_active: boolean
+  effective_from: string
+  effective_until: string | null
+  created_at: string
+  updated_at: string
+}
+
+// 固定予約（保証枠）
+export interface RecurringReservation {
+  id: string
+  user_id: string
+  trainer_id: string
+  session_type_id: string
+  day_of_week: number
+  start_time: string
+  end_time: string
+  is_active: boolean
+  priority: number
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+// 固定予約の反映履歴
+export interface RecurringReservationLog {
+  id: string
+  recurring_reservation_id: string
+  reservation_id: string | null
+  target_date: string
+  status: 'created' | 'skipped' | 'failed'
+  error_message: string | null
+  created_at: string
+}
+
+// シフト拡張型（トレーナー情報付き）
+export interface TrainerShiftWithProfile extends TrainerShift {
+  trainers: {
+    id: string
+    profiles: {
+      display_name: string | null
+    }
+  }
+}
+
+// 固定予約拡張型
+export interface RecurringReservationWithDetails extends RecurringReservation {
+  profiles: {
+    display_name: string | null
+    email: string
+  }
+  trainers: {
+    profiles: {
+      display_name: string | null
+    }
+  }
+  session_types: {
+    name: string
+    coin_cost: number
+  }
+}

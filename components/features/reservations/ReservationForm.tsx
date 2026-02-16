@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import { Loader2 } from 'lucide-react'
 
 interface SessionType {
   id: string
@@ -25,16 +26,21 @@ interface Trainer {
 
 interface Props {
   sessionTypes: SessionType[]
-  trainers: Trainer[]
+  trainers: Trainer[]  // 初期表示用（全トレーナー）
   availableBalance: number
 }
 
-export default function ReservationForm({ sessionTypes, trainers, availableBalance }: Props) {
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
+
+export default function ReservationForm({ sessionTypes, trainers: allTrainers, availableBalance }: Props) {
   const [sessionTypeId, setSessionTypeId] = useState('')
   const [trainerId, setTrainerId] = useState('')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [loading, setLoading] = useState(false)
+  const [loadingTrainers, setLoadingTrainers] = useState(false)
+  const [availableTrainers, setAvailableTrainers] = useState<Trainer[]>([])
+  const [selectedDayLabel, setSelectedDayLabel] = useState('')
   const router = useRouter()
   const { toast } = useToast()
 
@@ -50,6 +56,38 @@ export default function ReservationForm({ sessionTypes, trainers, availableBalan
   const maxDate = new Date()
   maxDate.setDate(maxDate.getDate() + 14)
   const maxDateStr = maxDate.toISOString().split('T')[0]
+
+  // 日付または時間が変更されたらトレーナーを再取得
+  useEffect(() => {
+    if (date && time) {
+      fetchAvailableTrainers()
+    } else {
+      setAvailableTrainers([])
+      setTrainerId('')
+    }
+  }, [date, time])
+
+  const fetchAvailableTrainers = async () => {
+    setLoadingTrainers(true)
+    setTrainerId('')  // トレーナー選択をリセット
+
+    try {
+      const response = await fetch(`/api/trainers/available?date=${date}&time=${time}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        setAvailableTrainers(data.trainers)
+        setSelectedDayLabel(DAY_LABELS[data.dayOfWeek])
+      } else {
+        setAvailableTrainers([])
+      }
+    } catch (error) {
+      console.error('Error fetching trainers:', error)
+      setAvailableTrainers([])
+    } finally {
+      setLoadingTrainers(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -132,28 +170,7 @@ export default function ReservationForm({ sessionTypes, trainers, availableBalan
         </div>
       </div>
 
-      {/* トレーナー */}
-      <div className="space-y-3">
-        <Label>トレーナー</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {trainers.map((trainer) => (
-            <div
-              key={trainer.id}
-              onClick={() => setTrainerId(trainer.id)}
-              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                trainerId === trainer.id
-                  ? 'border-amber-500 bg-amber-50'
-                  : 'hover:border-gray-300'
-              }`}
-            >
-              <p className="font-medium">{trainer.profiles?.display_name || '名前未設定'}</p>
-              <p className="text-sm text-gray-500">{trainer.specialty || ''}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 日付・時間 */}
+      {/* 日付・時間（トレーナーより先に選択） */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="date">日付</Label>
@@ -191,6 +208,50 @@ export default function ReservationForm({ sessionTypes, trainers, availableBalan
             <option value="20:00">20:00</option>
           </select>
         </div>
+      </div>
+
+      {/* トレーナー（日時選択後に表示） */}
+      <div className="space-y-3">
+        <Label>
+          トレーナー
+          {selectedDayLabel && (
+            <span className="ml-2 text-sm text-gray-500">
+              （{selectedDayLabel}曜 {time} に対応可能）
+            </span>
+          )}
+        </Label>
+
+        {!date || !time ? (
+          <p className="text-sm text-gray-500 p-4 bg-gray-50 rounded-lg">
+            日付と時間を選択すると、対応可能なトレーナーが表示されます
+          </p>
+        ) : loadingTrainers ? (
+          <div className="flex items-center justify-center p-4">
+            <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
+            <span className="ml-2 text-gray-500">トレーナーを検索中...</span>
+          </div>
+        ) : availableTrainers.length === 0 ? (
+          <div className="p-4 bg-red-50 rounded-lg text-red-600 text-sm">
+            この日時に対応可能なトレーナーがいません。別の日時を選択してください。
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {availableTrainers.map((trainer) => (
+              <div
+                key={trainer.id}
+                onClick={() => setTrainerId(trainer.id)}
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  trainerId === trainer.id
+                    ? 'border-amber-500 bg-amber-50'
+                    : 'hover:border-gray-300'
+                }`}
+              >
+                <p className="font-medium">{trainer.profiles?.display_name || '名前未設定'}</p>
+                <p className="text-sm text-gray-500">{trainer.specialty || ''}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 確認・送信 */}
