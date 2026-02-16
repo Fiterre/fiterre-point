@@ -210,3 +210,60 @@ export async function getMonthlyReports(
 
   return (data ?? []) as unknown as TrainingRecordWithRelations[]
 }
+
+export async function getRecentMentorRecords(
+  mentorUserId: string,
+  limit: number = 20
+): Promise<any[]> {
+  const supabase = createAdminClient()
+
+  // メンターIDを取得
+  const { data: mentor } = await supabase
+    .from('mentors')
+    .select('id')
+    .eq('user_id', mentorUserId)
+    .single()
+
+  if (!mentor) {
+    // メンターでない場合は全記録を取得（管理者向け）
+    const { data, error } = await supabase
+      .from('training_records')
+      .select(`
+        *,
+        profiles:user_id (
+          display_name,
+          email
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      console.error('Error fetching records:', error)
+      return []
+    }
+
+    return data ?? []
+  }
+
+  // メンターの場合は自分が作成した記録を取得
+  const { data, error } = await supabase
+    .from('training_records')
+    .select(`
+      *,
+      profiles:user_id (
+        display_name,
+        email
+      )
+    `)
+    .eq('mentor_id', mentor.id)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching mentor records:', error)
+    return []
+  }
+
+  return data ?? []
+}
