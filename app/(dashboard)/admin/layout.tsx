@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
+import { getUserTier } from '@/lib/queries/permissions'
+import TierBadge from '@/components/features/auth/TierBadge'
 import Link from 'next/link'
 import { Users, Coins, Settings, LayoutDashboard, Clock, CalendarClock } from 'lucide-react'
 
@@ -20,6 +22,8 @@ export default async function AdminLayout({
     redirect('/dashboard')
   }
 
+  const tierData = await getUserTier(user.id)
+
   const navItems = [
     { href: '/admin', label: 'ダッシュボード', icon: LayoutDashboard },
     { href: '/admin/users', label: 'ユーザー管理', icon: Users },
@@ -35,6 +39,14 @@ export default async function AdminLayout({
       <aside className="w-64 bg-gray-900 text-white">
         <div className="p-4 border-b border-gray-700">
           <h2 className="text-lg font-bold text-amber-400">管理者パネル</h2>
+          {tierData?.tier && (
+            <div className="mt-2">
+              <TierBadge
+                tierLevel={tierData.tier.tier_level}
+                tierName={tierData.tier.tier_name}
+              />
+            </div>
+          )}
         </div>
         <nav className="p-4 space-y-2">
           {navItems.map((item) => (

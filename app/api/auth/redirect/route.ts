@@ -17,8 +17,15 @@ export async function GET() {
     .eq('user_id', user.id)
     .single()
 
-  const role = roleData?.role
-  const path = role === 'admin' || role === 'manager' ? '/admin' : '/dashboard'
+  const role = roleData?.role || 'user'
+
+  // ロールに応じたリダイレクト先
+  let path = '/dashboard'
+  if (role === 'admin' || role === 'manager') {
+    path = '/admin'
+  } else if (role === 'mentor') {
+    path = '/mentor'
+  }
 
   return NextResponse.json({ path })
 }
