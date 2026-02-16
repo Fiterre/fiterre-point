@@ -27,6 +27,7 @@ export async function getUserTier(userId: string) {
 
   return {
     role: data.role,
+    tier_id: data.tier_id,
     tier
   }
 }
