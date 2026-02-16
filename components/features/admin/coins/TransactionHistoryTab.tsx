@@ -1,11 +1,20 @@
-import { Card, CardContent } from '@/components/ui/card'
+import { getAllTransactions, getTransactionStats } from '@/lib/queries/transactions'
+import { getAllUsers } from '@/lib/queries/users'
+import TransactionHistoryView from './TransactionHistoryView'
 
-export default function TransactionHistoryTab() {
+export default async function TransactionHistoryTab() {
+  const [{ data: transactions, count }, stats, users] = await Promise.all([
+    getAllTransactions(50),
+    getTransactionStats(),
+    getAllUsers()
+  ])
+
   return (
-    <Card>
-      <CardContent className="py-12 text-center text-gray-500">
-        取引履歴機能は次の指示で実装します
-      </CardContent>
-    </Card>
+    <TransactionHistoryView
+      initialTransactions={transactions}
+      totalCount={count}
+      stats={stats}
+      users={users}
+    />
   )
 }
