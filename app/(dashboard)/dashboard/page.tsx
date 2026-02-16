@@ -3,6 +3,8 @@ import { getUserBalance } from '@/lib/queries/balance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, History } from 'lucide-react'
 import BalanceCard from '@/components/features/dashboard/BalanceCard'
+import { getCoinRankings, getUserRankPosition } from '@/lib/queries/rankings'
+import CoinRankingCard from '@/components/features/dashboard/CoinRankingCard'
 import Link from 'next/link'
 
 export default async function DashboardPage() {
@@ -11,6 +13,11 @@ export default async function DashboardPage() {
 
   // ユーザーの残高を取得
   const balance = user ? await getUserBalance(user.id) : { available: 0, locked: 0, total: 0 }
+
+  const [rankings, userPosition] = await Promise.all([
+    getCoinRankings(5),
+    user ? getUserRankPosition(user.id) : Promise.resolve(null)
+  ])
 
   return (
     <div className="space-y-8">
@@ -68,6 +75,18 @@ export default async function DashboardPage() {
           </p>
         </CardContent>
       </Card>
+
+      {/* コインランキング */}
+      <CoinRankingCard
+        rankings={rankings}
+        currentUserId={user?.id}
+      />
+
+      {userPosition && (
+        <p className="text-sm text-center text-gray-500">
+          あなたの順位: {userPosition}位
+        </p>
+      )}
     </div>
   )
 }

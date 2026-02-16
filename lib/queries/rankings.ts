@@ -1,0 +1,79 @@
+import { createAdminClient } from '@/lib/supabase/admin'
+
+export interface CoinRanking {
+  userId: string
+  displayName: string
+  email: string
+  rank: string
+  totalCoins: number
+  position: number
+}
+
+export async function getCoinRankings(limit: number = 10): Promise<CoinRanking[]> {
+  const supabase = createAdminClient()
+
+  // 全ユーザーのコイン残高を取得
+  const { data: ledgers, error } = await supabase
+    .from('coin_ledgers')
+    .select(`
+      user_id,
+      amount_current,
+      amount_locked,
+      profiles:user_id (
+        display_name,
+        email,
+        rank
+      )
+    `)
+    .eq('status', 'active')
+
+  if (error) {
+    console.error('Error fetching rankings:', error)
+    return []
+  }
+
+  // ユーザーごとに集計
+  const userTotals: Record<string, {
+    displayName: string
+    email: string
+    rank: string
+    totalCoins: number
+  }> = {}
+
+  ledgers?.forEach(ledger => {
+    const userId = ledger.user_id
+    const profile = ledger.profiles as any
+
+    if (!userTotals[userId]) {
+      userTotals[userId] = {
+        displayName: profile?.display_name || '名前未設定',
+        email: profile?.email || '',
+        rank: profile?.rank || 'bronze',
+        totalCoins: 0
+      }
+    }
+
+    userTotals[userId].totalCoins += (ledger.amount_current || 0) + (ledger.amount_locked || 0)
+  })
+
+  // ランキング作成
+  const rankings = Object.entries(userTotals)
+    .map(([userId, data]) => ({
+      userId,
+      ...data
+    }))
+    .sort((a, b) => b.totalCoins - a.totalCoins)
+    .slice(0, limit)
+    .map((item, index) => ({
+      ...item,
+      position: index + 1
+    }))
+
+  return rankings
+}
+
+export async function getUserRankPosition(userId: string): Promise<number | null> {
+  const rankings = await getCoinRankings(100)
+  const userRank = rankings.find(r => r.userId === userId)
+  return userRank?.position || null
+}

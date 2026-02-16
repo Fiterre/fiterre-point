@@ -1,9 +1,12 @@
 import { getAllUsers } from '@/lib/queries/users'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Coins, Calendar, TrendingUp } from 'lucide-react'
+import { getCoinRankings } from '@/lib/queries/rankings'
+import CoinRankingCard from '@/components/features/dashboard/CoinRankingCard'
 
 export default async function AdminDashboardPage() {
   const users = await getAllUsers()
+  const rankings = await getCoinRankings(5)
 
   const stats = [
     {
@@ -92,6 +95,9 @@ export default async function AdminDashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* コインランキング */}
+      <CoinRankingCard rankings={rankings} showViewAll />
     </div>
   )
 }
