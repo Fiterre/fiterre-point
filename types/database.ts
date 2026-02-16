@@ -294,3 +294,48 @@ export interface UserRoleWithTier {
   granted_at: string
   role_tiers: RoleTier | null
 }
+
+// ========================================
+// トレーニングレコード
+// ========================================
+
+// エクササイズ詳細
+export interface Exercise {
+  name: string
+  sets?: number
+  reps?: number
+  weight?: number
+  duration?: number
+  notes?: string
+}
+
+// トレーニングレコード
+export interface TrainingRecord {
+  id: string
+  user_id: string
+  mentor_id: string | null
+  session_id: string | null
+  record_date: string
+  record_type: 'daily' | 'monthly'
+  title: string | null
+  content: string
+  exercises: Exercise[]
+  notes: string | null
+  is_sent_to_line: boolean
+  sent_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+// トレーニングレコード（リレーション付き）
+export interface TrainingRecordWithRelations extends TrainingRecord {
+  profiles?: {
+    display_name: string | null
+    email: string
+  }
+  mentors?: {
+    profiles: {
+      display_name: string | null
+    }
+  }
+}
