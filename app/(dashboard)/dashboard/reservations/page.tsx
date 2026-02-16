@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Plus, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import CancelReservationButton from '@/components/features/reservations/CancelReservationButton'
+import CancelSuggestionBanner from '@/components/features/reservations/CancelSuggestionBanner'
 
 export default async function ReservationsPage() {
   const supabase = await createClient()
@@ -36,6 +37,9 @@ export default async function ReservationsPage() {
 
   return (
     <div className="space-y-6">
+      {/* キャンセル多い顧客への提案 */}
+      {user && <CancelSuggestionBanner userId={user.id} />}
+
       {/* ヘッダー */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
