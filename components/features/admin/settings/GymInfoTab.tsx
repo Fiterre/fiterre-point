@@ -1,11 +1,14 @@
-import { Card, CardContent } from '@/components/ui/card'
+import { getSettings } from '@/lib/queries/settings'
+import GymInfoForm from './GymInfoForm'
 
-export default function GymInfoTab() {
-  return (
-    <Card>
-      <CardContent className="py-12 text-center text-gray-500">
-        ジム情報設定は次の指示で実装します
-      </CardContent>
-    </Card>
-  )
+export default async function GymInfoTab() {
+  const settings = await getSettings('gym')
+
+  const gymSettings: Record<string, string> = {}
+  settings.forEach(s => {
+    const value = s.value
+    gymSettings[s.key] = typeof value === 'string' ? value.replace(/^"|"$/g, '') : String(value)
+  })
+
+  return <GymInfoForm initialSettings={gymSettings} />
 }
