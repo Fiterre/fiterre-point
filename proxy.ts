@@ -46,8 +46,21 @@ export async function proxy(request: NextRequest) {
 
   // 認証済みユーザーがログインページにアクセスした場合、ダッシュボードへ
   if (user && isPublicPath) {
+    // user_rolesをチェックして管理者なら/adminへ
+    const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+    const adminClient = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    const { data: roleData } = await adminClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single()
+
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = roleData?.role === 'admin' || roleData?.role === 'manager' ? '/admin' : '/dashboard'
     return NextResponse.redirect(url)
   }
 

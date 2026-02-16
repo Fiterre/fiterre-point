@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function getCurrentUser() {
   const supabase = await createClient()
@@ -7,7 +8,7 @@ export async function getCurrentUser() {
 }
 
 export async function getUserRole(userId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('user_roles')
