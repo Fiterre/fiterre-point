@@ -42,7 +42,10 @@ export default function LoginPage() {
         description: 'ダッシュボードへ移動します',
       })
 
-      router.push('/dashboard')
+      // ロールに応じたリダイレクト先を取得
+      const res = await fetch('/api/auth/redirect')
+      const { path } = await res.json()
+      router.push(path)
       router.refresh()
     } catch {
       toast({
