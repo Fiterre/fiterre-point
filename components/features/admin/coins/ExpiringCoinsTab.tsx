@@ -1,11 +1,16 @@
-import { Card, CardContent } from '@/components/ui/card'
+import { getExpiringCoins, getExpiryStats } from '@/lib/queries/coins'
+import ExpiringCoinsView from './ExpiringCoinsView'
 
-export default function ExpiringCoinsTab() {
+export default async function ExpiringCoinsTab() {
+  const [expiringCoins, stats] = await Promise.all([
+    getExpiringCoins(30),
+    getExpiryStats()
+  ])
+
   return (
-    <Card>
-      <CardContent className="py-12 text-center text-gray-500">
-        期限切れ管理機能は次の指示で実装します
-      </CardContent>
-    </Card>
+    <ExpiringCoinsView
+      initialCoins={expiringCoins}
+      stats={stats}
+    />
   )
 }
