@@ -63,8 +63,9 @@ export async function getAvailableTrainers(dayOfWeek: number, time: string) {
 
   // 重複を除去
   const uniqueTrainers = data?.reduce((acc, shift) => {
-    if (shift.trainers && !acc.find(t => t.id === shift.trainers.id)) {
-      acc.push(shift.trainers)
+    const trainer = shift.trainers as unknown as { id: string; specialty: string; profiles: { display_name: string }[] } | null
+    if (trainer && !acc.find(t => t.id === trainer.id)) {
+      acc.push(trainer)
     }
     return acc
   }, [] as any[])

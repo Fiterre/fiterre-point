@@ -42,8 +42,9 @@ export async function GET(request: Request) {
     // 重複を除去してトレーナーリストを作成
     const trainersMap = new Map()
     shifts?.forEach(shift => {
-      if (shift.trainers && !trainersMap.has(shift.trainers.id)) {
-        trainersMap.set(shift.trainers.id, shift.trainers)
+      const trainer = shift.trainers as unknown as { id: string; specialty: string; profiles: { display_name: string }[] } | null
+      if (trainer && !trainersMap.has(trainer.id)) {
+        trainersMap.set(trainer.id, trainer)
       }
     })
 
