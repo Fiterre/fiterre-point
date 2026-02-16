@@ -1,11 +1,21 @@
-import { Card, CardContent } from '@/components/ui/card'
+import { getSettings } from '@/lib/queries/settings'
+import { getClosures } from '@/lib/queries/businessHours'
+import BusinessHoursForm from './BusinessHoursForm'
 
-export default function BusinessHoursTab() {
+export default async function BusinessHoursTab() {
+  const [settings, closures] = await Promise.all([
+    getSettings('hours'),
+    getClosures()
+  ])
+
+  const businessHours = settings.find(s => s.key === 'business_hours')?.value || {}
+  const slotInterval = settings.find(s => s.key === 'slot_interval_minutes')?.value || 60
+
   return (
-    <Card>
-      <CardContent className="py-12 text-center text-gray-500">
-        営業時間設定は次の指示で実装します
-      </CardContent>
-    </Card>
+    <BusinessHoursForm
+      initialHours={businessHours}
+      initialInterval={Number(slotInterval)}
+      initialClosures={closures}
+    />
   )
 }
