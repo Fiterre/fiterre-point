@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Plus, Calendar } from 'lucide-react'
 import Link from 'next/link'
+import CancelReservationButton from '@/components/features/reservations/CancelReservationButton'
 
 export default async function ReservationsPage() {
   const supabase = await createClient()
@@ -94,6 +95,13 @@ export default async function ReservationsPage() {
                         {res.coins_used.toLocaleString()} SC
                       </p>
                     </div>
+                    {(res.status === 'pending' || res.status === 'confirmed') && (
+                      <CancelReservationButton
+                        reservationId={res.id}
+                        reservedAt={res.reserved_at}
+                        coinsUsed={res.coins_used}
+                      />
+                    )}
                   </div>
                 )
               })}
