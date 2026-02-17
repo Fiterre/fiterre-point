@@ -419,3 +419,41 @@ export const FITEST_LEVEL_LABELS: Record<FitestLevel, string> = {
   advanced: '上級',
   master: 'マスター'
 }
+
+// ========================================
+// 入店認証・チェックイン
+// ========================================
+
+// 認証コード
+export interface VerificationCode {
+  id: string
+  user_id: string
+  reservation_id: string | null
+  code: string
+  expires_at: string
+  used_at: string | null
+  created_at: string
+}
+
+// チェックインログ
+export interface CheckInLog {
+  id: string
+  user_id: string
+  reservation_id: string | null
+  verification_code_id: string | null
+  method: 'code' | 'qr' | 'manual'
+  verified_by: string | null
+  bonus_coins_granted: number
+  check_in_at: string
+}
+
+// チェックインログ（リレーション付き）
+export interface CheckInLogWithRelations extends CheckInLog {
+  profiles?: {
+    display_name: string | null
+    email: string
+  }
+  verifier?: {
+    display_name: string | null
+  }
+}
