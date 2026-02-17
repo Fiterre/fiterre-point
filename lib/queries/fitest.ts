@@ -200,3 +200,26 @@ export async function getNextFitestDate(userId: string): Promise<Date | null> {
 
   return nextDate
 }
+
+export async function getRecentFitestResults(limit: number = 20): Promise<any[]> {
+  const supabase = createAdminClient()
+
+  const { data, error } = await supabase
+    .from('fitest_results')
+    .select(`
+      *,
+      profiles:user_id (
+        display_name,
+        email
+      )
+    `)
+    .order('test_date', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching recent fitest results:', error)
+    return []
+  }
+
+  return data ?? []
+}
