@@ -11,7 +11,8 @@ import {
   Calendar,
   ClipboardList,
   Clock,
-  FileText
+  FileText,
+  UserCheck
 } from 'lucide-react'
 
 export default async function MentorLayout({
@@ -40,6 +41,7 @@ export default async function MentorLayout({
     { href: '/mentor/shifts', label: 'マイシフト', icon: Clock },
     { href: '/mentor/records', label: 'トレーニング記録', icon: ClipboardList },
     { href: '/mentor/fitest', label: 'Fitest', icon: FileText },
+    { href: '/mentor/checkin', label: 'チェックイン', icon: UserCheck },
   ]
 
   return (

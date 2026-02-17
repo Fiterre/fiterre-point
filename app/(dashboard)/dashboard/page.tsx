@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getUserBalance } from '@/lib/queries/balance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, History, Award } from 'lucide-react'
+import { Calendar, History, Award, QrCode } from 'lucide-react'
 import BalanceCard from '@/components/features/dashboard/BalanceCard'
 import { getCoinRankings, getUserRankPosition } from '@/lib/queries/rankings'
 import CoinRankingCard from '@/components/features/dashboard/CoinRankingCard'
@@ -72,6 +72,20 @@ export default async function DashboardPage() {
               <div>
                 <h3 className="font-semibold">Fitest</h3>
                 <p className="text-sm text-gray-600">昇格試験の記録</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/checkin">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="p-3 bg-amber-100 rounded-full">
+                <QrCode className="h-6 w-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">チェックイン</h3>
+                <p className="text-sm text-gray-600">来店コード表示</p>
               </div>
             </CardContent>
           </Card>
