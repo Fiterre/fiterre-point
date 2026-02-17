@@ -339,3 +339,83 @@ export interface TrainingRecordWithRelations extends TrainingRecord {
     }
   }
 }
+
+// ========================================
+// Fitest（フィットネス能力測定テスト）
+// ========================================
+
+// Fitestレベル
+export type FitestLevel = 'beginner' | 'intermediate' | 'advanced' | 'master'
+
+// Fitest結果
+export interface FitestResult {
+  id: string
+  user_id: string
+  mentor_id: string | null
+  test_date: string
+  current_level: FitestLevel
+  target_level: FitestLevel
+
+  // 神経衰弱トレーニング
+  memory_game_score: number | null
+  memory_game_accuracy: number | null
+  memory_game_notes: string | null
+
+  // Big3計測
+  bench_press_1rm: number | null
+  squat_1rm: number | null
+  deadlift_1rm: number | null
+  big3_total: number | null
+  big3_notes: string | null
+
+  // 体重予測
+  weight_predicted: number | null
+  weight_actual: number | null
+  weight_difference: number | null
+  weight_notes: string | null
+
+  // 総合評価
+  total_score: number | null
+  passed: boolean
+  overall_notes: string | null
+
+  created_at: string
+  updated_at: string
+}
+
+// Fitest結果（リレーション付き）
+export interface FitestResultWithRelations extends FitestResult {
+  profiles?: {
+    display_name: string | null
+    email: string
+  }
+  mentors?: {
+    profiles: {
+      display_name: string | null
+    }
+  }
+}
+
+// Fitestマイルストーン
+export interface FitestMilestone {
+  id: string
+  from_level: FitestLevel
+  to_level: FitestLevel
+  min_memory_score: number | null
+  min_big3_total: number | null
+  max_weight_difference: number | null
+  min_total_score: number | null
+  reward_coins: number
+  reward_description: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+// レベルラベル
+export const FITEST_LEVEL_LABELS: Record<FitestLevel, string> = {
+  beginner: '基礎',
+  intermediate: '中級',
+  advanced: '上級',
+  master: 'マスター'
+}
