@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getCurrentUser } from '@/lib/queries/auth'
 import { getUserTier } from '@/lib/queries/permissions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

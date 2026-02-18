@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getAllUsers } from '@/lib/queries/users'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Coins, Calendar, TrendingUp } from 'lucide-react'

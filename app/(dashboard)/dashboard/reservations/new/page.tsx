@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import { getSessionTypes } from '@/lib/queries/reservations'
 import { getUserBalance } from '@/lib/queries/balance'

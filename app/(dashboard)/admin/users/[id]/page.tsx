@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getUserById, getUserBalanceAdmin } from '@/lib/queries/users'
 import { getCustomerDetails } from '@/lib/queries/customers'
 import { notFound } from 'next/navigation'

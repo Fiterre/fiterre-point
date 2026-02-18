@@ -10,7 +10,7 @@ const tierColors: Record<number, string> = {
   2: 'bg-purple-100 text-purple-800 border-purple-300',
   3: 'bg-blue-500/10 text-blue-600 border-blue-300',
   4: 'bg-green-500/10 text-green-600 border-green-300',
-  5: 'bg-gray-100 text-foreground border-gray-300',
+  5: 'bg-muted text-foreground border-border',
 }
 
 export default function TierBadge({ tierLevel, tierName }: TierBadgeProps) {

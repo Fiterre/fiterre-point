@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getMentors } from '@/lib/queries/reservations'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'

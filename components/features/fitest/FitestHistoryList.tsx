@@ -47,7 +47,7 @@ export default function FitestHistoryList({ results }: Props) {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{formattedDate}</span>
-                        <Badge className={result.passed ? 'bg-green-500' : 'bg-gray-400'}>
+                        <Badge className={result.passed ? 'bg-green-500' : 'bg-muted-foreground'}>
                           {result.passed ? '合格' : '不合格'}
                         </Badge>
                       </div>

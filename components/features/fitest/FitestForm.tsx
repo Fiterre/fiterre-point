@@ -55,7 +55,7 @@ function calcItemScore(item: FitestItem, rawValue: number): number {
 
 const LEVEL_ORDER: FitestLevel[] = ['beginner', 'intermediate', 'advanced', 'master']
 
-export default function FitestForm({ mentorId, users, milestones, fitestItems = [], preselectedUserId }: Props) {
+export default function FitestForm({ users, milestones, fitestItems = [], preselectedUserId }: Props) {
   const [selectedUserId, setSelectedUserId] = useState(preselectedUserId || '')
   const [testDate, setTestDate] = useState(new Date().toISOString().split('T')[0])
   const [currentLevel, setCurrentLevel] = useState<FitestLevel>('beginner')
@@ -180,7 +180,7 @@ export default function FitestForm({ mentorId, users, milestones, fitestItems = 
     }
   }, [selectedUserId, users])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!selectedUserId) {
@@ -513,11 +513,11 @@ export default function FitestForm({ mentorId, users, milestones, fitestItems = 
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-white rounded-lg">
+            <div className="p-4 bg-card rounded-lg border">
               <p className="text-sm text-muted-foreground">総合スコア</p>
               <p className="text-3xl font-bold">{totalScore}<span className="text-lg text-muted-foreground">/{maxScore}</span></p>
             </div>
-            <div className="p-4 bg-white rounded-lg">
+            <div className="p-4 bg-card rounded-lg border">
               <p className="text-sm text-muted-foreground">判定</p>
               <p className={`text-3xl font-bold ${passed ? 'text-green-600' : 'text-red-600'}`}>
                 {passed ? '合格' : '不合格'}
@@ -526,7 +526,7 @@ export default function FitestForm({ mentorId, users, milestones, fitestItems = 
           </div>
 
           {milestone && (
-            <div className="p-3 bg-white rounded-lg text-sm">
+            <div className="p-3 bg-card rounded-lg border text-sm">
               <p className="font-medium mb-2">合格基準:</p>
               <ul className="space-y-1 text-muted-foreground">
                 {milestone.min_memory_score && (

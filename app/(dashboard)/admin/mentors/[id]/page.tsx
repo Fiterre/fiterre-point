@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getMentorShifts } from '@/lib/queries/shifts'
 import { getAllTiers, getUserTier } from '@/lib/queries/permissions'

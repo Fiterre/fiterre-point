@@ -46,7 +46,7 @@ export default function RecentFitestList({ results }: Props) {
             className="block"
           >
             <div className={`flex items-center gap-4 p-4 rounded-lg border hover:shadow-md transition-shadow ${
-              result.passed ? 'bg-green-50 border-green-200' : 'bg-white'
+              result.passed ? 'bg-green-50 dark:bg-green-950/30 border-green-200' : 'bg-card'
             }`}>
               <div className={`p-2 rounded-full ${result.passed ? 'bg-green-500/10' : 'bg-muted'}`}>
                 {result.passed ? (
@@ -58,7 +58,7 @@ export default function RecentFitestList({ results }: Props) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant="outline">{formattedDate}</Badge>
-                  <Badge className="bg-muted0">
+                  <Badge className="bg-muted">
                     {FITEST_LEVEL_LABELS[result.current_level]} → {FITEST_LEVEL_LABELS[result.target_level]}
                   </Badge>
                   <Badge className={result.passed ? 'bg-green-500' : 'bg-red-400'}>

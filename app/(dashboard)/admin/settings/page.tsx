@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Settings, Clock, Shield, Palette, Building, Zap, Coins, FlaskConical } from 'lucide-react'
 import SystemSettingsTab from '@/components/features/admin/settings/SystemSettingsTab'

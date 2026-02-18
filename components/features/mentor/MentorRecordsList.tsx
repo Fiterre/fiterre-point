@@ -46,7 +46,7 @@ export default function MentorRecordsList({ records }: Props) {
             className="block"
           >
             <div className={`flex items-center gap-4 p-4 rounded-lg border hover:shadow-md transition-shadow ${
-              isMonthly ? 'bg-primary/5 border-primary/20' : 'bg-white'
+              isMonthly ? 'bg-primary/5 border-primary/20' : 'bg-card'
             }`}>
               <div className={`p-2 rounded-full ${isMonthly ? 'bg-primary/10' : 'bg-blue-500/10'}`}>
                 {isMonthly ? (

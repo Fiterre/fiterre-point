@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getMentors, getSessionTypes } from '@/lib/queries/reservations'
 import { getAllUsers } from '@/lib/queries/users'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

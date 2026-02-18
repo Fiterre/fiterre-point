@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getCurrentUser } from '@/lib/queries/auth'
 import { getAllUsers } from '@/lib/queries/users'
 import { redirect } from 'next/navigation'

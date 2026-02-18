@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getAllMentors } from '@/lib/queries/reservations'
 import { getAllTiers } from '@/lib/queries/permissions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

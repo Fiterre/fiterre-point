@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getCurrentUser } from '@/lib/queries/auth'
 import { getRecordById } from '@/lib/queries/trainingRecords'
 import { redirect, notFound } from 'next/navigation'

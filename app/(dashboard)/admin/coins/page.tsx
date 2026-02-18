@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Coins, History, Clock } from 'lucide-react'
 import BulkGrantTab from '@/components/features/admin/coins/BulkGrantTab'

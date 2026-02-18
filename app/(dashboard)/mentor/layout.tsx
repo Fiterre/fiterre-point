@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getCurrentUser, isMentor } from '@/lib/queries/auth'
 import { getUserTier } from '@/lib/queries/permissions'
 import { redirect } from 'next/navigation'

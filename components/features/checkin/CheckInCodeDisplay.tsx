@@ -15,7 +15,7 @@ interface CodeData {
   expiresAt: string
 }
 
-export default function CheckInCodeDisplay({ userId }: Props) {
+export default function CheckInCodeDisplay({ userId: _userId }: Props) {
   const [codeData, setCodeData] = useState<CodeData | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
@@ -113,12 +113,12 @@ export default function CheckInCodeDisplay({ userId }: Props) {
           </div>
 
           {/* コード表示 */}
-          <div className="bg-white rounded-xl p-6 mb-4 shadow-inner">
+          <div className="bg-card rounded-xl p-6 mb-4 shadow-inner border">
             <div className="flex justify-center gap-2">
               {codeData?.code.split('').map((digit, index) => (
                 <div
                   key={index}
-                  className="w-12 h-16 flex items-center justify-center bg-gray-100 rounded-lg text-3xl font-bold text-foreground"
+                  className="w-12 h-16 flex items-center justify-center bg-muted rounded-lg text-3xl font-bold text-foreground"
                 >
                   {digit}
                 </div>
@@ -158,7 +158,7 @@ export default function CheckInCodeDisplay({ userId }: Props) {
         </div>
 
         {/* 使い方 */}
-        <div className="mt-6 p-4 bg-white/50 rounded-lg">
+        <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <p className="text-sm text-primary text-center">
             来店時にこのコードをスタッフにお伝えください。<br />
             チェックインで<span className="font-bold">来店ポイント</span>がもらえます！

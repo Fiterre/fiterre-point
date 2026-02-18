@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getRecurringReservations, getNextTriggerDate, getTriggerStatus, DAY_OF_WEEK_LABELS } from '@/lib/queries/shifts'
 import ExecuteRecurringButton from '@/components/features/admin/ExecuteRecurringButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

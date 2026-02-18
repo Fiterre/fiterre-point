@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getCurrentUser } from '@/lib/queries/auth'
 import { getUserFitestResults, getNextFitestDate, getMilestones } from '@/lib/queries/fitest'
 import { redirect } from 'next/navigation'

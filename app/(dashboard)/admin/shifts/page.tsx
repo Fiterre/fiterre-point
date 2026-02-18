@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getMentorShifts, DAY_OF_WEEK_LABELS } from '@/lib/queries/shifts'
 import { getMentors } from '@/lib/queries/reservations'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

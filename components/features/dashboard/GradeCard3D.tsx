@@ -62,56 +62,130 @@ const RANK_CONFIG: Record<MemberRank, {
 export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
   const cardRef = useRef<HTMLDivElement>(null)
   const shimmerRef = useRef<HTMLDivElement>(null)
-  const [isHovered, setIsHovered] = useState(false)
-  const animFrameRef = useRef<number>(0)
+  const [isDragging, setIsDragging] = useState(false)
+
+  // アニメーション状態はすべてrefで管理（stale closure回避）
+  const isHoveredRef = useRef(false)
+  const isDraggingRef = useRef(false)
   const autoAngleRef = useRef(0)
+  const rotationRef = useRef({ x: 0, y: 0 })
+  const velocityRef = useRef({ x: 0, y: 0 })
+  const lastPosRef = useRef({ x: 0, y: 0 })
+  const lastTimeRef = useRef(Date.now())
+  const animFrameRef = useRef<number>(0)
 
   const cfg = RANK_CONFIG[rank]
 
-  // 自動回転（ホバー中は停止）
+  // 統合アニメーションループ（依存なし・ref経由でアクセス）
   useEffect(() => {
     const card = cardRef.current
     if (!card) return
 
     const animate = () => {
-      if (!isHovered) {
+      if (isDraggingRef.current) {
+        animFrameRef.current = requestAnimationFrame(animate)
+        return
+      }
+
+      const vx = velocityRef.current.x
+      const vy = velocityRef.current.y
+      const speed = Math.sqrt(vx * vx + vy * vy)
+
+      if (speed > 0.05) {
+        // 慣性フェーズ: 摩擦係数0.92で減速
+        const friction = 0.92
+        velocityRef.current.x *= friction
+        velocityRef.current.y *= friction
+        rotationRef.current.x += velocityRef.current.y * 0.3
+        rotationRef.current.y += velocityRef.current.x * 0.3
+        card.style.transform = `rotateX(${rotationRef.current.x}deg) rotateY(${rotationRef.current.y}deg)`
+      } else if (!isHoveredRef.current) {
+        // 自動回転フェーズ
+        velocityRef.current = { x: 0, y: 0 }
         autoAngleRef.current = (autoAngleRef.current + 0.3) % 360
         const y = autoAngleRef.current
         const x = Math.sin((y * Math.PI) / 180) * 8
-        card.style.transform = `rotateY(${y % 60 - 30}deg) rotateX(${x}deg)`
+        rotationRef.current = { x, y: y % 60 - 30 }
+        card.style.transform = `rotateY(${rotationRef.current.y}deg) rotateX(${rotationRef.current.x}deg)`
       }
+
       animFrameRef.current = requestAnimationFrame(animate)
     }
+
     animFrameRef.current = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animFrameRef.current)
-  }, [isHovered])
+  }, [])
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    isDraggingRef.current = true
+    setIsDragging(true)
+    lastPosRef.current = { x: e.clientX, y: e.clientY }
+    lastTimeRef.current = Date.now()
+    velocityRef.current = { x: 0, y: 0 }
+    ;(e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId)
+  }
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const card = cardRef.current
     const shimmer = shimmerRef.current
-    if (!card || !shimmer) return
+    if (!card) return
 
-    const rect = card.getBoundingClientRect()
-    const cx = rect.left + rect.width / 2
-    const cy = rect.top + rect.height / 2
-    const dx = e.clientX - cx
-    const dy = e.clientY - cy
-    const rotX = -(dy / (rect.height / 2)) * 25
-    const rotY = (dx / (rect.width / 2)) * 25
+    if (isDraggingRef.current) {
+      const now = Date.now()
+      const dt = Math.max(now - lastTimeRef.current, 1)
+      const dx = e.clientX - lastPosRef.current.x
+      const dy = e.clientY - lastPosRef.current.y
 
-    card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`
+      // 速度 = 移動量/時間 × フレーム係数(16ms)
+      velocityRef.current = {
+        x: (dx / dt) * 16,
+        y: (dy / dt) * 16,
+      }
+
+      rotationRef.current.y += dx * 0.5
+      rotationRef.current.x -= dy * 0.5
+      rotationRef.current.x = Math.max(-50, Math.min(50, rotationRef.current.x))
+      card.style.transform = `rotateX(${rotationRef.current.x}deg) rotateY(${rotationRef.current.y}deg)`
+
+      lastPosRef.current = { x: e.clientX, y: e.clientY }
+      lastTimeRef.current = now
+    } else if (isHoveredRef.current) {
+      // ホバー時マウス追従
+      const rect = card.getBoundingClientRect()
+      const dx = e.clientX - (rect.left + rect.width / 2)
+      const dy = e.clientY - (rect.top + rect.height / 2)
+      const rotX = -(dy / (rect.height / 2)) * 25
+      const rotY = (dx / (rect.width / 2)) * 25
+      rotationRef.current = { x: rotX, y: rotY }
+      card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`
+    }
 
     // ホログラフィックシマー
-    const pctX = ((e.clientX - rect.left) / rect.width) * 100
-    const pctY = ((e.clientY - rect.top) / rect.height) * 100
-    shimmer.style.background = `radial-gradient(circle at ${pctX}% ${pctY}%, ${cfg.shimmer} 0%, transparent 60%)`
-    shimmer.style.opacity = '1'
+    if (shimmer && card) {
+      const rect = card.getBoundingClientRect()
+      const pctX = ((e.clientX - rect.left) / rect.width) * 100
+      const pctY = ((e.clientY - rect.top) / rect.height) * 100
+      shimmer.style.background = `radial-gradient(circle at ${pctX}% ${pctY}%, ${cfg.shimmer} 0%, transparent 60%)`
+      shimmer.style.opacity = '1'
+    }
+  }
+
+  const handlePointerUp = () => {
+    isDraggingRef.current = false
+    setIsDragging(false)
+    // velocityRef は保持して慣性フェーズへ引き継ぐ
+  }
+
+  const handleMouseEnter = () => {
+    isHoveredRef.current = true
   }
 
   const handleMouseLeave = () => {
-    setIsHovered(false)
-    const shimmer = shimmerRef.current
-    if (shimmer) shimmer.style.opacity = '0'
+    if (!isDraggingRef.current) {
+      isHoveredRef.current = false
+      const shimmer = shimmerRef.current
+      if (shimmer) shimmer.style.opacity = '0'
+    }
   }
 
   const year = memberSince ? new Date(memberSince).getFullYear() : new Date().getFullYear()
@@ -123,8 +197,11 @@ export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
     >
       <div
         ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
           width: 340,
@@ -133,11 +210,11 @@ export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
           background: cfg.bg,
           boxShadow: cfg.glow,
           position: 'relative',
-          cursor: 'pointer',
+          cursor: isDragging ? 'grabbing' : 'grab',
           transformStyle: 'preserve-3d',
-          transition: isHovered ? 'none' : 'transform 0.05s linear',
           userSelect: 'none',
           overflow: 'hidden',
+          touchAction: 'none',
         }}
       >
         {/* ホログラフィックシマーレイヤー */}
