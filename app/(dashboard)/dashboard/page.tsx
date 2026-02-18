@@ -22,8 +22,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">ダッシュボード</h2>
-        <p className="text-gray-600">ようこそ、{user?.email} さん</p>
+        <h2 className="text-2xl font-bold text-foreground">ダッシュボード</h2>
+        <p className="text-muted-foreground">ようこそ、{user?.email} さん</p>
       </div>
 
       {/* コイン残高カード */}
@@ -38,12 +38,12 @@ export default async function DashboardPage() {
         <Link href="/dashboard/reservations">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 bg-amber-100 rounded-full">
-                <Calendar className="h-6 w-6 text-amber-600" />
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Calendar className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-semibold">予約する</h3>
-                <p className="text-sm text-gray-600">トレーニングを予約</p>
+                <p className="text-sm text-muted-foreground">トレーニングを予約</p>
               </div>
             </CardContent>
           </Card>
@@ -52,12 +52,12 @@ export default async function DashboardPage() {
         <Link href="/dashboard/history">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 bg-amber-100 rounded-full">
-                <History className="h-6 w-6 text-amber-600" />
+              <div className="p-3 bg-primary/10 rounded-full">
+                <History className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-semibold">履歴を見る</h3>
-                <p className="text-sm text-gray-600">取引履歴を確認</p>
+                <p className="text-sm text-muted-foreground">取引履歴を確認</p>
               </div>
             </CardContent>
           </Card>
@@ -66,12 +66,12 @@ export default async function DashboardPage() {
         <Link href="/dashboard/fitest">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 bg-amber-100 rounded-full">
-                <Award className="h-6 w-6 text-amber-600" />
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Award className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-semibold">Fitest</h3>
-                <p className="text-sm text-gray-600">昇格試験の記録</p>
+                <p className="text-sm text-muted-foreground">昇格試験の記録</p>
               </div>
             </CardContent>
           </Card>
@@ -80,12 +80,12 @@ export default async function DashboardPage() {
         <Link href="/dashboard/checkin">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 bg-amber-100 rounded-full">
-                <QrCode className="h-6 w-6 text-amber-600" />
+              <div className="p-3 bg-primary/10 rounded-full">
+                <QrCode className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-semibold">チェックイン</h3>
-                <p className="text-sm text-gray-600">来店コード表示</p>
+                <p className="text-sm text-muted-foreground">来店コード表示</p>
               </div>
             </CardContent>
           </Card>
@@ -94,12 +94,12 @@ export default async function DashboardPage() {
         <Link href="/dashboard/settings">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 bg-gray-100 rounded-full">
-                <Settings className="h-6 w-6 text-gray-600" />
+              <div className="p-3 bg-muted rounded-full">
+                <Settings className="h-6 w-6 text-muted-foreground" />
               </div>
               <div>
                 <h3 className="font-semibold">設定</h3>
-                <p className="text-sm text-gray-600">LINE連携・通知設定</p>
+                <p className="text-sm text-muted-foreground">LINE連携・通知設定</p>
               </div>
             </CardContent>
           </Card>
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
           <CardTitle>直近の予約</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-500 text-center py-8">
+          <p className="text-muted-foreground text-center py-8">
             予約がありません
           </p>
         </CardContent>
@@ -125,7 +125,7 @@ export default async function DashboardPage() {
       />
 
       {userPosition && (
-        <p className="text-sm text-center text-gray-500">
+        <p className="text-sm text-center text-muted-foreground">
           あなたの順位: {userPosition}位
         </p>
       )}

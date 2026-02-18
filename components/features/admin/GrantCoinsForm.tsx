@@ -1,23 +1,49 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 
+interface CoinPreset {
+  id: string
+  label: string
+  amount: number
+}
+
 interface Props {
   userId: string
   userName: string
 }
 
+const FALLBACK_PRESETS: CoinPreset[] = [
+  { id: '1', label: 'ライト', amount: 19000 },
+  { id: '2', label: 'スタンダード', amount: 40000 },
+  { id: '3', label: 'プレミアム', amount: 85000 },
+  { id: '4', label: 'ボーナス', amount: 5000 },
+]
+
 export default function GrantCoinsForm({ userId, userName }: Props) {
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
+  const [presets, setPresets] = useState<CoinPreset[]>(FALLBACK_PRESETS)
   const router = useRouter()
   const { toast } = useToast()
+
+  // DBからプリセットを取得
+  useEffect(() => {
+    fetch('/api/admin/settings/presets')
+      .then(res => res.json())
+      .then(data => {
+        if (data.presets && data.presets.length > 0) {
+          setPresets(data.presets)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,28 +85,21 @@ export default function GrantCoinsForm({ userId, userName }: Props) {
     }
   }
 
-  const presetAmounts = [
-    { label: 'ライト (19,000)', value: 19000 },
-    { label: 'スタンダード (40,000)', value: 40000 },
-    { label: 'プレミアム (85,000)', value: 85000 },
-    { label: 'ボーナス (5,000)', value: 5000 },
-  ]
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label>プリセット金額</Label>
         <div className="flex flex-wrap gap-2">
-          {presetAmounts.map((preset) => (
+          {presets.map((preset) => (
             <Button
-              key={preset.value}
+              key={preset.id}
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setAmount(preset.value.toString())}
-              className={amount === preset.value.toString() ? 'border-amber-500 bg-amber-50' : ''}
+              onClick={() => setAmount(preset.amount.toString())}
+              className={amount === preset.amount.toString() ? 'border-primary bg-primary/5' : ''}
             >
-              {preset.label}
+              {preset.label} ({preset.amount.toLocaleString()})
             </Button>
           ))}
         </div>

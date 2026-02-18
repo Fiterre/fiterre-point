@@ -13,21 +13,21 @@ export default function BalanceCard({ available, locked, total }: BalanceCardPro
   }
 
   return (
-    <Card className="bg-gradient-to-br from-amber-400 to-amber-600 text-white">
+    <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-primary-foreground">
           <Coins className="h-6 w-6" />
           コイン残高
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="text-4xl font-bold">{formatNumber(available)} SC</div>
-        <div className="mt-4 space-y-1 text-amber-100 text-sm">
+        <div className="mt-4 space-y-1 text-primary-foreground/70 text-sm">
           <div className="flex justify-between">
             <span>ロック中:</span>
             <span>{formatNumber(locked)} SC</span>
           </div>
-          <div className="flex justify-between border-t border-amber-300/30 pt-1">
+          <div className="flex justify-between border-t border-primary-foreground/20 pt-1">
             <span>合計:</span>
             <span>{formatNumber(total)} SC</span>
           </div>

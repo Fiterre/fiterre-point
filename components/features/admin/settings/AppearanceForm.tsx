@@ -139,8 +139,8 @@ export default function AppearanceForm({
                   onClick={() => handleThemeChange(opt.value)}
                   className={`flex flex-col items-center gap-2 p-4 border rounded-lg transition-colors ${
                     theme === opt.value
-                      ? 'border-amber-500 bg-amber-50'
-                      : 'hover:border-gray-300'
+                      ? 'border-primary bg-primary/5'
+                      : 'hover:border-border'
                   }`}
                 >
                   <opt.icon className="h-6 w-6" />
@@ -164,8 +164,8 @@ export default function AppearanceForm({
                   onClick={() => handleColorChange(opt.value)}
                   className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
                     accentColor === opt.value
-                      ? 'border-gray-900 ring-2 ring-gray-900'
-                      : 'hover:border-gray-300'
+                      ? 'border-foreground ring-2 ring-foreground'
+                      : 'hover:border-border'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full ${opt.bg}`} />
@@ -186,12 +186,12 @@ export default function AppearanceForm({
                   onClick={() => handleFontSizeChange(opt.value)}
                   className={`p-4 border rounded-lg text-left transition-colors ${
                     fontSize === opt.value
-                      ? 'border-amber-500 bg-amber-50'
-                      : 'hover:border-gray-300'
+                      ? 'border-primary bg-primary/5'
+                      : 'hover:border-border'
                   }`}
                 >
                   <span className="font-medium block">{opt.label}</span>
-                  <span className="text-xs text-gray-500">{opt.description}</span>
+                  <span className="text-xs text-muted-foreground">{opt.description}</span>
                 </button>
               ))}
             </div>
@@ -224,14 +224,14 @@ export default function AppearanceForm({
               onChange={(e) => handleTextChange(setLogoUrl)(e.target.value)}
               placeholder="https://example.com/logo.png"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               ※ 画像ファイルのURLを入力してください（推奨サイズ: 200x50px）
             </p>
           </div>
 
           {logoUrl && (
-            <div className="p-4 bg-gray-100 rounded-lg">
-              <p className="text-sm text-gray-500 mb-2">プレビュー:</p>
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground mb-2">プレビュー:</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={logoUrl}
@@ -272,7 +272,7 @@ export default function AppearanceForm({
               バッジ
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-3">
+          <p className="text-xs text-muted-foreground mt-3">
             ※ テーマ・カラー・フォントサイズは選択時に即座に反映されます
           </p>
         </CardContent>

@@ -16,8 +16,8 @@ export default async function AdminMentorsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">メンター管理</h1>
-          <p className="text-gray-600">メンターの一覧・権限・シフト管理</p>
+          <h1 className="text-2xl font-bold text-foreground">メンター管理</h1>
+          <p className="text-muted-foreground">メンターの一覧・権限・シフト管理</p>
         </div>
         <Link href="/admin/mentors/new">
           <Button>
@@ -33,12 +33,12 @@ export default async function AdminMentorsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">アクティブメンター</p>
+                <p className="text-sm text-muted-foreground">アクティブメンター</p>
                 <p className="text-2xl font-bold">
                   {mentors.filter(m => m.is_active).length}名
                 </p>
               </div>
-              <Users className="h-8 w-8 text-emerald-500" />
+              <Users className="h-8 w-8 text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -46,8 +46,8 @@ export default async function AdminMentorsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">非アクティブ</p>
-                <p className="text-2xl font-bold text-gray-400">
+                <p className="text-sm text-muted-foreground">非アクティブ</p>
+                <p className="text-2xl font-bold text-muted-foreground">
                   {mentors.filter(m => !m.is_active).length}名
                 </p>
               </div>
@@ -58,7 +58,7 @@ export default async function AdminMentorsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Tierテンプレート</p>
+                <p className="text-sm text-muted-foreground">Tierテンプレート</p>
                 <p className="text-2xl font-bold">{tiers.length}種類</p>
               </div>
             </div>
@@ -73,7 +73,7 @@ export default async function AdminMentorsPage() {
         </CardHeader>
         <CardContent>
           {mentors.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-muted-foreground">
               メンターが登録されていません
             </p>
           ) : (
@@ -85,11 +85,11 @@ export default async function AdminMentorsPage() {
                   className="block"
                 >
                   <div className={`flex items-center justify-between p-4 rounded-lg border hover:shadow-md transition-shadow ${
-                    mentor.is_active ? 'bg-white' : 'bg-gray-50'
+                    mentor.is_active ? 'bg-card' : 'bg-muted'
                   }`}>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <span className="text-emerald-600 font-bold">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-primary font-bold">
                           {(mentor.profiles?.display_name || 'M')[0].toUpperCase()}
                         </span>
                       </div>
@@ -99,18 +99,18 @@ export default async function AdminMentorsPage() {
                             {mentor.profiles?.display_name || '名前未設定'}
                           </p>
                           {!mentor.is_active && (
-                            <Badge variant="outline" className="text-gray-400">
+                            <Badge variant="outline" className="text-muted-foreground">
                               非アクティブ
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {mentor.profiles?.email || ''}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-500">詳細を見る →</p>
+                      <p className="text-sm text-muted-foreground">詳細を見る →</p>
                     </div>
                   </div>
                 </Link>

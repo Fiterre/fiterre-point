@@ -13,8 +13,8 @@ export default async function AdminDashboardPage() {
       label: '総ユーザー数',
       value: users.length,
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100'
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10'
     },
     {
       label: '今月の新規',
@@ -25,30 +25,30 @@ export default async function AdminDashboardPage() {
                created.getFullYear() === now.getFullYear()
       }).length,
       icon: TrendingUp,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100'
+      color: 'text-green-500',
+      bgColor: 'bg-green-500/10'
     },
     {
       label: 'アクティブ会員',
       value: users.filter(u => u.status === 'active').length,
       icon: Calendar,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-100'
+      color: 'text-primary',
+      bgColor: 'bg-primary/10'
     },
     {
       label: '本日の予約',
       value: 0,
       icon: Coins,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100'
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/10'
     },
   ]
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">管理者ダッシュボード</h1>
-        <p className="text-gray-600">システムの概要を確認できます</p>
+        <h1 className="text-2xl font-bold text-foreground">管理者ダッシュボード</h1>
+        <p className="text-muted-foreground">システムの概要を確認できます</p>
       </div>
 
       {/* 統計カード */}
@@ -58,7 +58,7 @@ export default async function AdminDashboardPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{stat.label}</p>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
                   <p className="text-3xl font-bold mt-1">{stat.value}</p>
                 </div>
                 <div className={`p-3 rounded-full ${stat.bgColor}`}>
@@ -77,16 +77,16 @@ export default async function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">ユーザーがいません</p>
+            <p className="text-muted-foreground text-center py-4">ユーザーがいません</p>
           ) : (
             <div className="space-y-3">
               {users.slice(0, 5).map((user) => (
                 <div key={user.id} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div>
                     <p className="font-medium">{user.display_name || '名前未設定'}</p>
-                    <p className="text-sm text-gray-500">{user.email}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-muted-foreground">
                     {new Date(user.created_at).toLocaleDateString('ja-JP')}
                   </div>
                 </div>

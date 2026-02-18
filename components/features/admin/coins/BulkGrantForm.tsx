@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,16 +17,22 @@ interface User {
   status: string
 }
 
+interface CoinPreset {
+  id: string
+  label: string
+  amount: number
+}
+
 interface Props {
   users: User[]
 }
 
-const PRESET_AMOUNTS = [
-  { label: 'ライト (19,000)', value: 19000 },
-  { label: 'スタンダード (40,000)', value: 40000 },
-  { label: 'プレミアム (85,000)', value: 85000 },
-  { label: 'ボーナス (5,000)', value: 5000 },
-  { label: 'ボーナス (10,000)', value: 10000 },
+const FALLBACK_PRESETS: CoinPreset[] = [
+  { id: '1', label: 'ライト', amount: 19000 },
+  { id: '2', label: 'スタンダード', amount: 40000 },
+  { id: '3', label: 'プレミアム', amount: 85000 },
+  { id: '4', label: 'ボーナス', amount: 5000 },
+  { id: '5', label: 'ボーナス大', amount: 10000 },
 ]
 
 export default function BulkGrantForm({ users }: Props) {
@@ -35,8 +41,21 @@ export default function BulkGrantForm({ users }: Props) {
   const [description, setDescription] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(false)
+  const [presets, setPresets] = useState<CoinPreset[]>(FALLBACK_PRESETS)
   const router = useRouter()
   const { toast } = useToast()
+
+  // DBからプリセットを取得
+  useEffect(() => {
+    fetch('/api/admin/settings/presets')
+      .then(res => res.json())
+      .then(data => {
+        if (data.presets && data.presets.length > 0) {
+          setPresets(data.presets)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // アクティブユーザーのみ
   const activeUsers = users.filter(u => u.status === 'active')
@@ -137,7 +156,7 @@ export default function BulkGrantForm({ users }: Props) {
               <Users className="h-5 w-5" />
               ユーザー選択
             </span>
-            <span className="text-sm font-normal text-gray-500">
+            <span className="text-sm font-normal text-muted-foreground">
               {selectedUserIds.length} / {activeUsers.length} 名選択中
             </span>
           </CardTitle>
@@ -146,7 +165,7 @@ export default function BulkGrantForm({ users }: Props) {
           {/* 検索・一括選択 */}
           <div className="flex gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="名前またはメールで検索..."
                 value={searchQuery}
@@ -167,8 +186,8 @@ export default function BulkGrantForm({ users }: Props) {
             {filteredUsers.map(user => (
               <label
                 key={user.id}
-                className={`flex items-center gap-3 p-3 cursor-pointer border-b last:border-0 hover:bg-gray-50 ${
-                  selectedUserIds.includes(user.id) ? 'bg-amber-50' : ''
+                className={`flex items-center gap-3 p-3 cursor-pointer border-b last:border-0 hover:bg-muted/50 ${
+                  selectedUserIds.includes(user.id) ? 'bg-primary/5' : ''
                 }`}
               >
                 <Checkbox
@@ -177,12 +196,12 @@ export default function BulkGrantForm({ users }: Props) {
                 />
                 <div className="flex-1">
                   <p className="font-medium">{user.display_name || '名前未設定'}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
               </label>
             ))}
             {filteredUsers.length === 0 && (
-              <p className="text-center py-4 text-gray-500">該当するユーザーがいません</p>
+              <p className="text-center py-4 text-muted-foreground">該当するユーザーがいません</p>
             )}
           </div>
         </CardContent>
@@ -198,16 +217,16 @@ export default function BulkGrantForm({ users }: Props) {
           <div className="space-y-2">
             <Label>プリセット金額</Label>
             <div className="flex flex-wrap gap-2">
-              {PRESET_AMOUNTS.map((preset) => (
+              {presets.map((preset) => (
                 <Button
-                  key={preset.value}
+                  key={preset.id}
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setAmount(preset.value.toString())}
-                  className={amount === preset.value.toString() ? 'border-amber-500 bg-amber-50' : ''}
+                  onClick={() => setAmount(preset.amount.toString())}
+                  className={amount === preset.amount.toString() ? 'border-primary bg-primary/5' : ''}
                 >
-                  {preset.label}
+                  {preset.label} ({preset.amount.toLocaleString()})
                 </Button>
               ))}
             </div>
@@ -241,9 +260,9 @@ export default function BulkGrantForm({ users }: Props) {
 
           {/* 確認表示 */}
           {selectedUserIds.length > 0 && amount && (
-            <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-              <p className="font-medium text-amber-800">付与内容</p>
-              <p className="text-amber-700">
+            <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="font-medium text-primary">付与内容</p>
+              <p className="text-primary/80">
                 {selectedUserIds.length}名 × {parseInt(amount).toLocaleString()} SC =
                 合計 {(selectedUserIds.length * parseInt(amount)).toLocaleString()} SC
               </p>

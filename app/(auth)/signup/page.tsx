@@ -58,7 +58,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Stella Coin</CardTitle>
@@ -105,9 +105,9 @@ export default function SignupPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? '登録中...' : '登録する'}
             </Button>
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-muted-foreground">
               既にアカウントをお持ちの方は{' '}
-              <Link href="/login" className="text-amber-600 hover:underline">
+              <Link href="/login" className="text-primary hover:underline">
                 ログイン
               </Link>
             </p>

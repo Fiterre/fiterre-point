@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Trophy, Medal, Award } from 'lucide-react'
 import Link from 'next/link'
 
@@ -19,8 +18,8 @@ interface Props {
 
 const POSITION_ICONS = [
   { icon: Trophy, color: 'text-yellow-500' },
-  { icon: Medal, color: 'text-gray-400' },
-  { icon: Award, color: 'text-amber-600' },
+  { icon: Medal, color: 'text-muted-foreground' },
+  { icon: Award, color: 'text-primary' },
 ]
 
 const RANK_COLORS: Record<string, string> = {
@@ -41,7 +40,7 @@ export default function CoinRankingCard({ rankings, currentUserId, showViewAll =
             コインランキング
           </span>
           {showViewAll && (
-            <Link href="/admin/rankings" className="text-sm text-amber-600 hover:underline">
+            <Link href="/admin/rankings" className="text-sm text-primary hover:underline">
               すべて見る →
             </Link>
           )}
@@ -49,7 +48,7 @@ export default function CoinRankingCard({ rankings, currentUserId, showViewAll =
       </CardHeader>
       <CardContent>
         {rankings.length === 0 ? (
-          <p className="text-center py-4 text-gray-500">ランキングデータがありません</p>
+          <p className="text-center py-4 text-muted-foreground">ランキングデータがありません</p>
         ) : (
           <div className="space-y-3">
             {rankings.map((item) => {
@@ -62,8 +61,8 @@ export default function CoinRankingCard({ rankings, currentUserId, showViewAll =
                   key={item.userId}
                   className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
                     isCurrentUser
-                      ? 'bg-amber-50 border border-amber-200'
-                      : 'hover:bg-gray-50'
+                      ? 'bg-primary/5 border border-primary/20'
+                      : 'hover:bg-muted'
                   }`}
                 >
                   {/* 順位 */}
@@ -71,7 +70,7 @@ export default function CoinRankingCard({ rankings, currentUserId, showViewAll =
                     {PositionIcon ? (
                       <PositionIcon className={`h-6 w-6 mx-auto ${positionColor}`} />
                     ) : (
-                      <span className="text-lg font-bold text-gray-400">
+                      <span className="text-lg font-bold text-muted-foreground">
                         {item.position}
                       </span>
                     )}
@@ -80,25 +79,25 @@ export default function CoinRankingCard({ rankings, currentUserId, showViewAll =
                   {/* ユーザー情報 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className={`font-medium truncate ${isCurrentUser ? 'text-amber-700' : ''}`}>
+                      <p className={`font-medium truncate ${isCurrentUser ? 'text-primary' : ''}`}>
                         {item.displayName}
                         {isCurrentUser && (
-                          <span className="ml-2 text-xs text-amber-600">(あなた)</span>
+                          <span className="ml-2 text-xs text-primary">(あなた)</span>
                         )}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <div className={`w-2 h-2 rounded-full ${RANK_COLORS[item.rank] || RANK_COLORS.bronze}`} />
-                      <span className="text-xs text-gray-500 capitalize">{item.rank}</span>
+                      <span className="text-xs text-muted-foreground capitalize">{item.rank}</span>
                     </div>
                   </div>
 
                   {/* コイン数 */}
                   <div className="text-right">
-                    <p className="font-bold text-amber-600">
+                    <p className="font-bold text-primary">
                       {item.totalCoins.toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-500">SC</p>
+                    <p className="text-xs text-muted-foreground">SC</p>
                   </div>
                 </div>
               )
