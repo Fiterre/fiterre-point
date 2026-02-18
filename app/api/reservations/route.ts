@@ -19,6 +19,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 })
     }
 
+    // 日付の有効性チェック（サーバーサイド検証）
+    const reservationDate = new Date(`${date}T00:00:00`)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrowCheck = new Date(today)
+    tomorrowCheck.setDate(tomorrowCheck.getDate() + 1)
+
+    if (reservationDate < tomorrowCheck) {
+      return NextResponse.json({ error: '明日以降の日付を選択してください' }, { status: 400 })
+    }
+
+    // 28日ルール: maxDate検証
+    const nowForRule = new Date()
+    const maxAllowedDate = nowForRule.getDate() >= 28
+      ? new Date(nowForRule.getFullYear(), nowForRule.getMonth() + 2, 0) // 翌月末
+      : new Date(nowForRule.getFullYear(), nowForRule.getMonth() + 1, 0) // 今月末
+    maxAllowedDate.setHours(23, 59, 59, 999)
+
+    if (reservationDate > maxAllowedDate) {
+      const maxStr = `${maxAllowedDate.getFullYear()}/${maxAllowedDate.getMonth() + 1}/${maxAllowedDate.getDate()}`
+      return NextResponse.json({
+        error: `${maxStr} までの予約が可能です`
+      }, { status: 400 })
+    }
+
     const adminClient = createAdminClient()
 
     // セッション種別を取得

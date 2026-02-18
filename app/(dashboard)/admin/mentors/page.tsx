@@ -1,4 +1,4 @@
-import { getMentors } from '@/lib/queries/reservations'
+import { getAllMentors } from '@/lib/queries/reservations'
 import { getAllTiers } from '@/lib/queries/permissions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,7 @@ import Link from 'next/link'
 
 export default async function AdminMentorsPage() {
   const [mentors, tiers] = await Promise.all([
-    getMentors(),
+    getAllMentors(),
     getAllTiers()
   ])
 
@@ -105,7 +105,7 @@ export default async function AdminMentorsPage() {
                           )}
                         </div>
                         <p className="text-sm text-gray-500">
-                          {mentor.specialty || '専門分野未設定'}
+                          {mentor.profiles?.email || ''}
                         </p>
                       </div>
                     </div>

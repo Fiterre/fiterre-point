@@ -25,11 +25,6 @@ const SETTING_LABELS: Record<string, { label: string; description: string; unit?
     description: '付与されたコインが何日で期限切れになるか',
     unit: '日'
   },
-  cancel_deadline_hours: {
-    label: 'キャンセル期限（参考値）',
-    description: '※ 現在はセッション前日の23:59が期限です',
-    unit: '時間前'
-  },
   max_daily_reservations: {
     label: '1日の予約上限',
     description: '1ユーザーが1日に予約できる最大数',

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isMentor } from '@/lib/queries/auth'
 import { createRecord } from '@/lib/queries/trainingRecords'
 
 export async function POST(request: Request) {
@@ -10,6 +11,11 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+    }
+
+    const mentorAuth = await isMentor(user.id)
+    if (!mentorAuth) {
+      return NextResponse.json({ error: '権限がありません' }, { status: 403 })
     }
 
     const adminClient = createAdminClient()

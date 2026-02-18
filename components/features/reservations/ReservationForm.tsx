@@ -18,7 +18,7 @@ interface SessionType {
 
 interface Mentor {
   id: string
-  specialty: string | null
+  name: string
   profiles: {
     display_name: string | null
   }
@@ -248,8 +248,7 @@ export default function ReservationForm({ sessionTypes, mentors: allMentors, ava
                     : 'hover:border-gray-300'
                 }`}
               >
-                <p className="font-medium">{mentor.profiles?.display_name || '名前未設定'}</p>
-                <p className="text-sm text-gray-500">{mentor.specialty || ''}</p>
+                <p className="font-medium">{mentor.profiles?.display_name || mentor.name}</p>
               </div>
             ))}
           </div>

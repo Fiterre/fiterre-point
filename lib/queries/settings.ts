@@ -41,6 +41,33 @@ export async function getSetting(key: string) {
   return data?.value
 }
 
+// テーマ設定をadminClient経由で取得（認証不要・レイアウト用）
+export async function getThemeSettings(): Promise<{
+  theme_mode: string
+  accent_color: string
+  font_size: string
+}> {
+  const supabase = createAdminClient()
+
+  const { data, error } = await supabase
+    .from('system_settings')
+    .select('key, value')
+    .in('key', ['theme_mode', 'accent_color', 'font_size'])
+
+  if (error) {
+    console.error('Error fetching theme settings:', error)
+    return { theme_mode: 'system', accent_color: 'amber', font_size: 'normal' }
+  }
+
+  const settings = Object.fromEntries(data?.map(s => [s.key, s.value]) ?? [])
+
+  return {
+    theme_mode: settings.theme_mode || 'system',
+    accent_color: settings.accent_color || 'amber',
+    font_size: settings.font_size || 'normal',
+  }
+}
+
 export async function updateSetting(key: string, value: any) {
   const supabase = createAdminClient()
 

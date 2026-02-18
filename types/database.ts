@@ -107,8 +107,7 @@ export interface Transaction {
 export interface Mentor {
   id: string
   user_id: string
-  specialty: string | null
-  bio: string | null
+  name: string
   is_active: boolean
   created_at: string
   updated_at: string

@@ -34,11 +34,11 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* モバイルヘッダー */}
-      <header className="lg:hidden bg-white border-b sticky top-0 z-40">
+      <header className="lg:hidden bg-card border-b border-border sticky top-0 z-40">
         <div className="flex items-center justify-between px-4 h-14">
-          <Link href="/dashboard" className="font-bold text-xl text-amber-600">
+          <Link href="/dashboard" className="font-bold text-xl text-primary">
             Stella Coin
           </Link>
         </div>
@@ -46,9 +46,9 @@ export default async function DashboardLayout({
 
       <div className="flex">
         {/* サイドバー（デスクトップ） */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r">
-          <div className="flex items-center h-16 px-6 border-b">
-            <Link href="/dashboard" className="font-bold text-xl text-amber-600">
+        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border">
+          <div className="flex items-center h-16 px-6 border-b border-border">
+            <Link href="/dashboard" className="font-bold text-xl text-primary">
               Stella Coin
             </Link>
           </div>
@@ -57,18 +57,18 @@ export default async function DashboardLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-foreground hover:bg-accent hover:text-primary transition-colors"
               >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
               </Link>
             ))}
           </nav>
-          <div className="p-4 border-t">
+          <div className="p-4 border-t border-border">
             <form action="/api/auth/signout" method="POST">
               <button
                 type="submit"
-                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
               >
                 <LogOut className="h-5 w-5" />
                 <span>ログアウト</span>
@@ -86,13 +86,13 @@ export default async function DashboardLayout({
       </div>
 
       {/* モバイルボトムナビ */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-40">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-40">
         <div className="flex justify-around py-2">
           {navItems.slice(0, 5).map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 px-3 py-1 text-gray-600 hover:text-amber-600"
+              className="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground hover:text-primary"
             >
               <item.icon className="h-5 w-5" />
               <span className="text-xs">{item.label}</span>

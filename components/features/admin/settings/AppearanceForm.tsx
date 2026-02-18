@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { Save, Sun, Moon, Monitor, Palette } from 'lucide-react'
+import { useThemeContext } from '@/components/providers/ThemeProvider'
 
 interface Props {
   initialTheme: string
@@ -24,12 +25,12 @@ const THEME_OPTIONS = [
 ]
 
 const COLOR_OPTIONS = [
-  { value: 'amber', label: 'アンバー', class: 'bg-amber-500' },
-  { value: 'blue', label: 'ブルー', class: 'bg-blue-500' },
-  { value: 'green', label: 'グリーン', class: 'bg-green-500' },
-  { value: 'purple', label: 'パープル', class: 'bg-purple-500' },
-  { value: 'red', label: 'レッド', class: 'bg-red-500' },
-  { value: 'emerald', label: 'エメラルド', class: 'bg-emerald-500' },
+  { value: 'amber', label: 'アンバー', bg: 'bg-amber-500', bgLight: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-500', textMid: 'text-amber-600' },
+  { value: 'blue', label: 'ブルー', bg: 'bg-blue-500', bgLight: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-500', textMid: 'text-blue-600' },
+  { value: 'green', label: 'グリーン', bg: 'bg-green-500', bgLight: 'bg-green-100', text: 'text-green-800', border: 'border-green-500', textMid: 'text-green-600' },
+  { value: 'purple', label: 'パープル', bg: 'bg-purple-500', bgLight: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-500', textMid: 'text-purple-600' },
+  { value: 'red', label: 'レッド', bg: 'bg-red-500', bgLight: 'bg-red-100', text: 'text-red-800', border: 'border-red-500', textMid: 'text-red-600' },
+  { value: 'emerald', label: 'エメラルド', bg: 'bg-emerald-500', bgLight: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-500', textMid: 'text-emerald-600' },
 ]
 
 const FONT_OPTIONS = [
@@ -54,35 +55,22 @@ export default function AppearanceForm({
   const [hasChanges, setHasChanges] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+  const themeContext = useThemeContext()
 
-  const handleChange = (setter: (v: string) => void) => (value: string) => {
-    setter(value)
-    setHasChanges(true)
-  }
-
-  const handleSave = async () => {
+  const saveSettings = async (updates: { key: string; value: string }[]) => {
     setLoading(true)
-
     try {
       const response = await fetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          settings: [
-            { key: 'theme_mode', value: theme },
-            { key: 'accent_color', value: accentColor },
-            { key: 'app_name', value: appName },
-            { key: 'logo_url', value: logoUrl },
-            { key: 'font_size', value: fontSize },
-          ]
-        }),
+        body: JSON.stringify({ settings: updates }),
       })
 
       if (!response.ok) {
         throw new Error('保存に失敗しました')
       }
 
-      toast({ title: '保存完了', description: 'デザイン設定を保存しました' })
+      toast({ title: '保存完了', description: '設定を保存しました' })
       setHasChanges(false)
       router.refresh()
     } catch (error) {
@@ -95,6 +83,41 @@ export default function AppearanceForm({
       setLoading(false)
     }
   }
+
+  // 選択系の設定は即時切替+自動保存
+  const handleThemeChange = (value: string) => {
+    setTheme(value)
+    themeContext?.setTheme(value)
+    saveSettings([{ key: 'theme_mode', value }])
+  }
+
+  const handleColorChange = (value: string) => {
+    setAccentColor(value)
+    themeContext?.setAccentColor(value)
+    saveSettings([{ key: 'accent_color', value }])
+  }
+
+  const handleFontSizeChange = (value: string) => {
+    setFontSize(value)
+    themeContext?.setFontSize(value)
+    saveSettings([{ key: 'font_size', value }])
+  }
+
+  // テキスト入力はhasChanges管理
+  const handleTextChange = (setter: (v: string) => void) => (value: string) => {
+    setter(value)
+    setHasChanges(true)
+  }
+
+  const handleSave = async () => {
+    await saveSettings([
+      { key: 'app_name', value: appName },
+      { key: 'logo_url', value: logoUrl },
+    ])
+  }
+
+  // プレビュー用: 選択中のカラーオプションを取得
+  const selectedColor = COLOR_OPTIONS.find(c => c.value === accentColor) || COLOR_OPTIONS[0]
 
   return (
     <div className="space-y-6">
@@ -113,7 +136,7 @@ export default function AppearanceForm({
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => handleChange(setTheme)(opt.value)}
+                  onClick={() => handleThemeChange(opt.value)}
                   className={`flex flex-col items-center gap-2 p-4 border rounded-lg transition-colors ${
                     theme === opt.value
                       ? 'border-amber-500 bg-amber-50'
@@ -138,14 +161,14 @@ export default function AppearanceForm({
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => handleChange(setAccentColor)(opt.value)}
+                  onClick={() => handleColorChange(opt.value)}
                   className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
                     accentColor === opt.value
                       ? 'border-gray-900 ring-2 ring-gray-900'
                       : 'hover:border-gray-300'
                   }`}
                 >
-                  <div className={`w-5 h-5 rounded-full ${opt.class}`} />
+                  <div className={`w-5 h-5 rounded-full ${opt.bg}`} />
                   <span className="text-sm">{opt.label}</span>
                 </button>
               ))}
@@ -160,7 +183,7 @@ export default function AppearanceForm({
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => handleChange(setFontSize)(opt.value)}
+                  onClick={() => handleFontSizeChange(opt.value)}
                   className={`p-4 border rounded-lg text-left transition-colors ${
                     fontSize === opt.value
                       ? 'border-amber-500 bg-amber-50'
@@ -188,7 +211,7 @@ export default function AppearanceForm({
             <Input
               id="appName"
               value={appName}
-              onChange={(e) => handleChange(setAppName)(e.target.value)}
+              onChange={(e) => handleTextChange(setAppName)(e.target.value)}
               placeholder="Stella Coin"
             />
           </div>
@@ -198,7 +221,7 @@ export default function AppearanceForm({
             <Input
               id="logoUrl"
               value={logoUrl}
-              onChange={(e) => handleChange(setLogoUrl)(e.target.value)}
+              onChange={(e) => handleTextChange(setLogoUrl)(e.target.value)}
               placeholder="https://example.com/logo.png"
             />
             <p className="text-xs text-gray-500">
@@ -239,18 +262,18 @@ export default function AppearanceForm({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <div className={`px-4 py-2 rounded-lg text-white bg-${accentColor}-500`}>
+            <div className={`px-4 py-2 rounded-lg text-white ${selectedColor.bg}`}>
               プライマリボタン
             </div>
-            <div className={`px-4 py-2 rounded-lg border border-${accentColor}-500 text-${accentColor}-600`}>
+            <div className={`px-4 py-2 rounded-lg border ${selectedColor.border} ${selectedColor.textMid}`}>
               セカンダリボタン
             </div>
-            <div className={`px-4 py-2 rounded-lg bg-${accentColor}-100 text-${accentColor}-800`}>
+            <div className={`px-4 py-2 rounded-lg ${selectedColor.bgLight} ${selectedColor.text}`}>
               バッジ
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-3">
-            ※ 実際の反映にはページの再読み込みが必要な場合があります
+            ※ テーマ・カラー・フォントサイズは選択時に即座に反映されます
           </p>
         </CardContent>
       </Card>

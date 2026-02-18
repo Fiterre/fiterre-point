@@ -39,7 +39,7 @@ export default async function AdminShiftsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               {mentor.profiles?.display_name || '名前未設定'}
-              <Badge variant="outline">{mentor.specialty || 'メンター'}</Badge>
+              <Badge variant="outline">メンター</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>

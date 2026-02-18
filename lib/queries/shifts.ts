@@ -13,7 +13,7 @@ export async function getMentorShifts(mentorId?: string) {
       *,
       mentors (
         id,
-        profiles (
+        profiles:user_id (
           display_name
         )
       )
@@ -45,8 +45,8 @@ export async function getAvailableMentors(dayOfWeek: number, time: string) {
       mentor_id,
       mentors (
         id,
-        specialty,
-        profiles (
+        name,
+        profiles:user_id (
           display_name
         )
       )
@@ -63,7 +63,7 @@ export async function getAvailableMentors(dayOfWeek: number, time: string) {
 
   // 重複を除去
   const uniqueMentors = data?.reduce((acc, shift) => {
-    const mentor = shift.mentors as unknown as { id: string; specialty: string; profiles: { display_name: string }[] } | null
+    const mentor = shift.mentors as unknown as { id: string; name: string; profiles: { display_name: string }[] } | null
     if (mentor && !acc.find(t => t.id === mentor.id)) {
       acc.push(mentor)
     }
@@ -80,12 +80,12 @@ export async function getRecurringReservations() {
     .from('recurring_reservations')
     .select(`
       *,
-      profiles (
+      profiles:user_id (
         display_name,
         email
       ),
       mentors (
-        profiles (
+        profiles:user_id (
           display_name
         )
       ),
@@ -134,13 +134,17 @@ export async function getTriggerStatus() {
     .select('*', { count: 'exact', head: true })
     .eq('is_active', true)
 
-  // 最新の実行ログ
-  const { data: latestLog } = await supabase
+  // 最新の実行ログ（.maybeSingle()でログ0件時もエラーにしない）
+  const { data: latestLog, error: logError } = await supabase
     .from('recurring_reservation_logs')
     .select('created_at, status')
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
+
+  if (logError) {
+    console.error('Error fetching latest log:', logError)
+  }
 
   // 直近の実行結果サマリ（最新日のログを集計）
   let lastRunStats: { created: number; skipped: number; failed: number } | null = null
@@ -148,11 +152,15 @@ export async function getTriggerStatus() {
   if (latestLog) {
     const logDate = latestLog.created_at.split('T')[0]
 
-    const { data: dayLogs } = await supabase
+    const { data: dayLogs, error: dayLogsError } = await supabase
       .from('recurring_reservation_logs')
       .select('status')
       .gte('created_at', `${logDate}T00:00:00`)
       .lte('created_at', `${logDate}T23:59:59`)
+
+    if (dayLogsError) {
+      console.error('Error fetching day logs:', dayLogsError)
+    }
 
     if (dayLogs) {
       lastRunStats = {

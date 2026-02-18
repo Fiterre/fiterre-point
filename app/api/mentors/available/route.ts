@@ -23,8 +23,8 @@ export async function GET(request: Request) {
         mentor_id,
         mentors (
           id,
-          specialty,
-          profiles (
+          name,
+          profiles:user_id (
             display_name
           )
         )
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
     // 重複を除去してメンターリストを作成
     const mentorsMap = new Map()
     shifts?.forEach(shift => {
-      const mentor = shift.mentors as unknown as { id: string; specialty: string; profiles: { display_name: string }[] } | null
+      const mentor = shift.mentors as unknown as { id: string; name: string; profiles: { display_name: string }[] } | null
       if (mentor && !mentorsMap.has(mentor.id)) {
         mentorsMap.set(mentor.id, mentor)
       }

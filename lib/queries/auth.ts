@@ -16,9 +16,14 @@ export async function getUserRole(userId: string) {
     .from('user_roles')
     .select('role')
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
 
-  if (error || !data) {
+  if (error) {
+    console.error('Error fetching user role:', error)
+    return 'user'
+  }
+
+  if (!data) {
     return 'user'
   }
 

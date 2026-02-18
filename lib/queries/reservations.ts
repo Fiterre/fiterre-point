@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function getSessionTypes() {
   const supabase = await createClient()
@@ -17,14 +18,15 @@ export async function getSessionTypes() {
   return data ?? []
 }
 
+// ユーザー向け: アクティブメンターのみ
 export async function getMentors() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('mentors')
     .select(`
       *,
-      profiles (
+      profiles:user_id (
         display_name
       )
     `)
@@ -33,6 +35,30 @@ export async function getMentors() {
 
   if (error) {
     console.error('Error fetching mentors:', error)
+    return []
+  }
+
+  return data ?? []
+}
+
+// 管理者向け: 全メンター（active/inactive）
+export async function getAllMentors() {
+  const supabase = createAdminClient()
+
+  const { data, error } = await supabase
+    .from('mentors')
+    .select(`
+      *,
+      profiles:user_id (
+        display_name,
+        email
+      )
+    `)
+    .order('is_active', { ascending: false })
+    .order('created_at')
+
+  if (error) {
+    console.error('Error fetching all mentors:', error)
     return []
   }
 
@@ -49,7 +75,7 @@ export async function getUserReservations(userId: string) {
       mentors (
         id,
         user_id,
-        profiles (
+        profiles:user_id (
           display_name
         )
       )
@@ -77,7 +103,7 @@ export async function getUpcomingReservations(userId: string) {
       mentors (
         id,
         user_id,
-        profiles (
+        profiles:user_id (
           display_name
         )
       )

@@ -78,8 +78,8 @@ export default async function MentorDetailPage({ params }: Props) {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">専門分野</p>
-                <p className="font-medium">{mentor.specialty || '未設定'}</p>
+                <p className="text-sm text-gray-500">名前</p>
+                <p className="font-medium">{mentor.name || '未設定'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">電話番号</p>
@@ -98,12 +98,6 @@ export default async function MentorDetailPage({ params }: Props) {
                 </Badge>
               </div>
             </div>
-            {mentor.bio && (
-              <div>
-                <p className="text-sm text-gray-500">自己紹介</p>
-                <p className="text-sm mt-1">{mentor.bio}</p>
-              </div>
-            )}
           </CardContent>
         </Card>
 

@@ -49,9 +49,9 @@ export default async function AdminLayout({
   const userTier = await getUserTier(user.id)
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       {/* モバイルヘッダー */}
-      <header className="lg:hidden bg-gray-800 text-white sticky top-0 z-40">
+      <header className="lg:hidden bg-sidebar text-sidebar-foreground sticky top-0 z-40">
         <div className="flex items-center justify-between px-4 h-14">
           <Link href="/admin" className="font-bold text-xl">
             Admin
@@ -64,8 +64,8 @@ export default async function AdminLayout({
 
       <div className="flex">
         {/* サイドバー（デスクトップ） */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-gray-800 text-white">
-          <div className="flex items-center justify-between h-16 px-6 bg-gray-900">
+        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-sidebar text-sidebar-foreground">
+          <div className="flex items-center justify-between h-16 px-6 bg-sidebar/80">
             <Link href="/admin" className="font-bold text-xl">
               Admin
             </Link>
@@ -78,24 +78,24 @@ export default async function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
               </Link>
             ))}
           </nav>
-          <div className="p-4 border-t border-gray-700">
+          <div className="p-4 border-t border-sidebar-border">
             <Link
               href="/dashboard"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors mb-2"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors mb-2"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>ユーザー画面へ</span>
             </Link>
             <Link
               href="/mentor"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-emerald-400 hover:bg-gray-700 transition-colors mb-2"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-primary hover:bg-sidebar-accent transition-colors mb-2"
             >
               <UserCog className="h-5 w-5" />
               <span>メンター画面へ</span>
@@ -103,7 +103,7 @@ export default async function AdminLayout({
             <form action="/api/auth/signout" method="POST">
               <button
                 type="submit"
-                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
                 <LogOut className="h-5 w-5" />
                 <span>ログアウト</span>
@@ -121,13 +121,13 @@ export default async function AdminLayout({
       </div>
 
       {/* モバイルボトムナビ */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-gray-800 z-40">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-sidebar z-40">
         <div className="flex justify-around py-2">
           {navItems.slice(0, 5).map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 px-3 py-1 text-gray-300"
+              className="flex flex-col items-center gap-1 px-3 py-1 text-sidebar-foreground/70"
             >
               <item.icon className="h-5 w-5" />
               <span className="text-xs">{item.label}</span>

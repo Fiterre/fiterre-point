@@ -31,7 +31,9 @@ export async function canCancelReservation(reservationId: string, userId: string
     return { canCancel: false, isWithinDeadline: false, reason: 'この予約は既にキャンセルまたは完了しています' }
   }
 
-  // 予約日時
+  // 予約日時（JST基準で計算）
+  // reserved_at は "2026-02-20T10:00:00" のような形式
+  // サーバーのタイムゾーンに依存しないよう、明示的にJSTで計算
   const reservedAt = new Date(reservation.reserved_at)
   const now = new Date()
 
@@ -40,11 +42,13 @@ export async function canCancelReservation(reservationId: string, userId: string
     return { canCancel: false, isWithinDeadline: false, reason: '過去の予約はキャンセルできません' }
   }
 
-  // キャンセル期限: セッション前日の23:59まで
-  const deadline = new Date(reservedAt)
-  deadline.setDate(deadline.getDate() - 1)
-  deadline.setHours(23, 59, 59, 999)
-  const isWithinDeadline = now <= deadline
+  // キャンセル期限: セッション前日の23:59 JST
+  // 予約日の日付部分を取得（YYYY-MM-DD）
+  const reservedDateStr = reservation.reserved_at.split('T')[0]
+  const [year, month, day] = reservedDateStr.split('-').map(Number)
+  // 前日23:59:59 JST = 前日14:59:59 UTC
+  const deadlineUTC = new Date(Date.UTC(year, month - 1, day - 1, 23 - 9, 59, 59, 999))
+  const isWithinDeadline = now <= deadlineUTC
 
   return { canCancel: true, isWithinDeadline }
 }

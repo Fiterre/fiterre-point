@@ -39,9 +39,9 @@ export default async function MentorLayout({
   const tierData = await getUserTier(user.id)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* モバイルヘッダー */}
-      <header className="lg:hidden bg-emerald-600 text-white sticky top-0 z-40">
+      <header className="lg:hidden bg-sidebar text-sidebar-foreground sticky top-0 z-40">
         <div className="flex items-center justify-between px-4 h-14">
           <Link href="/mentor" className="font-bold text-xl">
             Mentor
@@ -54,8 +54,8 @@ export default async function MentorLayout({
 
       <div className="flex">
         {/* サイドバー（デスクトップ） */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-emerald-700 text-white">
-          <div className="flex items-center justify-between h-16 px-6 bg-emerald-800">
+        <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-sidebar text-sidebar-foreground">
+          <div className="flex items-center justify-between h-16 px-6 bg-sidebar/80">
             <Link href="/mentor" className="font-bold text-xl">
               Mentor
             </Link>
@@ -68,17 +68,17 @@ export default async function MentorLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-emerald-100 hover:bg-emerald-600 transition-colors"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
               </Link>
             ))}
           </nav>
-          <div className="p-4 border-t border-emerald-600">
+          <div className="p-4 border-t border-sidebar-border">
             <Link
               href="/dashboard"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-emerald-200 hover:bg-emerald-600 transition-colors mb-2"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors mb-2"
             >
               <Users className="h-5 w-5" />
               <span>ユーザー画面へ</span>
@@ -86,7 +86,7 @@ export default async function MentorLayout({
             <form action="/api/auth/signout" method="POST">
               <button
                 type="submit"
-                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-emerald-200 hover:bg-emerald-600 transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
               >
                 <LogOut className="h-5 w-5" />
                 <span>ログアウト</span>
@@ -104,13 +104,13 @@ export default async function MentorLayout({
       </div>
 
       {/* モバイルボトムナビ */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-emerald-700 z-40">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-sidebar z-40">
         <div className="flex justify-around py-2">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 px-3 py-1 text-emerald-100"
+              className="flex flex-col items-center gap-1 px-3 py-1 text-sidebar-foreground/70"
             >
               <item.icon className="h-5 w-5" />
               <span className="text-xs">{item.label}</span>

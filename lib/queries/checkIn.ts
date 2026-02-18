@@ -114,21 +114,29 @@ export async function checkIn(
 
     // コードを使用済みにする
     if (codeId) {
-      await supabase
+      const { error: codeError } = await supabase
         .from('verification_codes')
         .update({ used_at: new Date().toISOString() })
         .eq('id', codeId)
+
+      if (codeError) {
+        console.error('Error marking code as used:', codeError)
+      }
     }
 
     // 予約ステータスを更新
     if (reservationId) {
-      await supabase
+      const { error: reservationError } = await supabase
         .from('reservations')
         .update({
           status: 'confirmed',
           updated_at: new Date().toISOString()
         })
         .eq('id', reservationId)
+
+      if (reservationError) {
+        console.error('Error updating reservation status:', reservationError)
+      }
     }
 
     // 来店ポイントを付与
@@ -160,7 +168,7 @@ export async function checkIn(
       const totalBalance = ledgers?.reduce((sum, l) => sum + l.amount_current, 0) || bonusCoins
 
       // 取引履歴に記録
-      await supabase
+      const { error: txError } = await supabase
         .from('coin_transactions')
         .insert({
           user_id: userId,
@@ -168,8 +176,13 @@ export async function checkIn(
           balance_after: totalBalance,
           type: 'bonus',
           description: '来店ポイント',
-          ledger_id: ledger?.id
+          ledger_id: ledger?.id,
+          executed_by: verifiedBy,
         })
+
+      if (txError) {
+        console.error('Error recording bonus transaction:', txError)
+      }
 
       // 来店回数を更新
       const { error: rpcError } = await supabase.rpc('increment_visit_count', { p_user_id: userId })
@@ -180,13 +193,17 @@ export async function checkIn(
           .select('total_visits')
           .eq('id', userId)
           .single()
-        await supabase
+        const { error: profileError } = await supabase
           .from('profiles')
           .update({
             total_visits: (profile?.total_visits || 0) + 1,
             last_visit_at: new Date().toISOString()
           })
           .eq('id', userId)
+
+        if (profileError) {
+          console.error('Error updating visit count:', profileError)
+        }
       }
     }
 
