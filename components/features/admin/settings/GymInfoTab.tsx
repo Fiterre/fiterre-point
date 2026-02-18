@@ -2,7 +2,7 @@ import { getSettings } from '@/lib/queries/settings'
 import GymInfoForm from './GymInfoForm'
 
 export default async function GymInfoTab() {
-  const settings = await getSettings('gym')
+  const settings = await getSettings()
 
   const gymSettings: Record<string, string> = {}
   settings.forEach(s => {

@@ -41,7 +41,6 @@ export async function POST(request: Request) {
             amount_locked: 0,
             expires_at: expiresAt.toISOString(),
             source_type: 'admin_adjust',
-            description: description,
           })
           .select()
           .single()

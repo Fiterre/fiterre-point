@@ -36,8 +36,8 @@ export async function POST(request: Request) {
         amount_initial: amount,
         amount_current: amount,
         amount_locked: 0,
-        status: 'active',
         expires_at: expiresAt.toISOString(),
+        source_type: 'admin_adjust',
       })
       .select()
       .single()
@@ -64,10 +64,12 @@ export async function POST(request: Request) {
       .from('coin_transactions')
       .insert({
         user_id: userId,
-        transaction_type: 'adjustment',
+        type: 'admin_adjust',
         amount: amount,
         balance_after: totalBalance,
         description: description,
+        executed_by: user.id,
+        ledger_id: ledger.id,
       })
 
     if (txError) {

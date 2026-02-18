@@ -2,7 +2,7 @@ import { getSettings } from '@/lib/queries/settings'
 import AppearanceForm from './AppearanceForm'
 
 export default async function AppearanceTab() {
-  const settings = await getSettings('appearance')
+  const settings = await getSettings()
 
   const getSettingValue = (key: string, defaultValue: string) => {
     const setting = settings.find(s => s.key === key)

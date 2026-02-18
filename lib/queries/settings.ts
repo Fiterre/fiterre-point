@@ -2,26 +2,20 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export interface SystemSetting {
+  id: string
   key: string
   value: any
-  description: string | null
-  category: string
+  created_at: string
   updated_at: string
 }
 
-export async function getSettings(category?: string) {
+export async function getSettings() {
   const supabase = await createClient()
 
-  let query = supabase
+  const { data, error } = await supabase
     .from('system_settings')
     .select('*')
     .order('key')
-
-  if (category) {
-    query = query.eq('category', category)
-  }
-
-  const { data, error } = await query
 
   if (error) {
     console.error('Error fetching settings:', error)
@@ -47,7 +41,7 @@ export async function getSetting(key: string) {
   return data?.value
 }
 
-export async function updateSetting(key: string, value: any, userId: string) {
+export async function updateSetting(key: string, value: any) {
   const supabase = createAdminClient()
 
   const { error } = await supabase
@@ -56,7 +50,6 @@ export async function updateSetting(key: string, value: any, userId: string) {
       key,
       value,
       updated_at: new Date().toISOString(),
-      updated_by: userId,
     })
 
   if (error) {
@@ -64,7 +57,7 @@ export async function updateSetting(key: string, value: any, userId: string) {
   }
 }
 
-export async function updateSettings(settings: { key: string; value: any }[], userId: string) {
+export async function updateSettings(settings: { key: string; value: any }[]) {
   const supabase = createAdminClient()
 
   for (const setting of settings) {
@@ -74,7 +67,6 @@ export async function updateSettings(settings: { key: string; value: any }[], us
         key: setting.key,
         value: setting.value,
         updated_at: new Date().toISOString(),
-        updated_by: userId,
       })
 
     if (error) {

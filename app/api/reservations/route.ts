@@ -79,23 +79,15 @@ export async function POST(request: Request) {
       }, { status: 400 })
     }
 
-    // 終了時間を計算
-    const [hours, minutes] = startTime.split(':').map(Number)
-    const startDate = new Date(2000, 0, 1, hours, minutes)
-    const endDate = new Date(startDate)
-    endDate.setMinutes(endDate.getMinutes() + sessionType.duration_minutes)
-    const endTime = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`
-
     // 1. training_sessionsレコードを作成
     const { data: trainingSession, error: trainingSessionError } = await adminClient
       .from('training_sessions')
       .insert({
         mentor_id: mentorId,
-        session_date: date,
-        start_time: startTime,
-        end_time: endTime,
-        capacity: 1,
-        is_available: false, // 予約されたので利用不可
+        session_type_id: sessionTypeId,
+        scheduled_at: `${date}T${startTime}:00`,
+        duration_minutes: sessionType.duration_minutes,
+        status: 'scheduled',
       })
       .select()
       .single()

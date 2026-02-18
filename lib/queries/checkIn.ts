@@ -145,7 +145,7 @@ export async function checkIn(
           amount_current: bonusCoins,
           amount_locked: 0,
           expires_at: expiresAt.toISOString(),
-          description: '来店ポイント'
+          source_type: 'bonus',
         })
         .select()
         .single()

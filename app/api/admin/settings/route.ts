@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '無効なパラメータです' }, { status: 400 })
     }
 
-    await updateSettings(settings, user.id)
+    await updateSettings(settings)
 
     return NextResponse.json({ success: true })
   } catch (error) {

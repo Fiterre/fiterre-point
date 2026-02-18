@@ -221,9 +221,6 @@ export async function cancelReservation(
         })
     }
 
-    // 4. キャンセル回数を記録
-    await incrementCancelCount(userId)
-
     const message = isWithinDeadline
       ? `予約をキャンセルしました。${refundedAmount.toLocaleString()} SCを返還しました。`
       : `予約をキャンセルしました。キャンセル期限を過ぎていたため、${forfeitedAmount.toLocaleString()} SCは没収されました。`
@@ -253,31 +250,37 @@ export async function getCancelStats(userId: string): Promise<{
 }> {
   const supabase = createAdminClient()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('cancel_count, cancel_count_month')
-    .eq('id', userId)
-    .single()
+  // reservationsテーブルからキャンセル回数を直接カウント
+  const { count: totalCancels } = await supabase
+    .from('reservations')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('status', 'cancelled')
 
-  const totalCancels = profile?.cancel_count || 0
-  const monthCancels = profile?.cancel_count_month || 0
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+
+  const { count: monthCancels } = await supabase
+    .from('reservations')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('status', 'cancelled')
+    .gte('updated_at', monthStart.toISOString())
+
+  const total = totalCancels || 0
+  const monthly = monthCancels || 0
 
   // 月3回以上、または累計10回以上でケア対象
-  const needsAttention = monthCancels >= 3 || totalCancels >= 10
+  const needsAttention = monthly >= 3 || total >= 10
 
   let suggestion: string | null = null
 
-  if (monthCancels >= 3) {
+  if (monthly >= 3) {
     suggestion = '最近キャンセルが多いようですね。お忙しい時期でしょうか？ご都合に合わせて、より柔軟なプランへの変更もご検討いただけます。お気軽にスタッフまでご相談ください。'
-  } else if (totalCancels >= 10) {
+  } else if (total >= 10) {
     suggestion = 'いつもご利用ありがとうございます。スケジュール調整が難しい場合は、ショートセッションや、予約の取りやすい時間帯のご案内も可能です。'
   }
 
-  return { totalCancels, monthCancels, needsAttention, suggestion }
-}
-
-export async function incrementCancelCount(userId: string) {
-  const supabase = createAdminClient()
-
-  await supabase.rpc('increment_cancel_count', { p_user_id: userId })
+  return { totalCancels: total, monthCancels: monthly, needsAttention, suggestion }
 }

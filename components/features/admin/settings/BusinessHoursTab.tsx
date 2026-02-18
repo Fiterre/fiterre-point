@@ -4,7 +4,7 @@ import BusinessHoursForm from './BusinessHoursForm'
 
 export default async function BusinessHoursTab() {
   const [settings, closures] = await Promise.all([
-    getSettings('hours'),
+    getSettings(),
     getClosures()
   ])
 
