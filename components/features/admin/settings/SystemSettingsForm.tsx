@@ -26,8 +26,8 @@ const SETTING_LABELS: Record<string, { label: string; description: string; unit?
     unit: '日'
   },
   cancel_deadline_hours: {
-    label: 'キャンセル期限',
-    description: '予約の何時間前までキャンセル可能か',
+    label: 'キャンセル期限（参考値）',
+    description: '※ 現在はセッション前日の23:59が期限です',
     unit: '時間前'
   },
   booking_advance_days: {

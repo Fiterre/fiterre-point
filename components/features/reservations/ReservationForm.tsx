@@ -52,9 +52,11 @@ export default function ReservationForm({ sessionTypes, mentors: allMentors, ava
   tomorrow.setDate(tomorrow.getDate() + 1)
   const minDate = tomorrow.toISOString().split('T')[0]
 
-  // 2週間後まで
-  const maxDate = new Date()
-  maxDate.setDate(maxDate.getDate() + 14)
+  // 28日ルール: 毎月28日に翌月分を解放
+  const now = new Date()
+  const maxDate = now.getDate() >= 28
+    ? new Date(now.getFullYear(), now.getMonth() + 2, 0) // 翌月末
+    : new Date(now.getFullYear(), now.getMonth() + 1, 0) // 今月末
   const maxDateStr = maxDate.toISOString().split('T')[0]
 
   // 日付または時間が変更されたらメンターを再取得

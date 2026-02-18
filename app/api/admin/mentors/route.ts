@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '権限がありません' }, { status: 403 })
     }
 
-    const { displayName, email, lineUserId, specialty } = await request.json()
+    const { displayName, email, lineUserId } = await request.json()
 
     if (!displayName || !email) {
       return NextResponse.json({ error: '名前とメールアドレスは必須です' }, { status: 400 })
@@ -83,7 +83,6 @@ export async function POST(request: Request) {
         .from('mentors')
         .update({
           is_active: true,
-          specialty: specialty || null,
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId)
@@ -92,7 +91,6 @@ export async function POST(request: Request) {
         .from('mentors')
         .insert({
           user_id: userId,
-          specialty: specialty || null,
           is_active: true,
         })
 

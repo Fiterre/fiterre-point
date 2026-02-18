@@ -1,5 +1,4 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getSetting } from './settings'
 
 export interface CancellationResult {
   success: boolean
@@ -32,21 +31,20 @@ export async function canCancelReservation(reservationId: string, userId: string
     return { canCancel: false, isWithinDeadline: false, reason: 'この予約は既にキャンセルまたは完了しています' }
   }
 
-  // キャンセル期限を取得（デフォルト24時間）
-  const cancelDeadlineHours = await getSetting('cancel_deadline_hours') || 24
-
   // 予約日時
   const reservedAt = new Date(reservation.reserved_at)
   const now = new Date()
-  const hoursUntilReservation = (reservedAt.getTime() - now.getTime()) / (1000 * 60 * 60)
 
   // 過去の予約
-  if (hoursUntilReservation < 0) {
+  if (reservedAt.getTime() < now.getTime()) {
     return { canCancel: false, isWithinDeadline: false, reason: '過去の予約はキャンセルできません' }
   }
 
-  // 期限内かどうか
-  const isWithinDeadline = hoursUntilReservation >= cancelDeadlineHours
+  // キャンセル期限: セッション前日の23:59まで
+  const deadline = new Date(reservedAt)
+  deadline.setDate(deadline.getDate() - 1)
+  deadline.setHours(23, 59, 59, 999)
+  const isWithinDeadline = now <= deadline
 
   return { canCancel: true, isWithinDeadline }
 }

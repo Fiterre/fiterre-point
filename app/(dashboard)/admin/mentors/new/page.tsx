@@ -14,7 +14,6 @@ export default function NewMentorPage() {
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [lineUserId, setLineUserId] = useState('')
-  const [specialty, setSpecialty] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
@@ -41,7 +40,6 @@ export default function NewMentorPage() {
           displayName: displayName.trim(),
           email: email.trim(),
           lineUserId: lineUserId.trim() || undefined,
-          specialty: specialty.trim() || undefined,
         }),
       })
 
@@ -119,16 +117,6 @@ export default function NewMentorPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="mentor@example.com"
                   required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="specialty">専門分野</Label>
-                <Input
-                  id="specialty"
-                  value={specialty}
-                  onChange={(e) => setSpecialty(e.target.value)}
-                  placeholder="パーソナルトレーニング"
                 />
               </div>
 

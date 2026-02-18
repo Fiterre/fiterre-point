@@ -151,7 +151,7 @@ export default function CancelReservationButton({ reservationId, reservedAt, coi
                           {coinsUsed.toLocaleString()} SC は没収されます
                         </p>
                         <p className="text-red-600 text-xs mt-2">
-                          ※ 予約の24時間前を過ぎているため、コインは返還されません
+                          ※ 前日23:59を過ぎているため、コインは返還されません
                         </p>
                       </div>
                     </div>

@@ -1,15 +1,16 @@
-import { getRecurringReservations, getNextTriggerDate, DAY_OF_WEEK_LABELS } from '@/lib/queries/shifts'
+import { getRecurringReservations, getNextTriggerDate, getTriggerStatus, DAY_OF_WEEK_LABELS } from '@/lib/queries/shifts'
 import ExecuteRecurringButton from '@/components/features/admin/ExecuteRecurringButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Clock, Calendar } from 'lucide-react'
+import { Plus, Clock, Calendar, Activity, CheckCircle2, AlertCircle, SkipForward } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function AdminRecurringPage() {
-  const [recurringReservations, triggerInfo] = await Promise.all([
+  const [recurringReservations, triggerInfo, triggerStatus] = await Promise.all([
     getRecurringReservations(),
-    getNextTriggerDate()
+    getNextTriggerDate(),
+    getTriggerStatus()
   ])
 
   // 曜日ごとにグループ化
@@ -56,6 +57,69 @@ export default async function AdminRecurringPage() {
                 {triggerInfo.date.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })}
               </p>
               <p className="text-sm text-amber-200">0:00 に翌月分を作成</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* トリガーステータス */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            トリガーステータス
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* 固定予約の自動反映 */}
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium text-sm">固定予約の自動反映</span>
+                <Badge className={triggerStatus.activeRecurringCount > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                  {triggerStatus.activeRecurringCount > 0 ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+              <p className="text-xs text-gray-500">毎月28日 0:00 実行</p>
+              <p className="text-xs text-gray-500">対象: {triggerStatus.activeRecurringCount}件の固定予約</p>
+            </div>
+
+            {/* 最終実行日時 */}
+            <div className="p-4 border rounded-lg">
+              <p className="font-medium text-sm mb-2">最終実行</p>
+              {triggerStatus.lastRunAt ? (
+                <p className="text-sm">
+                  {new Date(triggerStatus.lastRunAt).toLocaleString('ja-JP', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                  })}
+                </p>
+              ) : (
+                <p className="text-sm text-gray-400">未実行</p>
+              )}
+            </div>
+
+            {/* 直近の実行結果 */}
+            <div className="p-4 border rounded-lg">
+              <p className="font-medium text-sm mb-2">直近の実行結果</p>
+              {triggerStatus.lastRunStats ? (
+                <div className="flex gap-3 text-xs">
+                  <span className="flex items-center gap-1 text-green-700">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    作成 {triggerStatus.lastRunStats.created}
+                  </span>
+                  <span className="flex items-center gap-1 text-amber-700">
+                    <SkipForward className="h-3.5 w-3.5" />
+                    スキップ {triggerStatus.lastRunStats.skipped}
+                  </span>
+                  <span className="flex items-center gap-1 text-red-700">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    失敗 {triggerStatus.lastRunStats.failed}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">データなし</p>
+              )}
             </div>
           </div>
         </CardContent>

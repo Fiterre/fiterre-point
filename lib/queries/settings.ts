@@ -50,7 +50,7 @@ export async function updateSetting(key: string, value: any) {
       key,
       value,
       updated_at: new Date().toISOString(),
-    })
+    }, { onConflict: 'key' })
 
   if (error) {
     throw new Error(`設定の更新に失敗しました: ${error.message}`)
@@ -67,7 +67,7 @@ export async function updateSettings(settings: { key: string; value: any }[]) {
         key: setting.key,
         value: setting.value,
         updated_at: new Date().toISOString(),
-      })
+      }, { onConflict: 'key' })
 
     if (error) {
       throw new Error(`設定 ${setting.key} の更新に失敗しました`)

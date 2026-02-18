@@ -124,3 +124,48 @@ export async function getNextTriggerDate() {
     daysRemaining: diffDays
   }
 }
+
+export async function getTriggerStatus() {
+  const supabase = createAdminClient()
+
+  // アクティブな固定予約の件数
+  const { count: activeCount } = await supabase
+    .from('recurring_reservations')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_active', true)
+
+  // 最新の実行ログ
+  const { data: latestLog } = await supabase
+    .from('recurring_reservation_logs')
+    .select('created_at, status')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  // 直近の実行結果サマリ（最新日のログを集計）
+  let lastRunStats: { created: number; skipped: number; failed: number } | null = null
+
+  if (latestLog) {
+    const logDate = latestLog.created_at.split('T')[0]
+
+    const { data: dayLogs } = await supabase
+      .from('recurring_reservation_logs')
+      .select('status')
+      .gte('created_at', `${logDate}T00:00:00`)
+      .lte('created_at', `${logDate}T23:59:59`)
+
+    if (dayLogs) {
+      lastRunStats = {
+        created: dayLogs.filter(l => l.status === 'created').length,
+        skipped: dayLogs.filter(l => l.status === 'skipped').length,
+        failed: dayLogs.filter(l => l.status === 'failed').length,
+      }
+    }
+  }
+
+  return {
+    activeRecurringCount: activeCount || 0,
+    lastRunAt: latestLog?.created_at || null,
+    lastRunStats,
+  }
+}
