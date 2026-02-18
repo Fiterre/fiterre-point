@@ -44,6 +44,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'メンターが見つかりません' }, { status: 400 })
     }
 
+    // ブロック枠チェック
+    const reservedAtCheck = `${date}T${startTime}:00`
+    const { data: blockedSlots } = await adminClient
+      .from('reservations')
+      .select('id')
+      .eq('is_blocked', true)
+      .or(`reserved_at.eq.${reservedAtCheck},is_all_day_block.eq.true`)
+
+    const allDayBlocks = await adminClient
+      .from('reservations')
+      .select('id')
+      .eq('is_blocked', true)
+      .eq('is_all_day_block', true)
+      .gte('reserved_at', `${date}T00:00:00`)
+      .lt('reserved_at', `${date}T23:59:59`)
+
+    if ((blockedSlots && blockedSlots.length > 0) || (allDayBlocks.data && allDayBlocks.data.length > 0)) {
+      return NextResponse.json({ error: 'この時間帯は予約できません' }, { status: 400 })
+    }
+
     // 残高確認
     const { data: ledgers } = await adminClient
       .from('coin_ledgers')
