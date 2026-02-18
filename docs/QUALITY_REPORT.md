@@ -24,14 +24,14 @@
 
 ### 発見した問題
 
-1. **🔴 Critical**: 一部のAPI Route（`/api/admin/fitest-items`, `/api/admin/cache-clear`）でユーザー認証チェックはあるが、tier_levelチェックが未実装のものがある
+1. **🔴 Critical**: `/api/admin/settings/presets` で認証チェックが完全に欠如（`createAdminClient()` を無認証で使用）→ **修正済み**
 2. **🟡 Warning**: `console.error(error)` でサーバー側エラー詳細がログに出力される（本番環境でのログ管理が必要）
 3. **🟡 Warning**: CSRF対策がSameSite Cookieのみ。フォームにCSRFトークンを追加推奨
 4. **🟢 Info**: `/api/auth/redirect` でのロール判定ロジックが正常動作するかE2Eテストが必要
 
 ### 改善提案
 
-1. 全AdminAPIに `tier_level ≤ 2` チェックを統一実装
+1. ~~全AdminAPIに `tier_level ≤ 2` チェックを統一実装~~ → 修正済み（19ファイル全て対応）
 2. 本番環境では `console.error` をロギングサービス（Sentry等）に置き換え
 3. `next-csrf` または独自CSRFミドルウェアの導入検討
 
@@ -124,7 +124,9 @@
 
 ### 🔴 Critical（即時対応）
 
-1. **AdminAPI認証統一**: `/api/admin/fitest-items`, `/api/admin/cache-clear` のtier_levelチェックを追加
+1. ~~**AdminAPI認証統一**: `/api/admin/fitest-items`, `/api/admin/cache-clear` のtier_levelチェックを追加~~ → **修正済み**
+   - 実態調査：`fitest-items`, `cache-clear` は既に実装済みだった
+   - 新発見：`/api/admin/settings/presets` が完全無認証 → `checkAdmin()` + `tier_level > 2` 追加して修正
 
 ### 🟡 Warning（早期対応）
 
@@ -145,10 +147,10 @@
 
 | カテゴリ | スコア | 評価 |
 |---------|--------|------|
-| セキュリティ | 74/100 | B |
+| セキュリティ | 80/100 | B+ |
 | UX/UI | 79/100 | B+ |
 | パフォーマンス | 82/100 | A- |
-| **総合** | **78/100** | **B+** |
+| **総合** | **80/100** | **B+** |
 
 ---
 
