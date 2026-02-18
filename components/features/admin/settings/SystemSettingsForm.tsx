@@ -30,11 +30,6 @@ const SETTING_LABELS: Record<string, { label: string; description: string; unit?
     description: '※ 現在はセッション前日の23:59が期限です',
     unit: '時間前'
   },
-  booking_advance_days: {
-    label: '予約可能日数',
-    description: '何日先まで予約できるか',
-    unit: '日先'
-  },
   max_daily_reservations: {
     label: '1日の予約上限',
     description: '1ユーザーが1日に予約できる最大数',

@@ -82,6 +82,7 @@ export async function POST(request: Request) {
       await supabase
         .from('mentors')
         .update({
+          name: displayName,
           is_active: true,
           updated_at: new Date().toISOString(),
         })
@@ -91,6 +92,7 @@ export async function POST(request: Request) {
         .from('mentors')
         .insert({
           user_id: userId,
+          name: displayName,
           is_active: true,
         })
 
