@@ -10,12 +10,12 @@ export default async function NewShiftPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/admin/shifts" className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+        <Link href="/admin/shifts" className="p-2 hover:bg-accent rounded-lg transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">シフト追加</h1>
-          <p className="text-gray-600">メンターのシフトを登録</p>
+          <h1 className="text-2xl font-bold text-foreground">シフト追加</h1>
+          <p className="text-muted-foreground">メンターのシフトを登録</p>
         </div>
       </div>
 

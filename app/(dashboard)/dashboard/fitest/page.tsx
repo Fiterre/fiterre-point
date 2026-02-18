@@ -25,8 +25,8 @@ export default async function UserFitestPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Fitest</h1>
-        <p className="text-gray-600">あなたの昇格試験の記録</p>
+        <h1 className="text-2xl font-bold text-foreground">Fitest</h1>
+        <p className="text-muted-foreground">あなたの昇格試験の記録</p>
       </div>
 
       {/* 進捗カード */}

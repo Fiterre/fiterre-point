@@ -22,8 +22,8 @@ export default async function AdminShiftsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">シフト管理</h1>
-          <p className="text-gray-600">メンターの勤務シフトを管理</p>
+          <h1 className="text-2xl font-bold text-foreground">シフト管理</h1>
+          <p className="text-muted-foreground">メンターの勤務シフトを管理</p>
         </div>
         <Link href="/admin/shifts/new">
           <Button>
@@ -44,7 +44,7 @@ export default async function AdminShiftsPage() {
           </CardHeader>
           <CardContent>
             {shifts.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">シフトが登録されていません</p>
+              <p className="text-muted-foreground text-center py-4">シフトが登録されていません</p>
             ) : (
               <div className="grid grid-cols-7 gap-2">
                 {[0, 1, 2, 3, 4, 5, 6].map(day => {
@@ -55,10 +55,10 @@ export default async function AdminShiftsPage() {
                         {DAY_OF_WEEK_LABELS[day]}
                       </div>
                       {dayShifts.length === 0 ? (
-                        <div className="text-gray-300 text-sm">−</div>
+                        <div className="text-muted-foreground/50 text-sm">−</div>
                       ) : (
                         dayShifts.map(shift => (
-                          <div key={shift.id} className="text-xs bg-amber-100 text-amber-800 rounded px-1 py-0.5 mb-1">
+                          <div key={shift.id} className="text-xs bg-primary/10 text-primary rounded px-1 py-0.5 mb-1">
                             {shift.start_time.slice(0, 5)}〜{shift.end_time.slice(0, 5)}
                           </div>
                         ))
@@ -74,7 +74,7 @@ export default async function AdminShiftsPage() {
 
       {mentors.length === 0 && (
         <Card>
-          <CardContent className="py-8 text-center text-gray-500">
+          <CardContent className="py-8 text-center text-muted-foreground">
             メンターが登録されていません
           </CardContent>
         </Card>

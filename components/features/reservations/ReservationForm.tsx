@@ -153,17 +153,17 @@ export default function ReservationForm({ sessionTypes, mentors: allMentors, ava
               onClick={() => setSessionTypeId(session.id)}
               className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                 sessionTypeId === session.id
-                  ? 'border-amber-500 bg-amber-50'
+                  ? 'border-primary bg-primary/5'
                   : 'hover:border-gray-300'
               }`}
             >
               <div className="flex justify-between items-start">
                 <div>
                   <p className="font-medium">{session.name}</p>
-                  <p className="text-sm text-gray-500">{session.description}</p>
-                  <p className="text-sm text-gray-500">{session.duration_minutes}分</p>
+                  <p className="text-sm text-muted-foreground">{session.description}</p>
+                  <p className="text-sm text-muted-foreground">{session.duration_minutes}分</p>
                 </div>
-                <p className="font-bold text-amber-600">
+                <p className="font-bold text-primary">
                   {session.coin_cost.toLocaleString()} SC
                 </p>
               </div>
@@ -217,20 +217,20 @@ export default function ReservationForm({ sessionTypes, mentors: allMentors, ava
         <Label>
           メンター
           {selectedDayLabel && (
-            <span className="ml-2 text-sm text-gray-500">
+            <span className="ml-2 text-sm text-muted-foreground">
               （{selectedDayLabel}曜 {time} に対応可能）
             </span>
           )}
         </Label>
 
         {!date || !time ? (
-          <p className="text-sm text-gray-500 p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm text-muted-foreground p-4 bg-muted rounded-lg">
             日付と時間を選択すると、対応可能なメンターが表示されます
           </p>
         ) : loadingMentors ? (
           <div className="flex items-center justify-center p-4">
-            <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
-            <span className="ml-2 text-gray-500">メンターを検索中...</span>
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">メンターを検索中...</span>
           </div>
         ) : availableMentors.length === 0 ? (
           <div className="p-4 bg-red-50 rounded-lg text-red-600 text-sm">
@@ -244,7 +244,7 @@ export default function ReservationForm({ sessionTypes, mentors: allMentors, ava
                 onClick={() => setMentorId(mentor.id)}
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                   mentorId === mentor.id
-                    ? 'border-amber-500 bg-amber-50'
+                    ? 'border-primary bg-primary/5'
                     : 'hover:border-gray-300'
                 }`}
               >
@@ -257,10 +257,10 @@ export default function ReservationForm({ sessionTypes, mentors: allMentors, ava
 
       {/* 確認・送信 */}
       {selectedSession && (
-        <div className="p-4 bg-gray-50 rounded-lg">
+        <div className="p-4 bg-muted rounded-lg">
           <div className="flex justify-between items-center">
             <span>消費コイン</span>
-            <span className={`font-bold ${canAfford ? 'text-amber-600' : 'text-red-600'}`}>
+            <span className={`font-bold ${canAfford ? 'text-primary' : 'text-red-600'}`}>
               {selectedSession.coin_cost.toLocaleString()} SC
             </span>
           </div>

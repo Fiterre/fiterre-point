@@ -35,33 +35,33 @@ export default function FitestCountdown({ userId, currentRank, lastFitestDate }:
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-sm text-gray-500">現在のランク</p>
+          <p className="text-sm text-muted-foreground">現在のランク</p>
           <p className="text-lg font-bold">{RANK_LABELS[currentRank] || currentRank}</p>
         </div>
 
         {nextRank && (
           <div>
-            <p className="text-sm text-gray-500">次の目標</p>
-            <p className="font-medium text-amber-600">{RANK_LABELS[nextRank]}へ昇格</p>
+            <p className="text-sm text-muted-foreground">次の目標</p>
+            <p className="font-medium text-primary">{RANK_LABELS[nextRank]}へ昇格</p>
           </div>
         )}
 
         {daysUntilNextFitest !== null ? (
-          <div className="p-3 bg-amber-50 rounded-lg">
+          <div className="p-3 bg-primary/5 rounded-lg">
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-amber-600" />
-              <span className="text-sm text-amber-800">
+              <Clock className="h-5 w-5 text-primary" />
+              <span className="text-sm text-primary">
                 次回Fitestまで約{daysUntilNextFitest}日
               </span>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Fitest受験歴がありません
           </p>
         )}
 
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-muted-foreground/70">
           ※ Fitest機能は今後実装予定です
         </div>
       </CardContent>

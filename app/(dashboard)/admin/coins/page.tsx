@@ -8,8 +8,8 @@ export default function AdminCoinsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">コイン管理</h1>
-        <p className="text-gray-600">コインの付与・履歴・期限管理</p>
+        <h1 className="text-2xl font-bold text-foreground">コイン管理</h1>
+        <p className="text-muted-foreground">コインの付与・履歴・期限管理</p>
       </div>
 
       <Tabs defaultValue="bulk-grant" className="w-full">

@@ -165,7 +165,7 @@ export default function CheckInForm({ mentorId }: Props) {
 
       {/* 検証中 */}
       {verifying && (
-        <div className="flex items-center justify-center gap-2 text-gray-500">
+        <div className="flex items-center justify-center gap-2 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span>コードを確認中...</span>
         </div>

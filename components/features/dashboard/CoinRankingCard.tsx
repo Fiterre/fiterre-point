@@ -40,7 +40,7 @@ export default function CoinRankingCard({ rankings, currentUserId, showViewAll =
             コインランキング
           </span>
           {showViewAll && (
-            <Link href="/admin/rankings" className="text-sm text-primary hover:underline">
+            <Link href="/admin/analytics" className="text-sm text-primary hover:underline">
               すべて見る →
             </Link>
           )}

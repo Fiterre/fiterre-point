@@ -19,8 +19,8 @@ export default async function UserCheckInPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">チェックイン</h1>
-        <p className="text-gray-600">来店時にこのコードをスタッフに提示してください</p>
+        <h1 className="text-2xl font-bold text-foreground">チェックイン</h1>
+        <p className="text-muted-foreground">来店時にこのコードをスタッフに提示してください</p>
       </div>
 
       {/* コード表示 */}
@@ -31,11 +31,11 @@ export default async function UserCheckInPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-full">
+              <div className="p-2 bg-green-500/10 rounded-full">
                 <History className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">累計来店回数</p>
+                <p className="text-sm text-muted-foreground">累計来店回数</p>
                 <p className="text-2xl font-bold">{checkIns.length}回</p>
               </div>
             </div>
@@ -44,12 +44,12 @@ export default async function UserCheckInPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-100 rounded-full">
-                <Gift className="h-5 w-5 text-amber-600" />
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Gift className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">獲得来店ポイント</p>
-                <p className="text-2xl font-bold text-amber-600">{totalBonusCoins.toLocaleString()} SC</p>
+                <p className="text-sm text-muted-foreground">獲得来店ポイント</p>
+                <p className="text-2xl font-bold text-primary">{totalBonusCoins.toLocaleString()} SC</p>
               </div>
             </div>
           </CardContent>

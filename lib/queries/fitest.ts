@@ -63,7 +63,7 @@ export async function getLatestFitestResult(userId: string): Promise<FitestResul
     .eq('user_id', userId)
     .order('test_date', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (error) {
     return null

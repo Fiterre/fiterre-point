@@ -181,7 +181,7 @@ export default function BusinessHoursForm({ initialHours, initialInterval, initi
                 checked={hours[day as keyof BusinessHours]?.is_open ?? true}
                 onCheckedChange={(checked) => handleHoursChange(day, 'is_open', checked)}
               />
-              <span className="text-sm text-gray-500 w-12">
+              <span className="text-sm text-muted-foreground w-12">
                 {hours[day as keyof BusinessHours]?.is_open ? '営業' : '休業'}
               </span>
               {hours[day as keyof BusinessHours]?.is_open && (
@@ -216,7 +216,7 @@ export default function BusinessHoursForm({ initialHours, initialInterval, initi
                 <option value={60}>60分</option>
                 <option value={90}>90分</option>
               </select>
-              <span className="text-sm text-gray-500">刻みで予約枠を表示</span>
+              <span className="text-sm text-muted-foreground">刻みで予約枠を表示</span>
             </div>
           </div>
 
@@ -262,11 +262,11 @@ export default function BusinessHoursForm({ initialHours, initialInterval, initi
 
           {/* リスト */}
           {closures.length === 0 ? (
-            <p className="text-center py-4 text-gray-500">臨時休業の予定はありません</p>
+            <p className="text-center py-4 text-muted-foreground">臨時休業の予定はありません</p>
           ) : (
             <div className="space-y-2">
               {closures.map(closure => (
-                <div key={closure.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={closure.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                   <div>
                     <p className="font-medium">
                       {new Date(closure.closure_date).toLocaleDateString('ja-JP', {
@@ -277,7 +277,7 @@ export default function BusinessHoursForm({ initialHours, initialInterval, initi
                       })}
                     </p>
                     {closure.reason && (
-                      <p className="text-sm text-gray-500">{closure.reason}</p>
+                      <p className="text-sm text-muted-foreground">{closure.reason}</p>
                     )}
                   </div>
                   <Button

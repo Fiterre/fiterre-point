@@ -83,11 +83,11 @@ export default function ExpiringCoinsView({ initialCoins, stats }: Props) {
     if (daysUntil <= 0) {
       return <Badge className="bg-red-600 text-white">期限切れ</Badge>
     } else if (daysUntil <= 7) {
-      return <Badge className="bg-red-100 text-red-800">あと{daysUntil}日</Badge>
+      return <Badge className="bg-red-500/10 text-red-600">あと{daysUntil}日</Badge>
     } else if (daysUntil <= 14) {
-      return <Badge className="bg-yellow-100 text-yellow-800">あと{daysUntil}日</Badge>
+      return <Badge className="bg-yellow-500/10 text-yellow-600">あと{daysUntil}日</Badge>
     } else {
-      return <Badge className="bg-blue-100 text-blue-800">あと{daysUntil}日</Badge>
+      return <Badge className="bg-blue-500/10 text-blue-600">あと{daysUntil}日</Badge>
     }
   }
 
@@ -147,7 +147,7 @@ export default function ExpiringCoinsView({ initialCoins, stats }: Props) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">7日以内に期限切れ</p>
+                <p className="text-sm text-muted-foreground">7日以内に期限切れ</p>
                 <p className="text-2xl font-bold text-red-600">
                   {stats.within7Days.count}件
                 </p>
@@ -163,8 +163,8 @@ export default function ExpiringCoinsView({ initialCoins, stats }: Props) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">30日以内に期限切れ</p>
-                <p className="text-2xl font-bold text-amber-600">
+                <p className="text-sm text-muted-foreground">30日以内に期限切れ</p>
+                <p className="text-2xl font-bold text-primary">
                   {stats.within30Days.count}件
                 </p>
                 <p className="text-sm text-amber-500">
@@ -207,7 +207,7 @@ export default function ExpiringCoinsView({ initialCoins, stats }: Props) {
             <Button variant="outline" size="sm" onClick={deselectAll}>
               全解除
             </Button>
-            <span className="text-sm text-gray-500 mx-2">
+            <span className="text-sm text-muted-foreground mx-2">
               {selectedIds.length}件選択中
             </span>
             <div className="flex-1" />
@@ -227,7 +227,7 @@ export default function ExpiringCoinsView({ initialCoins, stats }: Props) {
 
           {/* リスト */}
           {filteredCoins.length === 0 ? (
-            <p className="text-center py-12 text-gray-500">
+            <p className="text-center py-12 text-muted-foreground">
               期限切れ予定のコインはありません
             </p>
           ) : (
@@ -237,8 +237,8 @@ export default function ExpiringCoinsView({ initialCoins, stats }: Props) {
                 return (
                   <label
                     key={coin.id}
-                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${
-                      selectedIds.includes(coin.id) ? 'bg-amber-50 border-amber-300' : ''
+                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent ${
+                      selectedIds.includes(coin.id) ? 'bg-primary/5 border-primary/30' : ''
                     } ${daysUntil <= 7 ? 'border-red-200' : ''}`}
                   >
                     <Checkbox
@@ -252,15 +252,15 @@ export default function ExpiringCoinsView({ initialCoins, stats }: Props) {
                         </p>
                         {getExpiryBadge(daysUntil)}
                       </div>
-                      <p className="text-sm text-gray-500 truncate">
+                      <p className="text-sm text-muted-foreground truncate">
                         {coin.profiles?.email}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-amber-600">
+                      <p className="font-bold text-primary">
                         {coin.amount_current.toLocaleString()} SC
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         期限: {new Date(coin.expires_at).toLocaleDateString('ja-JP')}
                       </p>
                     </div>

@@ -15,12 +15,12 @@ export default async function NewRecurringPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/admin/recurring" className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+        <Link href="/admin/recurring" className="p-2 hover:bg-accent rounded-lg transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">固定予約追加</h1>
-          <p className="text-gray-600">毎週繰り返す予約を登録</p>
+          <h1 className="text-2xl font-bold text-foreground">固定予約追加</h1>
+          <p className="text-muted-foreground">毎週繰り返す予約を登録</p>
         </div>
       </div>
 

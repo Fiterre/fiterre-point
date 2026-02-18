@@ -24,8 +24,8 @@ export default async function AdminRecurringPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">固定予約（保証枠）</h1>
-          <p className="text-gray-600">毎週同じ曜日・時間の予約を自動作成</p>
+          <h1 className="text-2xl font-bold text-foreground">固定予約（保証枠）</h1>
+          <p className="text-muted-foreground">毎週同じ曜日・時間の予約を自動作成</p>
         </div>
         <div className="flex gap-2">
           <ExecuteRecurringButton />
@@ -76,12 +76,12 @@ export default async function AdminRecurringPage() {
             <div className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium text-sm">固定予約の自動反映</span>
-                <Badge className={triggerStatus.activeRecurringCount > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                <Badge className={triggerStatus.activeRecurringCount > 0 ? 'bg-green-500/10 text-green-600' : 'bg-muted text-foreground'}>
                   {triggerStatus.activeRecurringCount > 0 ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
-              <p className="text-xs text-gray-500">毎月28日 0:00 実行</p>
-              <p className="text-xs text-gray-500">対象: {triggerStatus.activeRecurringCount}件の固定予約</p>
+              <p className="text-xs text-muted-foreground">毎月28日 0:00 実行</p>
+              <p className="text-xs text-muted-foreground">対象: {triggerStatus.activeRecurringCount}件の固定予約</p>
             </div>
 
             {/* 最終実行日時 */}
@@ -95,7 +95,7 @@ export default async function AdminRecurringPage() {
                   })}
                 </p>
               ) : (
-                <p className="text-sm text-gray-400">未実行</p>
+                <p className="text-sm text-muted-foreground/70">未実行</p>
               )}
             </div>
 
@@ -108,7 +108,7 @@ export default async function AdminRecurringPage() {
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     作成 {triggerStatus.lastRunStats.created}
                   </span>
-                  <span className="flex items-center gap-1 text-amber-700">
+                  <span className="flex items-center gap-1 text-primary">
                     <SkipForward className="h-3.5 w-3.5" />
                     スキップ {triggerStatus.lastRunStats.skipped}
                   </span>
@@ -118,7 +118,7 @@ export default async function AdminRecurringPage() {
                   </span>
                 </div>
               ) : (
-                <p className="text-sm text-gray-400">データなし</p>
+                <p className="text-sm text-muted-foreground/70">データなし</p>
               )}
             </div>
           </div>
@@ -139,25 +139,25 @@ export default async function AdminRecurringPage() {
             </CardHeader>
             <CardContent>
               {reservations.length === 0 ? (
-                <p className="text-gray-400 text-sm text-center py-4">なし</p>
+                <p className="text-muted-foreground/70 text-sm text-center py-4">なし</p>
               ) : (
                 <div className="space-y-2">
                   {reservations
                     .sort((a, b) => a.start_time.localeCompare(b.start_time))
                     .map(res => (
-                      <div key={res.id} className="p-2 bg-gray-50 rounded text-sm">
+                      <div key={res.id} className="p-2 bg-muted rounded text-sm">
                         <div className="flex items-center justify-between">
                           <span className="font-medium">
                             {res.start_time.slice(0, 5)}〜{res.end_time.slice(0, 5)}
                           </span>
-                          <Badge className="bg-amber-100 text-amber-800 text-xs">
+                          <Badge className="bg-primary/10 text-primary text-xs">
                             {res.session_types?.coin_cost?.toLocaleString()} SC
                           </Badge>
                         </div>
-                        <p className="text-gray-600 mt-1">
+                        <p className="text-muted-foreground mt-1">
                           {res.profiles?.display_name || res.profiles?.email || '顧客'}
                         </p>
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-muted-foreground/70 text-xs">
                           担当: {res.mentors?.profiles?.display_name || 'メンター'}
                         </p>
                       </div>
@@ -172,8 +172,8 @@ export default async function AdminRecurringPage() {
       {recurringReservations.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500 mb-4">固定予約が登録されていません</p>
+            <Calendar className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground mb-4">固定予約が登録されていません</p>
             <Link href="/admin/recurring/new">
               <Button>固定予約を追加する</Button>
             </Link>

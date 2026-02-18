@@ -100,7 +100,7 @@ export default function GymInfoForm({ initialSettings }: Props) {
           {FIELDS.map(field => (
             <div key={field.key} className="space-y-2">
               <Label htmlFor={field.key} className="flex items-center gap-2">
-                <field.icon className="h-4 w-4 text-gray-500" />
+                <field.icon className="h-4 w-4 text-muted-foreground" />
                 {field.label}
               </Label>
               <Input
@@ -128,7 +128,7 @@ export default function GymInfoForm({ initialSettings }: Props) {
           {SOCIAL_FIELDS.map(field => (
             <div key={field.key} className="space-y-2">
               <Label htmlFor={field.key} className="flex items-center gap-2">
-                <field.icon className="h-4 w-4 text-gray-500" />
+                <field.icon className="h-4 w-4 text-muted-foreground" />
                 {field.label}
               </Label>
               <Input
@@ -138,7 +138,7 @@ export default function GymInfoForm({ initialSettings }: Props) {
                 onChange={(e) => handleChange(field.key, e.target.value)}
                 placeholder={field.placeholder}
               />
-              <p className="text-xs text-gray-500">{field.description}</p>
+              <p className="text-xs text-muted-foreground">{field.description}</p>
             </div>
           ))}
         </CardContent>
@@ -157,7 +157,7 @@ export default function GymInfoForm({ initialSettings }: Props) {
           {LEGAL_FIELDS.map(field => (
             <div key={field.key} className="space-y-2">
               <Label htmlFor={field.key} className="flex items-center gap-2">
-                <field.icon className="h-4 w-4 text-gray-500" />
+                <field.icon className="h-4 w-4 text-muted-foreground" />
                 {field.label}
               </Label>
               <Input
@@ -167,7 +167,7 @@ export default function GymInfoForm({ initialSettings }: Props) {
                 onChange={(e) => handleChange(field.key, e.target.value)}
                 placeholder={field.placeholder}
               />
-              <p className="text-xs text-gray-500">{field.description}</p>
+              <p className="text-xs text-muted-foreground">{field.description}</p>
             </div>
           ))}
         </CardContent>
@@ -179,10 +179,10 @@ export default function GymInfoForm({ initialSettings }: Props) {
           <CardTitle>フッター表示プレビュー</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-gray-100 p-4 rounded-lg">
+          <div className="bg-muted p-4 rounded-lg">
             <p className="font-bold">{settings.gym_name || 'ジム名'}</p>
-            <p className="text-sm text-gray-600">{settings.gym_address || '住所'}</p>
-            <div className="flex gap-4 mt-2 text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">{settings.gym_address || '住所'}</p>
+            <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
               {settings.gym_phone && <span>TEL: {settings.gym_phone}</span>}
               {settings.gym_email && <span>Email: {settings.gym_email}</span>}
             </div>

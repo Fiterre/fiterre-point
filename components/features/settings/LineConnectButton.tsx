@@ -90,7 +90,7 @@ export default function LineConnectButton({ userId, isConnected }: Props) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
-          <div className="p-2 bg-green-100 rounded-full">
+          <div className="p-2 bg-green-500/10 rounded-full">
             <Check className="h-5 w-5 text-green-600" />
           </div>
           <div className="flex-1">
@@ -118,9 +118,9 @@ export default function LineConnectButton({ userId, isConnected }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-gray-50 rounded-lg">
+      <div className="p-4 bg-muted rounded-lg">
         <h4 className="font-medium mb-2">LINE連携の手順</h4>
-        <ol className="text-sm text-gray-600 space-y-1">
+        <ol className="text-sm text-muted-foreground space-y-1">
           <li>1. Fiterre公式LINEアカウントを友だち追加</li>
           <li>2. トーク画面で「連携」と送信</li>
           <li>3. 届いた連携コードを下に入力</li>

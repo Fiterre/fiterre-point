@@ -133,10 +133,10 @@ export default function SystemSettingsForm({ initialSettings }: Props) {
                     className="flex-1"
                   />
                   {meta.unit && (
-                    <span className="text-sm text-gray-500 w-16">{meta.unit}</span>
+                    <span className="text-sm text-muted-foreground w-16">{meta.unit}</span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500">{meta.description}</p>
+                <p className="text-xs text-muted-foreground">{meta.description}</p>
               </div>
             ))}
           </div>

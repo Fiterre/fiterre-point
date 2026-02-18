@@ -77,8 +77,8 @@ export default function NewMentorPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">メンター追加</h1>
-          <p className="text-gray-600">新しいメンターを登録します</p>
+          <h1 className="text-2xl font-bold text-foreground">メンター追加</h1>
+          <p className="text-muted-foreground">新しいメンターを登録します</p>
         </div>
       </div>
 
@@ -128,7 +128,7 @@ export default function NewMentorPage() {
                   onChange={(e) => setLineUserId(e.target.value)}
                   placeholder="U1234567890abcdef..."
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   LINE通知を有効にする場合に入力してください
                 </p>
               </div>

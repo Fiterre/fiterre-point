@@ -9,8 +9,8 @@ interface Props {
 export default function UserCheckInHistory({ checkIns }: Props) {
   if (checkIns.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+      <div className="text-center py-12 text-muted-foreground">
+        <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
         <p>まだ来店履歴がありません</p>
         <p className="text-sm mt-2">次回のご来店をお待ちしています！</p>
       </div>
@@ -32,7 +32,7 @@ export default function UserCheckInHistory({ checkIns }: Props) {
     <div className="space-y-6">
       {Object.entries(groupedByMonth).map(([month, monthCheckIns]) => (
         <div key={month}>
-          <h3 className="font-medium text-gray-700 mb-3 flex items-center gap-2">
+          <h3 className="font-medium text-foreground mb-3 flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             {month}（{monthCheckIns.length}回）
           </h3>
@@ -52,19 +52,19 @@ export default function UserCheckInHistory({ checkIns }: Props) {
               return (
                 <div
                   key={checkIn.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-full">
+                    <div className="p-2 bg-green-500/10 rounded-full">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     </div>
                     <div>
                       <p className="font-medium">{formattedDate}</p>
-                      <p className="text-sm text-gray-500">{formattedTime}</p>
+                      <p className="text-sm text-muted-foreground">{formattedTime}</p>
                     </div>
                   </div>
                   {checkIn.bonus_coins_granted > 0 && (
-                    <Badge className="bg-amber-100 text-amber-800">
+                    <Badge className="bg-primary/10 text-primary">
                       <Coins className="h-3 w-3 mr-1" />
                       +{checkIn.bonus_coins_granted} SC
                     </Badge>

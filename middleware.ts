@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // 認証不要のパス
-  const publicPaths = ['/login', '/signup', '/auth/callback', '/auth/confirm']
+  const publicPaths = ['/login', '/signup', '/auth/callback']
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path))
 
   // 未認証ユーザーをログインページへリダイレクト

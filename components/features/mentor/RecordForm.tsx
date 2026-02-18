@@ -164,7 +164,7 @@ export default function RecordForm({ mentorId, users, recordType, preselectedUse
       </Card>
 
       {/* 内容 */}
-      <Card className={isMonthly ? 'border-amber-200 bg-amber-50/30' : ''}>
+      <Card className={isMonthly ? 'border-primary/20 bg-primary/5/30' : ''}>
         <CardHeader>
           <CardTitle>{isMonthly ? '月次レポート内容' : 'トレーニング内容'}</CardTitle>
         </CardHeader>
@@ -196,13 +196,13 @@ export default function RecordForm({ mentorId, users, recordType, preselectedUse
           </CardHeader>
           <CardContent>
             {exercises.length === 0 ? (
-              <p className="text-center py-4 text-gray-500">
+              <p className="text-center py-4 text-muted-foreground">
                 種目を追加してください
               </p>
             ) : (
               <div className="space-y-4">
                 {exercises.map((exercise, index) => (
-                  <div key={index} className="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
+                  <div key={index} className="flex gap-2 items-start p-3 bg-muted rounded-lg">
                     <div className="flex-1 grid grid-cols-2 md:grid-cols-5 gap-2">
                       <Input
                         placeholder="種目名 *"

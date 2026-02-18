@@ -121,8 +121,34 @@ export interface Reservation {
   reserved_at: string | null
   coins_used: number
   status: ReservationStatus | null
+  is_blocked: boolean
+  is_all_day_block: boolean
+  block_reason: string | null
   created_at: string | null
   updated_at: string | null
+}
+
+// トレーニングセッション
+export type TrainingSessionStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
+
+export interface TrainingSession {
+  id: string
+  mentor_id: string
+  session_type_id: string
+  scheduled_at: string
+  duration_minutes: number
+  status: TrainingSessionStatus
+  created_at: string
+  updated_at: string
+}
+
+// 臨時休業
+export interface BusinessClosure {
+  id: string
+  closure_date: string
+  reason: string | null
+  created_by: string | null
+  created_at: string
 }
 
 // ========================================

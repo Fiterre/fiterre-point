@@ -29,12 +29,12 @@ export default async function HistoryPage() {
 
   const getTypeBadgeColor = (type: string) => {
     if (['purchase', 'bonus', 'adjustment', 'refund'].includes(type)) {
-      return 'bg-green-100 text-green-800'
+      return 'bg-green-500/10 text-green-600'
     }
     if (['reservation', 'expiration'].includes(type)) {
-      return 'bg-red-100 text-red-800'
+      return 'bg-red-500/10 text-red-600'
     }
-    return 'bg-gray-100 text-gray-800'
+    return 'bg-muted text-foreground'
   }
 
   return (
@@ -43,13 +43,13 @@ export default async function HistoryPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard"
-          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+          className="p-2 hover:bg-accent rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">取引履歴</h1>
-          <p className="text-gray-600">コインの獲得・利用履歴</p>
+          <h1 className="text-2xl font-bold text-foreground">取引履歴</h1>
+          <p className="text-muted-foreground">コインの獲得・利用履歴</p>
         </div>
       </div>
 
@@ -60,7 +60,7 @@ export default async function HistoryPage() {
         </CardHeader>
         <CardContent>
           {transactions.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-muted-foreground">
               取引履歴がありません
             </p>
           ) : (
@@ -82,10 +82,10 @@ export default async function HistoryPage() {
                           {getTypeLabel(tx.transaction_type)}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {tx.description || getTypeLabel(tx.transaction_type)}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-muted-foreground/70">
                         {new Date(tx.created_at).toLocaleString('ja-JP')}
                       </p>
                     </div>
@@ -94,7 +94,7 @@ export default async function HistoryPage() {
                     <p className={`text-lg font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} SC
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       残高: {tx.balance_after.toLocaleString()} SC
                     </p>
                   </div>

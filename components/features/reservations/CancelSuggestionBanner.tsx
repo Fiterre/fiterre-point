@@ -40,28 +40,28 @@ export default function CancelSuggestionBanner({ userId }: Props) {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+    <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border-primary/20">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-amber-100 rounded-full">
-            <Heart className="h-5 w-5 text-amber-600" />
+          <div className="p-2 bg-primary/10 rounded-full">
+            <Heart className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="font-medium text-amber-800 mb-1">
+            <p className="font-medium text-primary mb-1">
               ご利用ありがとうございます
             </p>
-            <p className="text-sm text-amber-700">
+            <p className="text-sm text-primary">
               {stats.suggestion}
             </p>
             <div className="flex gap-2 mt-3">
-              <Button size="sm" variant="outline" className="text-amber-700 border-amber-300">
+              <Button size="sm" variant="outline" className="text-primary border-primary/30">
                 <MessageCircle className="h-4 w-4 mr-1" />
                 LINE で相談
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-amber-600"
+                className="text-primary"
                 onClick={() => setDismissed(true)}
               >
                 閉じる
@@ -70,7 +70,7 @@ export default function CancelSuggestionBanner({ userId }: Props) {
           </div>
           <button
             onClick={() => setDismissed(true)}
-            className="text-amber-400 hover:text-amber-600"
+            className="text-amber-400 hover:text-primary"
           >
             <X className="h-4 w-4" />
           </button>

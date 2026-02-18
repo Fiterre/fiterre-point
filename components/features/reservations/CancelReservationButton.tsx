@@ -118,8 +118,8 @@ export default function CancelReservationButton({ reservationId, reservedAt, coi
 
         {checking ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-            <span className="ml-2 text-gray-500">確認中...</span>
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/70" />
+            <span className="ml-2 text-muted-foreground">確認中...</span>
           </div>
         ) : cancelInfo ? (
           <div className="space-y-4">

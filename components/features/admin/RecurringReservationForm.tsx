@@ -137,11 +137,11 @@ export default function RecurringReservationForm({ mentors, sessionTypes, users 
               key={user.id}
               onClick={() => setUserId(user.id)}
               className={`p-3 cursor-pointer border-b last:border-0 ${
-                userId === user.id ? 'bg-amber-50' : 'hover:bg-gray-50'
+                userId === user.id ? 'bg-primary/5' : 'hover:bg-accent'
               }`}
             >
               <p className="font-medium">{user.display_name || '名前未設定'}</p>
-              <p className="text-sm text-gray-500">{user.email}</p>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
           ))}
         </div>
@@ -156,12 +156,12 @@ export default function RecurringReservationForm({ mentors, sessionTypes, users 
               key={session.id}
               onClick={() => setSessionTypeId(session.id)}
               className={`p-3 border rounded-lg cursor-pointer ${
-                sessionTypeId === session.id ? 'border-amber-500 bg-amber-50' : 'hover:border-gray-300'
+                sessionTypeId === session.id ? 'border-primary bg-primary/5' : 'hover:border-gray-300'
               }`}
             >
               <div className="flex justify-between">
                 <span>{session.name}（{session.duration_minutes}分）</span>
-                <span className="font-bold text-amber-600">{session.coin_cost.toLocaleString()} SC</span>
+                <span className="font-bold text-primary">{session.coin_cost.toLocaleString()} SC</span>
               </div>
             </div>
           ))}
@@ -177,7 +177,7 @@ export default function RecurringReservationForm({ mentors, sessionTypes, users 
               key={mentor.id}
               onClick={() => setMentorId(mentor.id)}
               className={`p-3 border rounded-lg cursor-pointer ${
-                mentorId === mentor.id ? 'border-amber-500 bg-amber-50' : 'hover:border-gray-300'
+                mentorId === mentor.id ? 'border-primary bg-primary/5' : 'hover:border-gray-300'
               }`}
             >
               {mentor.profiles?.display_name || '名前未設定'}
@@ -197,7 +197,7 @@ export default function RecurringReservationForm({ mentors, sessionTypes, users 
               onClick={() => setDayOfWeek(index)}
               className={`px-4 py-2 rounded-lg border transition-colors ${
                 dayOfWeek === index
-                  ? 'border-amber-500 bg-amber-500 text-white'
+                  ? 'border-primary bg-primary/50 text-white'
                   : 'hover:border-gray-300'
               } ${index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : ''}`}
             >
@@ -225,7 +225,7 @@ export default function RecurringReservationForm({ mentors, sessionTypes, users 
         </div>
         <div className="space-y-2">
           <Label>終了時間</Label>
-          <Input value={endTime} disabled className="bg-gray-50" />
+          <Input value={endTime} disabled className="bg-muted" />
         </div>
       </div>
 
@@ -241,12 +241,12 @@ export default function RecurringReservationForm({ mentors, sessionTypes, users 
 
       {/* 確認 */}
       {userId && dayOfWeek !== null && startTime && selectedSession && (
-        <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-          <p className="font-medium text-amber-800">登録内容</p>
-          <p className="text-sm text-amber-700 mt-1">
+        <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+          <p className="font-medium text-primary">登録内容</p>
+          <p className="text-sm text-primary mt-1">
             毎週{DAY_LABELS[dayOfWeek]} {startTime}〜{endTime} / {selectedSession.name}
           </p>
-          <p className="text-sm text-amber-700">
+          <p className="text-sm text-primary">
             毎月28日に翌月分の予約を自動作成します
           </p>
         </div>

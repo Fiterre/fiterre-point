@@ -19,11 +19,11 @@ export default async function ReservationsPage() {
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      confirmed: 'bg-green-100 text-green-800',
-      completed: 'bg-blue-100 text-blue-800',
-      cancelled: 'bg-gray-100 text-gray-800',
-      no_show: 'bg-red-100 text-red-800',
+      pending: 'bg-yellow-500/10 text-yellow-600',
+      confirmed: 'bg-green-500/10 text-green-600',
+      completed: 'bg-blue-500/10 text-blue-600',
+      cancelled: 'bg-muted text-foreground',
+      no_show: 'bg-red-500/10 text-red-600',
     }
     const labels: Record<string, string> = {
       pending: '確認待ち',
@@ -43,12 +43,12 @@ export default async function ReservationsPage() {
       {/* ヘッダー */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+          <Link href="/dashboard" className="p-2 hover:bg-accent rounded-lg transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">予約管理</h1>
-            <p className="text-gray-600">トレーニングの予約・確認</p>
+            <h1 className="text-2xl font-bold text-foreground">予約管理</h1>
+            <p className="text-muted-foreground">トレーニングの予約・確認</p>
           </div>
         </div>
         <Link href="/dashboard/reservations/new">
@@ -70,7 +70,7 @@ export default async function ReservationsPage() {
         <CardContent>
           {upcoming.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">予約がありません</p>
+              <p className="text-muted-foreground mb-4">予約がありません</p>
               <Link href="/dashboard/reservations/new">
                 <Button variant="outline">予約を作成する</Button>
               </Link>
@@ -84,7 +84,7 @@ export default async function ReservationsPage() {
                 const timeStr = reservedDate ? reservedDate.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : ''
 
                 return (
-                  <div key={res.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div key={res.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-semibold">
@@ -92,10 +92,10 @@ export default async function ReservationsPage() {
                         </span>
                         <Badge className={badge.style}>{badge.label}</Badge>
                       </div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         メンター: {res.mentors?.profiles?.display_name || '未設定'}
                       </p>
-                      <p className="text-sm text-amber-600 font-medium">
+                      <p className="text-sm text-primary font-medium">
                         {res.coins_used.toLocaleString()} SC
                       </p>
                     </div>
@@ -121,7 +121,7 @@ export default async function ReservationsPage() {
         </CardHeader>
         <CardContent>
           {history.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">履歴がありません</p>
+            <p className="text-center py-8 text-muted-foreground">履歴がありません</p>
           ) : (
             <div className="space-y-2">
               {history.slice(0, 10).map((res) => {
@@ -134,7 +134,7 @@ export default async function ReservationsPage() {
                   <div key={res.id} className="flex items-center justify-between py-3 border-b last:border-0">
                     <div>
                       <p className="font-medium">{dateStr} {timeStr}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {res.mentors?.profiles?.display_name || '未設定'}
                       </p>
                     </div>

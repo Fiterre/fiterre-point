@@ -55,8 +55,8 @@ export default async function MentorReservationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">予約管理</h1>
-        <p className="text-gray-600">あなたの担当する予約を確認</p>
+        <h1 className="text-2xl font-bold text-foreground">予約管理</h1>
+        <p className="text-muted-foreground">あなたの担当する予約を確認</p>
       </div>
 
       {/* 今日の予約 */}
@@ -69,7 +69,7 @@ export default async function MentorReservationsPage() {
         </CardHeader>
         <CardContent>
           {!todayReservations || todayReservations.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-muted-foreground">
               本日の予約はありません
             </p>
           ) : (
@@ -84,21 +84,21 @@ export default async function MentorReservationsPage() {
                 return (
                   <div
                     key={res.id}
-                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
+                    className="flex items-center gap-4 p-4 bg-muted rounded-lg"
                   >
-                    <div className="p-2 bg-emerald-100 rounded-full">
-                      <Clock className="h-5 w-5 text-emerald-600" />
+                    <div className="p-2 bg-green-500/10 rounded-full">
+                      <Clock className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">
                         {res.profiles?.display_name || res.profiles?.email || '顧客'}
                       </p>
-                      <p className="text-sm text-gray-500">{formattedTime}</p>
+                      <p className="text-sm text-muted-foreground">{formattedTime}</p>
                     </div>
                     <span className={`px-2 py-1 rounded text-sm ${
-                      res.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      res.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                      res.status === 'confirmed' ? 'bg-green-500/10 text-green-600' :
+                      res.status === 'pending' ? 'bg-yellow-500/10 text-yellow-600' :
+                      'bg-muted text-foreground'
                     }`}>
                       {res.status}
                     </span>
@@ -120,7 +120,7 @@ export default async function MentorReservationsPage() {
         </CardHeader>
         <CardContent>
           {!upcomingReservations || upcomingReservations.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-muted-foreground">
               今後の予約はありません
             </p>
           ) : (
@@ -140,11 +140,11 @@ export default async function MentorReservationsPage() {
                 return (
                   <div
                     key={res.id}
-                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
+                    className="flex items-center gap-4 p-4 bg-muted rounded-lg"
                   >
                     <div className="text-center min-w-[60px]">
                       <p className="text-sm font-medium">{formattedDate}</p>
-                      <p className="text-xs text-gray-500">{formattedTime}</p>
+                      <p className="text-xs text-muted-foreground">{formattedTime}</p>
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">

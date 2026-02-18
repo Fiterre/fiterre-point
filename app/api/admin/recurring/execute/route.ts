@@ -88,7 +88,7 @@ export async function POST(request: Request) {
             .select('id')
             .eq('user_id', recurring.user_id)
             .eq('reserved_at', `${targetDate}T${recurring.start_time}:00`)
-            .single()
+            .maybeSingle()
 
           if (existing) {
             skipped++

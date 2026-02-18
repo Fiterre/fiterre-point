@@ -245,14 +245,14 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>現在のレベル</Label>
-              <div className="p-3 bg-gray-100 rounded-md">
+              <div className="p-3 bg-muted rounded-md">
                 <Badge>{FITEST_LEVEL_LABELS[currentLevel]}</Badge>
               </div>
             </div>
             <div className="space-y-2">
               <Label>目標レベル</Label>
-              <div className="p-3 bg-amber-50 rounded-md">
-                <Badge className="bg-amber-500">{FITEST_LEVEL_LABELS[targetLevel]}</Badge>
+              <div className="p-3 bg-primary/5 rounded-md">
+                <Badge className="bg-primary/50">{FITEST_LEVEL_LABELS[targetLevel]}</Badge>
               </div>
             </div>
           </div>
@@ -346,8 +346,8 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
               />
             </div>
           </div>
-          <div className="p-3 bg-gray-100 rounded-md">
-            <span className="text-sm text-gray-600">Big3トータル: </span>
+          <div className="p-3 bg-muted rounded-md">
+            <span className="text-sm text-muted-foreground">Big3トータル: </span>
             <span className="font-bold text-lg">{big3Total.toFixed(1)} kg</span>
           </div>
           <div className="space-y-2">
@@ -395,8 +395,8 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
             </div>
           </div>
           {weightDifference !== null && (
-            <div className={`p-3 rounded-md ${weightDifference <= 1 ? 'bg-green-100' : weightDifference <= 3 ? 'bg-yellow-100' : 'bg-red-100'}`}>
-              <span className="text-sm text-gray-600">誤差: </span>
+            <div className={`p-3 rounded-md ${weightDifference <= 1 ? 'bg-green-500/10' : weightDifference <= 3 ? 'bg-yellow-100' : 'bg-red-100'}`}>
+              <span className="text-sm text-muted-foreground">誤差: </span>
               <span className={`font-bold ${weightDifference <= 1 ? 'text-green-600' : weightDifference <= 3 ? 'text-yellow-600' : 'text-red-600'}`}>
                 {weightDifference.toFixed(1)} kg
               </span>
@@ -429,11 +429,11 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 bg-white rounded-lg">
-              <p className="text-sm text-gray-500">総合スコア</p>
-              <p className="text-3xl font-bold">{totalScore}<span className="text-lg text-gray-500">/300</span></p>
+              <p className="text-sm text-muted-foreground">総合スコア</p>
+              <p className="text-3xl font-bold">{totalScore}<span className="text-lg text-muted-foreground">/300</span></p>
             </div>
             <div className="p-4 bg-white rounded-lg">
-              <p className="text-sm text-gray-500">判定</p>
+              <p className="text-sm text-muted-foreground">判定</p>
               <p className={`text-3xl font-bold ${passed ? 'text-green-600' : 'text-red-600'}`}>
                 {passed ? '合格' : '不合格'}
               </p>
@@ -443,7 +443,7 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
           {milestone && (
             <div className="p-3 bg-white rounded-lg text-sm">
               <p className="font-medium mb-2">合格基準:</p>
-              <ul className="space-y-1 text-gray-600">
+              <ul className="space-y-1 text-muted-foreground">
                 {milestone.min_memory_score && (
                   <li>・神経衰弱: {milestone.min_memory_score}点以上</li>
                 )}

@@ -72,7 +72,7 @@ export default function MentorTierSelector({ mentorId, userId, currentTierId, ti
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted-foreground">
         メンターに適用するTierを選択してください。Tierによって利用可能な機能が変わります。
       </p>
 
@@ -95,7 +95,7 @@ export default function MentorTierSelector({ mentorId, userId, currentTierId, ti
               className="sr-only"
             />
             <TierBadge tierLevel={tier.tier_level} tierName={tier.tier_name} />
-            <span className="text-sm text-gray-600">{tier.description}</span>
+            <span className="text-sm text-muted-foreground">{tier.description}</span>
           </label>
         ))}
       </div>

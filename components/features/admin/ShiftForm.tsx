@@ -102,7 +102,7 @@ export default function ShiftForm({ mentors }: Props) {
               onClick={() => setMentorId(mentor.id)}
               className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                 mentorId === mentor.id
-                  ? 'border-amber-500 bg-amber-50'
+                  ? 'border-primary bg-primary/5'
                   : 'hover:border-gray-300'
               }`}
             >
@@ -123,7 +123,7 @@ export default function ShiftForm({ mentors }: Props) {
               onClick={() => toggleDay(index)}
               className={`px-4 py-2 rounded-lg border transition-colors ${
                 selectedDays.includes(index)
-                  ? 'border-amber-500 bg-amber-500 text-white'
+                  ? 'border-primary bg-primary/50 text-white'
                   : 'hover:border-gray-300'
               } ${index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : ''}`}
             >
@@ -163,8 +163,8 @@ export default function ShiftForm({ mentors }: Props) {
 
       {/* 確認表示 */}
       {selectedDays.length > 0 && (
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">
+        <div className="p-4 bg-muted rounded-lg">
+          <p className="text-sm text-muted-foreground">
             登録内容: {selectedDays.map(d => DAY_LABELS[d]).join('・')} {startTime}〜{endTime}
           </p>
         </div>

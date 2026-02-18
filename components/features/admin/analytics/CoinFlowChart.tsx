@@ -41,7 +41,7 @@ export default function CoinFlowChart({ data }: Props) {
                   style={{ height: `${Math.max(spentHeight, 2)}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-2">{dayLabel}</p>
+              <p className="text-xs text-muted-foreground mt-2">{dayLabel}</p>
             </div>
           )
         })}

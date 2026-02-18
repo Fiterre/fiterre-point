@@ -39,7 +39,7 @@ export default async function FitestDetailPage({ params }: Props) {
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard/fitest"
-          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+          className="p-2 hover:bg-accent rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -50,16 +50,16 @@ export default async function FitestDetailPage({ params }: Props) {
             ) : (
               <Badge className="bg-gray-400 text-white">不合格</Badge>
             )}
-            <span className="text-gray-500">
+            <span className="text-muted-foreground">
               {FITEST_LEVEL_LABELS[result.current_level as FitestLevel]} → {FITEST_LEVEL_LABELS[result.target_level as FitestLevel]}
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">Fitest結果</h1>
+          <h1 className="text-2xl font-bold text-foreground mt-1">Fitest結果</h1>
         </div>
       </div>
 
       {/* メタ情報 */}
-      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
         <span className="flex items-center gap-1">
           <Calendar className="h-4 w-4" />
           {formattedDate}
@@ -73,19 +73,19 @@ export default async function FitestDetailPage({ params }: Props) {
       </div>
 
       {/* 総合結果 */}
-      <Card className={result.passed ? 'bg-green-50 border-green-200' : 'bg-gray-50'}>
+      <Card className={result.passed ? 'bg-green-50 border-green-200' : 'bg-muted'}>
         <CardContent className="p-6">
           <div className="flex items-center justify-center gap-6">
-            <div className={`p-4 rounded-full ${result.passed ? 'bg-green-100' : 'bg-gray-200'}`}>
+            <div className={`p-4 rounded-full ${result.passed ? 'bg-green-500/10' : 'bg-muted'}`}>
               {result.passed ? (
                 <Trophy className="h-12 w-12 text-green-600" />
               ) : (
-                <XCircle className="h-12 w-12 text-gray-400" />
+                <XCircle className="h-12 w-12 text-muted-foreground/70" />
               )}
             </div>
             <div className="text-center">
               <p className="text-5xl font-bold">{result.total_score || 0}</p>
-              <p className="text-gray-500">総合スコア</p>
+              <p className="text-muted-foreground">総合スコア</p>
             </div>
           </div>
         </CardContent>
@@ -104,15 +104,15 @@ export default async function FitestDetailPage({ params }: Props) {
           <CardContent>
             <p className="text-3xl font-bold text-purple-600">
               {result.memory_game_score ?? '-'}
-              <span className="text-lg text-gray-400">/100</span>
+              <span className="text-lg text-muted-foreground/70">/100</span>
             </p>
             {result.memory_game_accuracy && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 正確性: {result.memory_game_accuracy}%
               </p>
             )}
             {result.memory_game_notes && (
-              <p className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded">
+              <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
                 {result.memory_game_notes}
               </p>
             )}
@@ -130,15 +130,15 @@ export default async function FitestDetailPage({ params }: Props) {
           <CardContent>
             <p className="text-3xl font-bold text-red-600">
               {result.big3_total ?? '-'}
-              <span className="text-lg text-gray-400">kg</span>
+              <span className="text-lg text-muted-foreground/70">kg</span>
             </p>
-            <div className="text-sm text-gray-500 mt-1 space-y-1">
+            <div className="text-sm text-muted-foreground mt-1 space-y-1">
               {result.bench_press_1rm && <p>ベンチ: {result.bench_press_1rm}kg</p>}
               {result.squat_1rm && <p>スクワット: {result.squat_1rm}kg</p>}
               {result.deadlift_1rm && <p>デッドリフト: {result.deadlift_1rm}kg</p>}
             </div>
             {result.big3_notes && (
-              <p className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded">
+              <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
                 {result.big3_notes}
               </p>
             )}
@@ -156,14 +156,14 @@ export default async function FitestDetailPage({ params }: Props) {
           <CardContent>
             <p className="text-3xl font-bold text-blue-600">
               ±{result.weight_difference !== null ? Math.abs(result.weight_difference).toFixed(1) : '-'}
-              <span className="text-lg text-gray-400">kg</span>
+              <span className="text-lg text-muted-foreground/70">kg</span>
             </p>
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="text-sm text-muted-foreground mt-1">
               {result.weight_predicted && <p>予測: {result.weight_predicted}kg</p>}
               {result.weight_actual && <p>実測: {result.weight_actual}kg</p>}
             </div>
             {result.weight_notes && (
-              <p className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded">
+              <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
                 {result.weight_notes}
               </p>
             )}
@@ -178,7 +178,7 @@ export default async function FitestDetailPage({ params }: Props) {
             <CardTitle>メンターからのコメント</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-700 whitespace-pre-wrap">{result.overall_notes}</p>
+            <p className="text-foreground whitespace-pre-wrap">{result.overall_notes}</p>
           </CardContent>
         </Card>
       )}

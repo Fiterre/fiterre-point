@@ -95,21 +95,21 @@ export default function CheckInCodeDisplay({ userId }: Props) {
 
   if (loading) {
     return (
-      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-primary/20">
         <CardContent className="p-8 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+    <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-primary/20">
       <CardContent className="p-6">
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <QrCode className="h-6 w-6 text-amber-600" />
-            <span className="text-amber-700 font-medium">チェックインコード</span>
+            <QrCode className="h-6 w-6 text-primary" />
+            <span className="text-primary font-medium">チェックインコード</span>
           </div>
 
           {/* コード表示 */}
@@ -118,7 +118,7 @@ export default function CheckInCodeDisplay({ userId }: Props) {
               {codeData?.code.split('').map((digit, index) => (
                 <div
                   key={index}
-                  className="w-12 h-16 flex items-center justify-center bg-gray-100 rounded-lg text-3xl font-bold text-gray-800"
+                  className="w-12 h-16 flex items-center justify-center bg-gray-100 rounded-lg text-3xl font-bold text-foreground"
                 >
                   {digit}
                 </div>
@@ -127,7 +127,7 @@ export default function CheckInCodeDisplay({ userId }: Props) {
           </div>
 
           {/* 有効期限 */}
-          <p className="text-sm text-amber-700 mb-4">
+          <p className="text-sm text-primary mb-4">
             {timeLeft === '期限切れ' ? (
               <span className="text-red-600">コードの有効期限が切れました</span>
             ) : (
@@ -159,7 +159,7 @@ export default function CheckInCodeDisplay({ userId }: Props) {
 
         {/* 使い方 */}
         <div className="mt-6 p-4 bg-white/50 rounded-lg">
-          <p className="text-sm text-amber-800 text-center">
+          <p className="text-sm text-primary text-center">
             来店時にこのコードをスタッフにお伝えください。<br />
             チェックインで<span className="font-bold">来店ポイント</span>がもらえます！
           </p>

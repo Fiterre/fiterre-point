@@ -20,8 +20,8 @@ export default async function MentorFitestPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Fitest管理</h1>
-          <p className="text-gray-600">昇格試験の実施・結果入力</p>
+          <h1 className="text-2xl font-bold text-foreground">Fitest管理</h1>
+          <p className="text-muted-foreground">昇格試験の実施・結果入力</p>
         </div>
         <Link href="/mentor/fitest/new">
           <Button>
@@ -36,11 +36,11 @@ export default async function MentorFitestPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-100 rounded-full">
-                <Award className="h-5 w-5 text-amber-600" />
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Award className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">今月の実施数</p>
+                <p className="text-sm text-muted-foreground">今月の実施数</p>
                 <p className="text-xl font-bold">{recentResults.filter(r => {
                   const d = new Date(r.test_date)
                   const now = new Date()
@@ -53,11 +53,11 @@ export default async function MentorFitestPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-full">
+              <div className="p-2 bg-green-500/10 rounded-full">
                 <Trophy className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">合格者数（今月）</p>
+                <p className="text-sm text-muted-foreground">合格者数（今月）</p>
                 <p className="text-xl font-bold">{recentResults.filter(r => {
                   const d = new Date(r.test_date)
                   const now = new Date()
@@ -70,11 +70,11 @@ export default async function MentorFitestPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-full">
+              <div className="p-2 bg-blue-500/10 rounded-full">
                 <Award className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">累計実施数</p>
+                <p className="text-sm text-muted-foreground">累計実施数</p>
                 <p className="text-xl font-bold">{recentResults.length}件</p>
               </div>
             </div>

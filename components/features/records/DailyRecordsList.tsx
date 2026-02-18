@@ -33,8 +33,8 @@ export default function DailyRecordsList({ records }: Props) {
   if (records.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-gray-500">
-          <Dumbbell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+        <CardContent className="py-12 text-center text-muted-foreground">
+          <Dumbbell className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
           <p>トレーニング記録がまだありません</p>
           <p className="text-sm mt-2">セッション後にメンターが記録を追加します</p>
         </CardContent>
@@ -57,7 +57,7 @@ export default function DailyRecordsList({ records }: Props) {
     <div className="space-y-6">
       {Object.entries(groupedByMonth).map(([month, monthRecords]: [string, DailyRecord[]]) => (
         <div key={month}>
-          <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             {month}
           </h3>
@@ -79,7 +79,7 @@ export default function DailyRecordsList({ records }: Props) {
                           <div className="flex items-center gap-2 mb-1">
                             <Badge variant="outline">{formattedDate}</Badge>
                             {record.mentors?.profiles?.display_name && (
-                              <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
                                 <User className="h-3 w-3" />
                                 {record.mentors.profiles.display_name}
                               </span>
@@ -88,18 +88,18 @@ export default function DailyRecordsList({ records }: Props) {
                           <h4 className="font-medium">
                             {record.title || 'トレーニングログ'}
                           </h4>
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                             {record.content}
                           </p>
                           {record.exercises && record.exercises.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {record.exercises.slice(0, 3).map((ex: Exercise, i: number) => (
-                                <Badge key={i} className="bg-amber-100 text-amber-800 text-xs">
+                                <Badge key={i} className="bg-primary/10 text-primary text-xs">
                                   {ex.name}
                                 </Badge>
                               ))}
                               {record.exercises.length > 3 && (
-                                <Badge className="bg-gray-100 text-gray-600 text-xs">
+                                <Badge className="bg-muted text-muted-foreground text-xs">
                                   +{record.exercises.length - 3}
                                 </Badge>
                               )}

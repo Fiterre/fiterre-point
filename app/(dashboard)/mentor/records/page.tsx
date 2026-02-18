@@ -20,8 +20,8 @@ export default async function MentorRecordsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">トレーニング記録</h1>
-          <p className="text-gray-600">顧客のトレーニングログと月次レポートを管理</p>
+          <h1 className="text-2xl font-bold text-foreground">トレーニング記録</h1>
+          <p className="text-muted-foreground">顧客のトレーニングログと月次レポートを管理</p>
         </div>
         <div className="flex gap-2">
           <Link href="/mentor/records/new?type=daily">
@@ -31,7 +31,7 @@ export default async function MentorRecordsPage() {
             </Button>
           </Link>
           <Link href="/mentor/records/new?type=monthly">
-            <Button variant="outline" className="border-amber-500 text-amber-600 hover:bg-amber-50">
+            <Button variant="outline" className="border-primary text-primary hover:bg-primary/5">
               <FileText className="h-4 w-4 mr-2" />
               月次レポート作成
             </Button>

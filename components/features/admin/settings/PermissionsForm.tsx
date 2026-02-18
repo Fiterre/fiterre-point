@@ -135,22 +135,22 @@ export default function PermissionsForm({ initialTiers }: Props) {
               {/* Tierヘッダー */}
               <button
                 onClick={() => setExpandedTier(expandedTier === tier.id ? null : tier.id)}
-                className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                className="w-full flex items-center justify-between p-4 hover:bg-accent"
               >
                 <div className="flex items-center gap-3">
                   {expandedTier === tier.id ? (
-                    <ChevronDown className="h-5 w-5 text-gray-400" />
+                    <ChevronDown className="h-5 w-5 text-muted-foreground/70" />
                   ) : (
-                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                    <ChevronRight className="h-5 w-5 text-muted-foreground/70" />
                   )}
                   <TierBadge tierLevel={tier.tier_level} tierName={tier.tier_name} />
-                  <span className="text-sm text-gray-500">{tier.description}</span>
+                  <span className="text-sm text-muted-foreground">{tier.description}</span>
                 </div>
               </button>
 
               {/* 権限詳細 */}
               {expandedTier === tier.id && (
-                <div className="border-t p-4 bg-gray-50">
+                <div className="border-t p-4 bg-muted">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(tier.permissions).map(([category, actions]) => (
                       <div key={category} className="bg-white p-3 rounded-lg border">
@@ -160,7 +160,7 @@ export default function PermissionsForm({ initialTiers }: Props) {
                         <div className="space-y-2">
                           {Object.entries(actions as Record<string, boolean>).map(([action, enabled]) => (
                             <div key={action} className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-muted-foreground">
                                 {ACTION_LABELS[action] || action}
                               </span>
                               <Switch
@@ -177,7 +177,7 @@ export default function PermissionsForm({ initialTiers }: Props) {
                     ))}
                   </div>
                   {tier.tier_level === 1 && (
-                    <p className="text-xs text-gray-500 mt-3">
+                    <p className="text-xs text-muted-foreground mt-3">
                       ※ Tier 1（Admin）の権限は変更できません
                     </p>
                   )}
@@ -204,27 +204,27 @@ export default function PermissionsForm({ initialTiers }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <h4 className="font-medium">ユーザー管理</h4>
-              <p className="text-gray-500">顧客情報の閲覧・編集・削除</p>
+              <p className="text-muted-foreground">顧客情報の閲覧・編集・削除</p>
             </div>
             <div>
               <h4 className="font-medium">コイン管理</h4>
-              <p className="text-gray-500">コイン残高の確認・付与・調整</p>
+              <p className="text-muted-foreground">コイン残高の確認・付与・調整</p>
             </div>
             <div>
               <h4 className="font-medium">シフト管理</h4>
-              <p className="text-gray-500">自分/全員のシフト編集</p>
+              <p className="text-muted-foreground">自分/全員のシフト編集</p>
             </div>
             <div>
               <h4 className="font-medium">予約管理</h4>
-              <p className="text-gray-500">予約の閲覧・編集・キャンセル</p>
+              <p className="text-muted-foreground">予約の閲覧・編集・キャンセル</p>
             </div>
             <div>
               <h4 className="font-medium">Fitest</h4>
-              <p className="text-gray-500">テストの閲覧・入力・設定管理</p>
+              <p className="text-muted-foreground">テストの閲覧・入力・設定管理</p>
             </div>
             <div>
               <h4 className="font-medium">トレーニング記録</h4>
-              <p className="text-gray-500">記録の閲覧・編集権限</p>
+              <p className="text-muted-foreground">記録の閲覧・編集権限</p>
             </div>
           </div>
         </CardContent>

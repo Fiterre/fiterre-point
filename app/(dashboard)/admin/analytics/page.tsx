@@ -22,7 +22,7 @@ export default async function AdminAnalyticsPage() {
       change: analytics.reservationChange,
       icon: Calendar,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-100'
+      bgColor: 'bg-blue-500/10'
     },
     {
       title: 'アクティブ会員',
@@ -30,15 +30,15 @@ export default async function AdminAnalyticsPage() {
       change: analytics.userChange,
       icon: Users,
       color: 'text-green-600',
-      bgColor: 'bg-green-100'
+      bgColor: 'bg-green-500/10'
     },
     {
       title: '今月のコイン付与',
       value: `${analytics.monthlyCoinsGranted.toLocaleString()} SC`,
       change: analytics.coinsGrantedChange,
       icon: Coins,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-100'
+      color: 'text-primary',
+      bgColor: 'bg-primary/10'
     },
     {
       title: '今月のコイン消費',
@@ -53,8 +53,8 @@ export default async function AdminAnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">分析ダッシュボード</h1>
-        <p className="text-gray-600">売上・予約・メンターのパフォーマンスを確認</p>
+        <h1 className="text-2xl font-bold text-foreground">分析ダッシュボード</h1>
+        <p className="text-muted-foreground">売上・予約・メンターのパフォーマンスを確認</p>
       </div>
 
       {/* 統計カード */}
@@ -64,7 +64,7 @@ export default async function AdminAnalyticsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">{stat.title}</p>
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
                   <p className="text-2xl font-bold mt-1">{stat.value}</p>
                   <div className="flex items-center mt-2">
                     {stat.change >= 0 ? (
@@ -75,7 +75,7 @@ export default async function AdminAnalyticsPage() {
                     <span className={`text-sm ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {stat.change >= 0 ? '+' : ''}{stat.change}%
                     </span>
-                    <span className="text-sm text-gray-400 ml-1">先月比</span>
+                    <span className="text-sm text-muted-foreground/70 ml-1">先月比</span>
                   </div>
                 </div>
                 <div className={`p-3 rounded-full ${stat.bgColor}`}>

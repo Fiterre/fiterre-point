@@ -30,7 +30,7 @@ export default function ReservationChart({ data }: Props) {
                 className="w-full bg-blue-500 rounded-t transition-all"
                 style={{ height: `${Math.max(height, 4)}%` }}
               />
-              <p className="text-xs text-gray-500 mt-2">{dayLabel}</p>
+              <p className="text-xs text-muted-foreground mt-2">{dayLabel}</p>
               <p className="text-xs font-medium">{point.count}</p>
             </div>
           )
@@ -38,7 +38,7 @@ export default function ReservationChart({ data }: Props) {
       </div>
 
       {/* 合計 */}
-      <div className="text-center text-sm text-gray-500">
+      <div className="text-center text-sm text-muted-foreground">
         過去7日間: {recentData.reduce((sum, d) => sum + d.count, 0)}件
       </div>
     </div>

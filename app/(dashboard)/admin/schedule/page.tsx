@@ -147,8 +147,8 @@ export default function AdminSchedulePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">スケジュール管理</h1>
-          <p className="text-gray-600">予約ブロック（休業日・メンテナンス等）の管理</p>
+          <h1 className="text-2xl font-bold text-foreground">スケジュール管理</h1>
+          <p className="text-muted-foreground">予約ブロック（休業日・メンテナンス等）の管理</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -158,7 +158,7 @@ export default function AdminSchedulePage() {
 
       {/* ブロック作成フォーム */}
       {showForm && (
-        <Card className="border-amber-200 bg-amber-50">
+        <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
             <CardTitle className="text-lg">新しいブロック</CardTitle>
             <CardDescription>
@@ -238,9 +238,9 @@ export default function AdminSchedulePage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-center py-8 text-gray-500">読み込み中...</p>
+            <p className="text-center py-8 text-muted-foreground">読み込み中...</p>
           ) : blocks.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">
+            <p className="text-center py-8 text-muted-foreground">
               ブロックはありません
             </p>
           ) : (
@@ -274,7 +274,7 @@ export default function AdminSchedulePage() {
                           </Badge>
                         )}
                         {block.block_reason && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-muted-foreground">
                             {block.block_reason}
                           </span>
                         )}

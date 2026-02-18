@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
+import { getSetting } from '@/lib/queries/settings'
+import { isValidUUID, isPositiveInteger } from '@/lib/validation'
 
 export async function POST(request: Request) {
   try {
@@ -22,11 +24,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '無効なパラメータです' }, { status: 400 })
     }
 
+    if (!isValidUUID(userId)) {
+      return NextResponse.json({ error: '無効なユーザーIDです' }, { status: 400 })
+    }
+
+    if (!isPositiveInteger(amount) || amount > 100000) {
+      return NextResponse.json({ error: '無効なコイン数です' }, { status: 400 })
+    }
+
     const supabase = createAdminClient()
 
-    // 有効期限（90日後）
+    // ユーザー存在確認
+    const { data: targetUser } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (!targetUser) {
+      return NextResponse.json({ error: '対象ユーザーが見つかりません' }, { status: 404 })
+    }
+
+    // 有効期限をsystem_settingsから取得（デフォルト90日）
+    const coinExpiryDays = (await getSetting('coin_expiry_days')) || 90
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 90)
+    expiresAt.setDate(expiresAt.getDate() + Number(coinExpiryDays))
 
     // コイン台帳に追加
     const { data: ledger, error: ledgerError } = await supabase

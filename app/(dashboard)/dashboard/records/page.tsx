@@ -22,8 +22,8 @@ export default async function UserRecordsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">トレーニング記録</h1>
-        <p className="text-gray-600">あなたのトレーニング履歴と月次レポート</p>
+        <h1 className="text-2xl font-bold text-foreground">トレーニング記録</h1>
+        <p className="text-muted-foreground">あなたのトレーニング履歴と月次レポート</p>
       </div>
 
       <Tabs defaultValue="daily" className="w-full">

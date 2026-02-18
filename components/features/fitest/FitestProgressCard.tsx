@@ -45,14 +45,14 @@ export default function FitestProgressCard({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* 現在のレベル */}
-      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+      <Card className="bg-primary/5 border-primary/20">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white rounded-full shadow">
-              <Award className="h-8 w-8 text-amber-600" />
+              <Award className="h-8 w-8 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-amber-700">現在のレベル</p>
+              <p className="text-sm text-primary">現在のレベル</p>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className={`${LEVEL_COLORS[currentLevel]} text-white text-lg px-3 py-1`}>
                   {FITEST_LEVEL_LABELS[currentLevel]}
@@ -67,13 +67,13 @@ export default function FitestProgressCard({
               {LEVEL_ORDER.map((level, index) => (
                 <div
                   key={level}
-                  className={`text-xs ${index <= currentIndex ? 'text-amber-700 font-medium' : 'text-gray-400'}`}
+                  className={`text-xs ${index <= currentIndex ? 'text-primary font-medium' : 'text-gray-400'}`}
                 >
                   {FITEST_LEVEL_LABELS[level]}
                 </div>
               ))}
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-amber-400 to-amber-600 transition-all"
                 style={{ width: `${((currentIndex + 1) / LEVEL_ORDER.length) * 100}%` }}
@@ -93,7 +93,7 @@ export default function FitestProgressCard({
             <div className="flex-1">
               {nextLevel ? (
                 <>
-                  <p className="text-sm text-gray-500">次の目標</p>
+                  <p className="text-sm text-muted-foreground">次の目標</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge className={`${LEVEL_COLORS[nextLevel]} text-white`}>
                       {FITEST_LEVEL_LABELS[nextLevel]}
@@ -103,7 +103,7 @@ export default function FitestProgressCard({
                 </>
               ) : (
                 <>
-                  <p className="text-sm text-gray-500">おめでとうございます！</p>
+                  <p className="text-sm text-muted-foreground">おめでとうございます！</p>
                   <p className="font-bold text-lg">最高レベル達成</p>
                 </>
               )}
@@ -111,9 +111,9 @@ export default function FitestProgressCard({
           </div>
 
           {nextMilestone && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
+            <div className="mt-4 p-3 bg-muted rounded-lg text-sm">
               <p className="font-medium mb-2">合格基準:</p>
-              <ul className="space-y-1 text-gray-600">
+              <ul className="space-y-1 text-muted-foreground">
                 {nextMilestone.min_memory_score && (
                   <li className="flex items-center gap-1">
                     <ChevronRight className="h-3 w-3" />
@@ -134,7 +134,7 @@ export default function FitestProgressCard({
                 )}
               </ul>
               {nextMilestone.reward_coins > 0 && (
-                <p className="mt-2 text-amber-600 font-medium">
+                <p className="mt-2 text-primary font-medium">
                   合格報酬: {nextMilestone.reward_coins.toLocaleString()} SC
                 </p>
               )}
@@ -151,10 +151,10 @@ export default function FitestProgressCard({
               <Trophy className="h-8 w-8 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">テスト実績</p>
+              <p className="text-sm text-muted-foreground">テスト実績</p>
               <p className="text-2xl font-bold">
                 {passedCount}<span className="text-lg text-gray-400">/{totalTests}</span>
-                <span className="text-sm text-gray-500 ml-2">合格</span>
+                <span className="text-sm text-muted-foreground ml-2">合格</span>
               </p>
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function FitestProgressCard({
               <Calendar className="h-8 w-8 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">次回Fitest予定</p>
+              <p className="text-sm text-muted-foreground">次回Fitest予定</p>
               {daysUntilNext !== null && daysUntilNext > 0 ? (
                 <p className="text-2xl font-bold">
                   あと<span className="text-purple-600">{daysUntilNext}</span>日
@@ -177,7 +177,7 @@ export default function FitestProgressCard({
               ) : totalTests > 0 ? (
                 <p className="text-lg font-bold text-purple-600">受験可能です！</p>
               ) : (
-                <p className="text-gray-500">まだ受験していません</p>
+                <p className="text-muted-foreground">まだ受験していません</p>
               )}
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { isValidDate, isValidTime, isValidUUID } from '@/lib/validation'
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +18,17 @@ export async function POST(request: Request) {
 
     if (!sessionTypeId || !mentorId || !date || !startTime) {
       return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 })
+    }
+
+    // フォーマットバリデーション
+    if (!isValidUUID(sessionTypeId) || !isValidUUID(mentorId)) {
+      return NextResponse.json({ error: '無効なIDフォーマットです' }, { status: 400 })
+    }
+    if (!isValidDate(date)) {
+      return NextResponse.json({ error: '無効な日付フォーマットです（YYYY-MM-DD）' }, { status: 400 })
+    }
+    if (!isValidTime(startTime)) {
+      return NextResponse.json({ error: '無効な時刻フォーマットです（HH:MM）' }, { status: 400 })
     }
 
     // 日付の有効性チェック（サーバーサイド検証）
@@ -145,33 +157,65 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '予約の作成に失敗しました' }, { status: 500 })
     }
 
-    // コインをロック（FIFO順）
-    let remainingToLock = sessionType.coin_cost
+    // コインをロック（FIFO順）- ロールバック保護付き
+    const lockedUpdates: { id: string; prevCurrent: number; prevLocked: number }[] = []
 
-    const { data: activeLedgers } = await adminClient
-      .from('coin_ledgers')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .gt('amount_current', 0)
-      .order('expires_at', { ascending: true })
-      .order('granted_at', { ascending: true })
+    try {
+      let remainingToLock = sessionType.coin_cost
 
-    for (const ledger of activeLedgers || []) {
-      if (remainingToLock <= 0) break
-
-      const lockAmount = Math.min(ledger.amount_current, remainingToLock)
-
-      await adminClient
+      const { data: activeLedgers } = await adminClient
         .from('coin_ledgers')
-        .update({
-          amount_current: ledger.amount_current - lockAmount,
-          amount_locked: ledger.amount_locked + lockAmount,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', ledger.id)
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .gt('amount_current', 0)
+        .order('expires_at', { ascending: true })
+        .order('granted_at', { ascending: true })
 
-      remainingToLock -= lockAmount
+      for (const ledger of activeLedgers || []) {
+        if (remainingToLock <= 0) break
+
+        const lockAmount = Math.min(ledger.amount_current, remainingToLock)
+
+        const { error: lockError } = await adminClient
+          .from('coin_ledgers')
+          .update({
+            amount_current: ledger.amount_current - lockAmount,
+            amount_locked: ledger.amount_locked + lockAmount,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', ledger.id)
+
+        if (lockError) throw new Error(`コインロック失敗: ${lockError.message}`)
+
+        lockedUpdates.push({
+          id: ledger.id,
+          prevCurrent: ledger.amount_current,
+          prevLocked: ledger.amount_locked,
+        })
+
+        remainingToLock -= lockAmount
+      }
+
+      if (remainingToLock > 0) {
+        throw new Error('コインロック中に残高不足が発生しました')
+      }
+    } catch (lockErr) {
+      // コインロック失敗時: ロールバック
+      for (const update of lockedUpdates) {
+        await adminClient
+          .from('coin_ledgers')
+          .update({
+            amount_current: update.prevCurrent,
+            amount_locked: update.prevLocked,
+          })
+          .eq('id', update.id)
+      }
+      // 予約とセッションも削除
+      await adminClient.from('reservations').delete().eq('id', reservation.id)
+      await adminClient.from('training_sessions').delete().eq('id', trainingSession.id)
+      console.error('Coin lock rollback:', lockErr)
+      return NextResponse.json({ error: 'コインのロックに失敗しました' }, { status: 500 })
     }
 
     // 残高再計算

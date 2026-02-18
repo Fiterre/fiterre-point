@@ -18,17 +18,17 @@ export default function CustomerLoginInfo({ userId, email, lastLoginAt }: Props)
       </CardHeader>
       <CardContent className="space-y-3">
         <div>
-          <p className="text-sm text-gray-500">メールアドレス</p>
+          <p className="text-sm text-muted-foreground">メールアドレス</p>
           <p className="font-medium flex items-center gap-1 text-sm">
-            <Mail className="h-4 w-4 text-gray-400" />
+            <Mail className="h-4 w-4 text-muted-foreground/70" />
             {email}
           </p>
         </div>
 
         <div>
-          <p className="text-sm text-gray-500">最終ログイン</p>
+          <p className="text-sm text-muted-foreground">最終ログイン</p>
           <p className="font-medium flex items-center gap-1 text-sm">
-            <Clock className="h-4 w-4 text-gray-400" />
+            <Clock className="h-4 w-4 text-muted-foreground/70" />
             {lastLoginAt
               ? new Date(lastLoginAt).toLocaleString('ja-JP')
               : '情報なし'
@@ -36,7 +36,7 @@ export default function CustomerLoginInfo({ userId, email, lastLoginAt }: Props)
           </p>
         </div>
 
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-muted-foreground/70">
           ID: {userId.slice(0, 8)}...
         </div>
       </CardContent>

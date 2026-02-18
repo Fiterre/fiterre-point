@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isMentor } from '@/lib/queries/auth'
+import { isValidUUID, isValidDate } from '@/lib/validation'
 
 export async function POST(request: Request) {
   try {
@@ -27,6 +28,25 @@ export async function POST(request: Request) {
       .single()
 
     const body = await request.json()
+
+    // 入力バリデーション
+    if (!body.userId || !isValidUUID(body.userId)) {
+      return NextResponse.json({ error: '無効なユーザーIDです' }, { status: 400 })
+    }
+    if (!body.testDate || !isValidDate(body.testDate)) {
+      return NextResponse.json({ error: '無効なテスト日付です' }, { status: 400 })
+    }
+
+    // 対象ユーザーの存在確認
+    const { data: targetUser } = await adminClient
+      .from('profiles')
+      .select('id')
+      .eq('id', body.userId)
+      .maybeSingle()
+
+    if (!targetUser) {
+      return NextResponse.json({ error: '対象ユーザーが見つかりません' }, { status: 404 })
+    }
 
     const { data, error } = await adminClient
       .from('fitest_results')

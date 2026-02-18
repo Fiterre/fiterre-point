@@ -50,7 +50,7 @@ export default function NotificationSettings({ userId }: Props) {
             <Label htmlFor={setting.key} className="font-medium">
               {setting.label}
             </Label>
-            <p className="text-sm text-gray-500">{setting.description}</p>
+            <p className="text-sm text-muted-foreground">{setting.description}</p>
           </div>
           <Switch
             id={setting.key}

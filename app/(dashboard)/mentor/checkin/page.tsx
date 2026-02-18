@@ -21,8 +21,8 @@ export default async function MentorCheckInPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">チェックイン</h1>
-        <p className="text-gray-600">来店されたお客様のチェックイン処理</p>
+        <h1 className="text-2xl font-bold text-foreground">チェックイン</h1>
+        <p className="text-muted-foreground">来店されたお客様のチェックイン処理</p>
       </div>
 
       {/* 統計 */}
@@ -30,7 +30,7 @@ export default async function MentorCheckInPage() {
         <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-full">
+              <div className="p-3 bg-green-500/10 rounded-full">
                 <Users className="h-8 w-8 text-green-600" />
               </div>
               <div>
@@ -43,11 +43,11 @@ export default async function MentorCheckInPage() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-full">
+              <div className="p-3 bg-blue-500/10 rounded-full">
                 <Clock className="h-8 w-8 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">現在時刻</p>
+                <p className="text-sm text-muted-foreground">現在時刻</p>
                 <p className="text-2xl font-bold" suppressHydrationWarning>
                   {new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                 </p>

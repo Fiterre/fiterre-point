@@ -11,8 +11,8 @@ interface Props {
 export default function FitestHistoryList({ results }: Props) {
   if (results.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <Trophy className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+      <div className="text-center py-12 text-muted-foreground">
+        <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
         <p>まだFitestを受験していません</p>
         <p className="text-sm mt-2">メンターに相談して昇格試験に挑戦しましょう！</p>
       </div>
@@ -37,11 +37,11 @@ export default function FitestHistoryList({ results }: Props) {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-full ${result.passed ? 'bg-green-100' : 'bg-gray-100'}`}>
+                    <div className={`p-2 rounded-full ${result.passed ? 'bg-green-500/10' : 'bg-muted'}`}>
                       {result.passed ? (
                         <Trophy className="h-6 w-6 text-green-600" />
                       ) : (
-                        <XCircle className="h-6 w-6 text-gray-400" />
+                        <XCircle className="h-6 w-6 text-muted-foreground/70" />
                       )}
                     </div>
                     <div>
@@ -51,7 +51,7 @@ export default function FitestHistoryList({ results }: Props) {
                           {result.passed ? '合格' : '不合格'}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-1 mt-1 text-sm text-gray-500">
+                      <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
                         <span>{FITEST_LEVEL_LABELS[result.current_level as FitestLevel]}</span>
                         <ChevronRight className="h-3 w-3" />
                         <span>{FITEST_LEVEL_LABELS[result.target_level as FitestLevel]}</span>
@@ -85,7 +85,7 @@ export default function FitestHistoryList({ results }: Props) {
                     {/* 総合スコア */}
                     <div className="text-right">
                       <p className="text-2xl font-bold">{result.total_score || 0}</p>
-                      <p className="text-xs text-gray-500">点</p>
+                      <p className="text-xs text-muted-foreground">点</p>
                     </div>
                   </div>
                 </div>

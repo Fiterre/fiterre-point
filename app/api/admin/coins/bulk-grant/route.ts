@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
+import { getSetting } from '@/lib/queries/settings'
+import { isPositiveInteger } from '@/lib/validation'
 
 export async function POST(request: Request) {
   try {
@@ -16,15 +18,20 @@ export async function POST(request: Request) {
 
     const { userIds, amount, description } = await request.json()
 
-    if (!userIds || userIds.length === 0 || !amount || amount <= 0) {
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0 || !amount || amount <= 0) {
       return NextResponse.json({ error: '無効なパラメータです' }, { status: 400 })
+    }
+
+    if (!isPositiveInteger(amount) || amount > 100000) {
+      return NextResponse.json({ error: '無効なコイン数です' }, { status: 400 })
     }
 
     const supabase = createAdminClient()
 
-    // 有効期限（90日後）
+    // 有効期限をsystem_settingsから取得（デフォルト90日）
+    const coinExpiryDays = (await getSetting('coin_expiry_days')) || 90
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 90)
+    expiresAt.setDate(expiresAt.getDate() + Number(coinExpiryDays))
 
     let successCount = 0
     const errors: string[] = []

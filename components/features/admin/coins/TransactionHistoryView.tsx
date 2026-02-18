@@ -65,13 +65,13 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  subscription_pay: 'bg-green-100 text-green-800',
-  bonus: 'bg-blue-100 text-blue-800',
-  spend: 'bg-red-100 text-red-800',
-  reservation_lock: 'bg-yellow-100 text-yellow-800',
-  reservation_confirm: 'bg-red-100 text-red-800',
-  reservation_cancel: 'bg-green-100 text-green-800',
-  expire: 'bg-gray-100 text-gray-800',
+  subscription_pay: 'bg-green-500/10 text-green-600',
+  bonus: 'bg-blue-500/10 text-blue-600',
+  spend: 'bg-red-500/10 text-red-600',
+  reservation_lock: 'bg-yellow-500/10 text-yellow-600',
+  reservation_confirm: 'bg-red-500/10 text-red-600',
+  reservation_cancel: 'bg-green-500/10 text-green-600',
+  expire: 'bg-muted text-foreground',
   admin_adjust: 'bg-purple-100 text-purple-800',
   referral_reward: 'bg-pink-100 text-pink-800',
 }
@@ -128,7 +128,7 @@ export default function TransactionHistoryView({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">今月の付与</p>
+                <p className="text-sm text-muted-foreground">今月の付与</p>
                 <p className="text-2xl font-bold text-green-600">
                   +{stats.monthlyGranted.toLocaleString()} SC
                 </p>
@@ -141,7 +141,7 @@ export default function TransactionHistoryView({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">今月の消費</p>
+                <p className="text-sm text-muted-foreground">今月の消費</p>
                 <p className="text-2xl font-bold text-red-600">
                   -{stats.monthlySpent.toLocaleString()} SC
                 </p>
@@ -154,7 +154,7 @@ export default function TransactionHistoryView({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">今月の純増</p>
+                <p className="text-sm text-muted-foreground">今月の純増</p>
                 <p className={`text-2xl font-bold ${stats.monthlyNet >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
                   {stats.monthlyNet >= 0 ? '+' : ''}{stats.monthlyNet.toLocaleString()} SC
                 </p>
@@ -233,33 +233,33 @@ export default function TransactionHistoryView({
         <CardContent className="p-0">
           <div className="max-h-[500px] overflow-y-auto">
             {filteredTransactions.length === 0 ? (
-              <p className="text-center py-12 text-gray-500">取引がありません</p>
+              <p className="text-center py-12 text-muted-foreground">取引がありません</p>
             ) : (
               <table className="w-full">
-                <thead className="bg-gray-50 sticky top-0">
+                <thead className="bg-muted sticky top-0">
                   <tr>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">日時</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">ユーザー</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">種別</th>
-                    <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">金額</th>
-                    <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">残高</th>
-                    <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">説明</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">日時</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">ユーザー</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">種別</th>
+                    <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">金額</th>
+                    <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">残高</th>
+                    <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">説明</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {filteredTransactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-500">
+                    <tr key={tx.id} className="hover:bg-accent">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {new Date(tx.created_at).toLocaleString('ja-JP')}
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-sm font-medium">
                           {tx.profiles?.display_name || '名前未設定'}
                         </p>
-                        <p className="text-xs text-gray-500">{tx.profiles?.email}</p>
+                        <p className="text-xs text-muted-foreground">{tx.profiles?.email}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge className={TYPE_COLORS[tx.type] || 'bg-gray-100'}>
+                        <Badge className={TYPE_COLORS[tx.type] || 'bg-muted'}>
                           {TYPE_LABELS[tx.type] || tx.type}
                         </Badge>
                       </td>
@@ -275,10 +275,10 @@ export default function TransactionHistoryView({
                           {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-gray-500">
+                      <td className="px-4 py-3 text-right text-sm text-muted-foreground">
                         {tx.balance_after.toLocaleString()}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500 max-w-[200px] truncate">
+                      <td className="px-4 py-3 text-sm text-muted-foreground max-w-[200px] truncate">
                         {tx.description || '-'}
                       </td>
                     </tr>
