@@ -445,6 +445,39 @@ export const FITEST_LEVEL_LABELS: Record<FitestLevel, string> = {
   master: 'マスター'
 }
 
+// Fitestテスト項目マスタ
+export type FitestInputType = 'score' | 'weight' | 'time' | 'distance' | 'count'
+export type FitestScoringMethod = 'higher_better' | 'lower_better' | 'target_match'
+
+export interface FitestItem {
+  id: string
+  name: string
+  description: string | null
+  icon: string | null
+  input_type: FitestInputType
+  unit: string | null
+  scoring_method: FitestScoringMethod
+  max_score: number
+  is_active: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
+export const INPUT_TYPE_LABELS: Record<FitestInputType, string> = {
+  score:    '得点',
+  weight:   '重量 (kg)',
+  time:     '時間 (秒)',
+  distance: '距離 (m)',
+  count:    '回数',
+}
+
+export const SCORING_METHOD_LABELS: Record<FitestScoringMethod, string> = {
+  higher_better: '高いほど良い',
+  lower_better:  '低いほど良い',
+  target_match:  '目標値に近いほど良い',
+}
+
 // ========================================
 // 入店認証・チェックイン
 // ========================================

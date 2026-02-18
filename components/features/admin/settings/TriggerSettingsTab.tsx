@@ -1,12 +1,16 @@
-import { getNextTriggerDate, getTriggerStatus } from '@/lib/queries/shifts'
+import { getNextTriggerDate, getTriggerStatus, getRecurringReservations } from '@/lib/queries/shifts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Clock, Activity, CheckCircle2, AlertCircle, SkipForward } from 'lucide-react'
+import { Clock, Activity, CheckCircle2, AlertCircle, SkipForward, Repeat, ExternalLink } from 'lucide-react'
+import Link from 'next/link'
+
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
 export default async function TriggerSettingsTab() {
-  const [triggerInfo, triggerStatus] = await Promise.all([
+  const [triggerInfo, triggerStatus, recurringList] = await Promise.all([
     getNextTriggerDate(),
-    getTriggerStatus()
+    getTriggerStatus(),
+    getRecurringReservations(),
   ])
 
   return (
@@ -92,6 +96,59 @@ export default async function TriggerSettingsTab() {
               )}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* 固定予約一覧 */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Repeat className="h-5 w-5" />
+              固定予約一覧（{recurringList.length}件）
+            </CardTitle>
+            <Link
+              href="/admin/recurring"
+              className="text-sm text-primary flex items-center gap-1 hover:underline"
+            >
+              管理ページ
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {recurringList.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">固定予約はありません</p>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {(recurringList as {
+                id: string
+                day_of_week: number
+                start_time: string
+                end_time: string
+                profiles: { display_name: string | null; email: string } | null
+                mentors: { profiles: { display_name: string | null } } | null
+                session_types: { name: string } | null
+              }[]).map(rec => (
+                <div key={rec.id} className="flex items-center justify-between p-2 bg-muted rounded-lg text-sm">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="shrink-0">
+                      {DAY_LABELS[rec.day_of_week]}曜
+                    </Badge>
+                    <span className="text-muted-foreground">
+                      {rec.start_time.slice(0, 5)}〜{rec.end_time.slice(0, 5)}
+                    </span>
+                    <span className="font-medium">
+                      {rec.profiles?.display_name || rec.profiles?.email || '—'}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground shrink-0">
+                    {rec.mentors?.profiles?.display_name || '未設定'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -1,6 +1,33 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { FitestResult, FitestResultWithRelations, FitestMilestone, FitestLevel } from '@/types/database'
+import { FitestResult, FitestResultWithRelations, FitestMilestone, FitestLevel, FitestItem } from '@/types/database'
+
+// ========== FitestItem CRUD ==========
+
+export async function getFitestItems(): Promise<FitestItem[]> {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('fitest_items')
+    .select('*')
+    .order('display_order')
+    .order('created_at')
+  if (error) {
+    console.error('Error fetching fitest items:', error)
+    return []
+  }
+  return data ?? []
+}
+
+export async function getActiveFitestItems(): Promise<FitestItem[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('fitest_items')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order')
+  if (error) return []
+  return data ?? []
+}
 
 export async function getUserFitestResults(userId: string): Promise<FitestResultWithRelations[]> {
   const supabase = await createClient()

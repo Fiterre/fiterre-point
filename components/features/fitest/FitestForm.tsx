@@ -18,7 +18,7 @@ import {
   Trophy,
   AlertTriangle
 } from 'lucide-react'
-import { FitestMilestone, FITEST_LEVEL_LABELS, FitestLevel } from '@/types/database'
+import { FitestMilestone, FITEST_LEVEL_LABELS, FitestLevel, FitestItem } from '@/types/database'
 
 interface User {
   id: string
@@ -31,12 +31,31 @@ interface Props {
   mentorId: string
   users: User[]
   milestones: FitestMilestone[]
+  fitestItems?: FitestItem[]
   preselectedUserId?: string
+}
+
+// 動的アイテムのスコア換算（0〜item.max_score）
+function calcItemScore(item: FitestItem, rawValue: number): number {
+  const max = item.max_score
+  switch (item.scoring_method) {
+    case 'higher_better':
+      // 値をそのままスコアとして使用（上限 max_score にクランプ）
+      return Math.min(rawValue, max)
+    case 'lower_better':
+      // 0なら満点、max以上なら0点（線形）
+      return Math.max(max - (rawValue / max) * max, 0)
+    case 'target_match':
+      // target_value は別途 milestone_criteria で管理。ここでは直接rawを使用
+      return Math.min(rawValue, max)
+    default:
+      return 0
+  }
 }
 
 const LEVEL_ORDER: FitestLevel[] = ['beginner', 'intermediate', 'advanced', 'master']
 
-export default function FitestForm({ mentorId, users, milestones, preselectedUserId }: Props) {
+export default function FitestForm({ mentorId, users, milestones, fitestItems = [], preselectedUserId }: Props) {
   const [selectedUserId, setSelectedUserId] = useState(preselectedUserId || '')
   const [testDate, setTestDate] = useState(new Date().toISOString().split('T')[0])
   const [currentLevel, setCurrentLevel] = useState<FitestLevel>('beginner')
@@ -58,12 +77,19 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
   const [weightActual, setWeightActual] = useState('')
   const [weightNotes, setWeightNotes] = useState('')
 
+  // 動的カスタム項目の値 { [itemId]: rawValue }
+  const [customValues, setCustomValues] = useState<Record<string, string>>({})
+
   // 総合
   const [overallNotes, setOverallNotes] = useState('')
   const [loading, setLoading] = useState(false)
 
   const router = useRouter()
   const { toast } = useToast()
+
+  // レガシー3項目を除いたカスタム項目（DB移行後に fitest_items で管理）
+  const LEGACY_NAMES = ['神経衰弱', 'Big3合計', '体重予測精度']
+  const customItems = fitestItems.filter(item => !LEGACY_NAMES.includes(item.name))
 
   // Big3トータル計算
   const big3Total = (parseFloat(benchPress) || 0) + (parseFloat(squat) || 0) + (parseFloat(deadlift) || 0)
@@ -76,7 +102,7 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
   // 該当するマイルストーン
   const milestone = milestones.find(m => m.from_level === currentLevel && m.to_level === targetLevel)
 
-  // スコア計算
+  // 汎用スコア計算（レガシー3項目 + カスタム項目）
   const calculateScore = () => {
     let score = 0
 
@@ -95,10 +121,20 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
       score += Math.max(100 - (weightDifference * 20), 0)
     }
 
+    // カスタム項目スコア
+    customItems.forEach(item => {
+      const raw = parseFloat(customValues[item.id] || '')
+      if (!isNaN(raw)) {
+        score += calcItemScore(item, raw)
+      }
+    })
+
     return Math.round(score)
   }
 
   const totalScore = calculateScore()
+  // 総スコア上限（レガシー3項目 × 100 + カスタム項目の合計上限）
+  const maxScore = 300 + customItems.reduce((sum, item) => sum + item.max_score, 0)
 
   // 合格判定
   const checkPass = (): boolean => {
@@ -155,6 +191,15 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
     setLoading(true)
 
     try {
+      // カスタム項目の値を配列化
+      const customItemValues = customItems
+        .filter(item => customValues[item.id])
+        .map(item => ({
+          itemId: item.id,
+          rawValue: parseFloat(customValues[item.id]),
+          convertedScore: calcItemScore(item, parseFloat(customValues[item.id])),
+        }))
+
       const response = await fetch('/api/mentor/fitest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -177,7 +222,8 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
           weightNotes: weightNotes || null,
           totalScore,
           passed,
-          overallNotes: overallNotes || null
+          overallNotes: overallNotes || null,
+          customItemValues,
         }),
       })
 
@@ -414,6 +460,45 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
         </CardContent>
       </Card>
 
+      {/* カスタム追加項目 */}
+      {customItems.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-amber-500" />
+              追加テスト項目
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {customItems.map(item => (
+              <div key={item.id} className="space-y-2">
+                <Label>
+                  {item.name}
+                  {item.unit && <span className="text-muted-foreground ml-1">({item.unit})</span>}
+                  {item.description && (
+                    <span className="block text-xs text-muted-foreground font-normal mt-0.5">
+                      {item.description}
+                    </span>
+                  )}
+                </Label>
+                <Input
+                  type="number"
+                  value={customValues[item.id] ?? ''}
+                  onChange={e => setCustomValues(prev => ({ ...prev, [item.id]: e.target.value }))}
+                  placeholder="数値を入力"
+                  step="0.01"
+                />
+                {customValues[item.id] && !isNaN(parseFloat(customValues[item.id])) && (
+                  <p className="text-xs text-muted-foreground">
+                    換算スコア: {calcItemScore(item, parseFloat(customValues[item.id])).toFixed(1)} / {item.max_score}点
+                  </p>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* 総合評価 */}
       <Card className={passed ? 'border-green-500 bg-green-50' : 'border-red-300 bg-red-50'}>
         <CardHeader>
@@ -430,7 +515,7 @@ export default function FitestForm({ mentorId, users, milestones, preselectedUse
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 bg-white rounded-lg">
               <p className="text-sm text-muted-foreground">総合スコア</p>
-              <p className="text-3xl font-bold">{totalScore}<span className="text-lg text-muted-foreground">/300</span></p>
+              <p className="text-3xl font-bold">{totalScore}<span className="text-lg text-muted-foreground">/{maxScore}</span></p>
             </div>
             <div className="p-4 bg-white rounded-lg">
               <p className="text-sm text-muted-foreground">判定</p>

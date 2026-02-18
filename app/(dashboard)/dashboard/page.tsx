@@ -3,21 +3,27 @@ import { getUserBalance } from '@/lib/queries/balance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, History, Award, QrCode, Settings } from 'lucide-react'
 import BalanceCard from '@/components/features/dashboard/BalanceCard'
+import GradeCard3D from '@/components/features/dashboard/GradeCard3D'
 import { getCoinRankings, getUserRankPosition } from '@/lib/queries/rankings'
 import CoinRankingCard from '@/components/features/dashboard/CoinRankingCard'
 import Link from 'next/link'
+import type { MemberRank } from '@/types/database'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // ユーザーの残高を取得
+  // ユーザーの残高・プロフィールを取得
   const balance = user ? await getUserBalance(user.id) : { available: 0, locked: 0, total: 0 }
 
-  const [rankings, userPosition] = await Promise.all([
+  const [rankings, userPosition, profileRes] = await Promise.all([
     getCoinRankings(5),
-    user ? getUserRankPosition(user.id) : Promise.resolve(null)
+    user ? getUserRankPosition(user.id) : Promise.resolve(null),
+    user
+      ? supabase.from('profiles').select('display_name, rank, created_at').eq('id', user.id).single()
+      : Promise.resolve({ data: null }),
   ])
+  const profile = profileRes.data
 
   return (
     <div className="space-y-8">
@@ -25,6 +31,15 @@ export default async function DashboardPage() {
         <h2 className="text-2xl font-bold text-foreground">ダッシュボード</h2>
         <p className="text-muted-foreground">ようこそ、{user?.email} さん</p>
       </div>
+
+      {/* 3Dグレードカード */}
+      {profile && (
+        <GradeCard3D
+          rank={(profile.rank as MemberRank) ?? 'bronze'}
+          displayName={profile.display_name}
+          memberSince={profile.created_at}
+        />
+      )}
 
       {/* コイン残高カード */}
       <BalanceCard

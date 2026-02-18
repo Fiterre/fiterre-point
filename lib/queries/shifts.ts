@@ -73,6 +73,36 @@ export async function getAvailableMentors(dayOfWeek: number, time: string) {
   return uniqueMentors ?? []
 }
 
+export async function getUserRecurringReservations(userId: string) {
+  const supabase = createAdminClient()
+
+  const { data, error } = await supabase
+    .from('recurring_reservations')
+    .select(`
+      *,
+      mentors (
+        profiles:user_id (
+          display_name
+        )
+      ),
+      session_types (
+        name,
+        coin_cost
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .order('day_of_week')
+    .order('start_time')
+
+  if (error) {
+    console.error('Error fetching user recurring reservations:', error)
+    return []
+  }
+
+  return data ?? []
+}
+
 export async function getRecurringReservations() {
   const supabase = createAdminClient()
 

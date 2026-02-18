@@ -1,12 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { getUserReservations, getUpcomingReservations } from '@/lib/queries/reservations'
+import { getUserRecurringReservations } from '@/lib/queries/shifts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Plus, Calendar } from 'lucide-react'
+import { ArrowLeft, Plus, Calendar, Repeat } from 'lucide-react'
 import Link from 'next/link'
 import CancelReservationButton from '@/components/features/reservations/CancelReservationButton'
 import CancelSuggestionBanner from '@/components/features/reservations/CancelSuggestionBanner'
+
+const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 
 export default async function ReservationsPage() {
   const supabase = await createClient()
@@ -14,8 +17,11 @@ export default async function ReservationsPage() {
 
   if (!user) return null
 
-  const upcoming = await getUpcomingReservations(user.id)
-  const history = await getUserReservations(user.id)
+  const [upcoming, history, recurring] = await Promise.all([
+    getUpcomingReservations(user.id),
+    getUserReservations(user.id),
+    getUserRecurringReservations(user.id),
+  ])
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -59,6 +65,45 @@ export default async function ReservationsPage() {
         </Link>
       </div>
 
+      {/* 固定予約 */}
+      {recurring.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Repeat className="h-5 w-5" />
+              固定予約スケジュール
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {recurring.map((rec: {
+                id: string
+                day_of_week: number
+                start_time: string
+                end_time: string
+                mentors: { profiles: { display_name: string | null } } | null
+                session_types: { name: string; coin_cost: number } | null
+              }) => (
+                <div key={rec.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div>
+                    <p className="font-medium">
+                      毎週{DAY_LABELS[rec.day_of_week]}曜
+                      <span className="ml-2 text-sm">{rec.start_time.slice(0, 5)}〜{rec.end_time.slice(0, 5)}</span>
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {rec.session_types?.name}　メンター: {rec.mentors?.profiles?.display_name || '未設定'}
+                    </p>
+                  </div>
+                  <span className="text-sm font-medium text-primary">
+                    {rec.session_types?.coin_cost.toLocaleString()} SC
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* 直近の予約 */}
       <Card>
         <CardHeader>
@@ -77,7 +122,13 @@ export default async function ReservationsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {upcoming.map((res) => {
+              {upcoming.map((res: {
+                id: string
+                status: string | null
+                reserved_at: string | null
+                coins_used: number
+                mentors: { profiles: { display_name: string | null } } | null
+              }) => {
                 const badge = getStatusBadge(res.status || 'pending')
                 const reservedDate = res.reserved_at ? new Date(res.reserved_at) : null
                 const dateStr = reservedDate ? reservedDate.toLocaleDateString('ja-JP') : ''
@@ -102,7 +153,7 @@ export default async function ReservationsPage() {
                     {(res.status === 'pending' || res.status === 'confirmed') && (
                       <CancelReservationButton
                         reservationId={res.id}
-                        reservedAt={res.reserved_at}
+                        reservedAt={res.reserved_at ?? ''}
                         coinsUsed={res.coins_used}
                       />
                     )}
@@ -124,7 +175,12 @@ export default async function ReservationsPage() {
             <p className="text-center py-8 text-muted-foreground">履歴がありません</p>
           ) : (
             <div className="space-y-2">
-              {history.slice(0, 10).map((res) => {
+              {history.slice(0, 10).map((res: {
+                id: string
+                status: string | null
+                reserved_at: string | null
+                mentors: { profiles: { display_name: string | null } } | null
+              }) => {
                 const badge = getStatusBadge(res.status || 'pending')
                 const reservedDate = res.reserved_at ? new Date(res.reserved_at) : null
                 const dateStr = reservedDate ? reservedDate.toLocaleDateString('ja-JP') : ''

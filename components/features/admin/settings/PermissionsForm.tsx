@@ -153,7 +153,7 @@ export default function PermissionsForm({ initialTiers }: Props) {
                 <div className="border-t p-4 bg-muted">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.entries(tier.permissions).map(([category, actions]) => (
-                      <div key={category} className="bg-white p-3 rounded-lg border">
+                      <div key={category} className="bg-card p-3 rounded-lg border">
                         <h4 className="font-medium text-sm mb-2">
                           {CATEGORY_LABELS[category] || category}
                         </h4>

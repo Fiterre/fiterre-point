@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { Save } from 'lucide-react'
+import { Save, RefreshCw } from 'lucide-react'
 
 interface Setting {
   key: string
@@ -62,8 +62,23 @@ export default function SystemSettingsForm({ initialSettings }: Props) {
   })
   const [loading, setLoading] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
+  const [clearingCache, setClearingCache] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+
+  const handleCacheClear = async () => {
+    setClearingCache(true)
+    try {
+      const res = await fetch('/api/admin/cache-clear', { method: 'POST' })
+      if (!res.ok) throw new Error('キャッシュクリアに失敗しました')
+      toast({ title: 'キャッシュクリア完了', description: '全ページのキャッシュを更新しました' })
+      router.refresh()
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'エラー', description: e instanceof Error ? e.message : '失敗しました' })
+    } finally {
+      setClearingCache(false)
+    }
+  }
 
   const handleChange = (key: string, value: string) => {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -141,7 +156,16 @@ export default function SystemSettingsForm({ initialSettings }: Props) {
             ))}
           </div>
 
-          <div className="flex justify-end pt-4 border-t">
+          <div className="flex items-center justify-between pt-4 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCacheClear}
+              disabled={clearingCache}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${clearingCache ? 'animate-spin' : ''}`} />
+              {clearingCache ? 'クリア中...' : 'キャッシュクリア'}
+            </Button>
             <Button type="submit" disabled={loading || !hasChanges}>
               <Save className="h-4 w-4 mr-2" />
               {loading ? '保存中...' : '設定を保存'}

@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/lib/queries/auth'
 import { getAllUsers } from '@/lib/queries/users'
-import { getMilestones } from '@/lib/queries/fitest'
+import { getMilestones, getActiveFitestItems } from '@/lib/queries/fitest'
 import { redirect } from 'next/navigation'
 import FitestForm from '@/components/features/fitest/FitestForm'
 
@@ -16,9 +16,10 @@ export default async function NewFitestPage({ searchParams }: Props) {
     redirect('/login')
   }
 
-  const [users, milestones] = await Promise.all([
+  const [users, milestones, fitestItems] = await Promise.all([
     getAllUsers(),
-    getMilestones()
+    getMilestones(),
+    getActiveFitestItems(),
   ])
 
   return (
@@ -32,6 +33,7 @@ export default async function NewFitestPage({ searchParams }: Props) {
         mentorId={user.id}
         users={users}
         milestones={milestones}
+        fitestItems={fitestItems}
         preselectedUserId={userId}
       />
     </div>

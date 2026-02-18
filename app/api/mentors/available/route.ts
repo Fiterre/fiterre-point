@@ -12,11 +12,13 @@ export async function GET(request: Request) {
     }
 
     // 曜日を計算（0=日曜, 1=月曜, ...）
-    const dayOfWeek = new Date(date).getDay()
+    // UTC誤差を防ぐためローカル時間として解釈
+    const dayOfWeek = new Date(date + 'T00:00:00').getDay()
 
     const supabase = await createClient()
 
     // その曜日・時間にシフトがあるメンターを取得
+    // start_time <= 選択時刻 かつ end_time > 選択時刻（終了時刻ちょうどは含まない）
     const { data: shifts, error } = await supabase
       .from('mentor_shifts')
       .select(`
@@ -24,6 +26,7 @@ export async function GET(request: Request) {
         mentors (
           id,
           name,
+          is_active,
           profiles:user_id (
             display_name
           )
@@ -31,19 +34,19 @@ export async function GET(request: Request) {
       `)
       .eq('day_of_week', dayOfWeek)
       .eq('is_active', true)
-      .lte('start_time', time + ':00')
-      .gte('end_time', time + ':00')
+      .lte('start_time', time)
+      .gt('end_time', time)
 
     if (error) {
       console.error('Error fetching available mentors:', error)
       return NextResponse.json({ error: 'メンター取得に失敗しました' }, { status: 500 })
     }
 
-    // 重複を除去してメンターリストを作成
+    // 重複を除去してメンターリストを作成（is_activeなメンターのみ）
     const mentorsMap = new Map()
     shifts?.forEach(shift => {
-      const mentor = shift.mentors as unknown as { id: string; name: string; profiles: { display_name: string }[] } | null
-      if (mentor && !mentorsMap.has(mentor.id)) {
+      const mentor = shift.mentors as unknown as { id: string; name: string; is_active: boolean; profiles: { display_name: string }[] } | null
+      if (mentor && mentor.is_active && !mentorsMap.has(mentor.id)) {
         mentorsMap.set(mentor.id, mentor)
       }
     })

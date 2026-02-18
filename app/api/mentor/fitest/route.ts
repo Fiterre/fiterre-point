@@ -80,6 +80,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '結果の保存に失敗しました' }, { status: 500 })
     }
 
+    // カスタム項目の値を fitest_result_values に保存
+    if (body.customItemValues && Array.isArray(body.customItemValues) && body.customItemValues.length > 0) {
+      const valuesToInsert = body.customItemValues
+        .filter((v: { itemId: string; rawValue: number; convertedScore: number }) =>
+          v.itemId && typeof v.rawValue === 'number' && !isNaN(v.rawValue)
+        )
+        .map((v: { itemId: string; rawValue: number; convertedScore: number }) => ({
+          result_id: data.id,
+          item_id: v.itemId,
+          raw_value: v.rawValue,
+          converted_score: v.convertedScore ?? null,
+        }))
+
+      if (valuesToInsert.length > 0) {
+        await adminClient.from('fitest_result_values').insert(valuesToInsert)
+      }
+    }
+
     // 合格した場合、ユーザーのランクを更新
     if (body.passed) {
       const rankMapping: Record<string, string> = {
