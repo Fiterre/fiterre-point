@@ -190,7 +190,7 @@ export async function POST(request: Request) {
 
           // 取引履歴
           await supabase
-            .from('transactions')
+            .from('coin_transactions')
             .insert({
               user_id: recurring.user_id,
               amount: -coinCost,

@@ -34,8 +34,7 @@
 - **UIコンポーネント**: shadcn/ui
 - **データベース**: Supabase (PostgreSQL)
 - **認証**: Supabase Auth
-- **メール**: Resend
-- **LINE連携**: LINE Messaging API
+- **通知**: LINE Messaging API
 - **デプロイ**: Vercel
 
 ## 📦 セットアップ
@@ -59,9 +58,6 @@ npm install
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# Resend
-RESEND_API_KEY=your_resend_api_key
 
 # LINE Messaging API
 LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token

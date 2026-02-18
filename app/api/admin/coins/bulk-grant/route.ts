@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
         // 取引履歴に追加
         await supabase
-          .from('transactions')
+          .from('coin_transactions')
           .insert({
             user_id: userId,
             amount: amount,

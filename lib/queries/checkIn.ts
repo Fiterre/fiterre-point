@@ -161,7 +161,7 @@ export async function checkIn(
 
       // 取引履歴に記録
       await supabase
-        .from('transactions')
+        .from('coin_transactions')
         .insert({
           user_id: userId,
           amount: bonusCoins,

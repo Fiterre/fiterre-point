@@ -162,7 +162,7 @@ export async function cancelReservation(
 
       // 取引履歴に返還を記録
       await supabase
-        .from('transactions')
+        .from('coin_transactions')
         .insert({
           user_id: userId,
           amount: refundedAmount,
@@ -210,7 +210,7 @@ export async function cancelReservation(
 
       // 取引履歴に没収を記録
       await supabase
-        .from('transactions')
+        .from('coin_transactions')
         .insert({
           user_id: userId,
           amount: -forfeitedAmount,

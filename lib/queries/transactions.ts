@@ -15,7 +15,7 @@ export async function getAllTransactions(
   const supabase = createAdminClient()
 
   let query = supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select(`
       *,
       profiles:user_id (
@@ -65,14 +65,14 @@ export async function getTransactionStats() {
 
   // 今月の付与総額
   const { data: granted } = await supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select('amount')
     .gte('created_at', monthStart)
     .gt('amount', 0)
 
   // 今月の消費総額
   const { data: spent } = await supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select('amount')
     .gte('created_at', monthStart)
     .lt('amount', 0)

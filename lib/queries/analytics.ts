@@ -55,7 +55,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
   // 今月のコイン付与
   const { data: thisMonthGranted } = await supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select('amount')
     .gte('created_at', thisMonthStart)
     .gt('amount', 0)
@@ -64,7 +64,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
   // 先月のコイン付与
   const { data: lastMonthGranted } = await supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select('amount')
     .gte('created_at', lastMonthStart)
     .lt('created_at', thisMonthStart)
@@ -74,7 +74,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
   // 今月のコイン消費
   const { data: thisMonthSpent } = await supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select('amount')
     .gte('created_at', thisMonthStart)
     .lt('amount', 0)
@@ -83,7 +83,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
   // 先月のコイン消費
   const { data: lastMonthSpent } = await supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select('amount')
     .gte('created_at', lastMonthStart)
     .lt('created_at', thisMonthStart)
@@ -102,7 +102,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 
   // コインフロー推移（過去30日）
   const { data: coinFlowData } = await supabase
-    .from('transactions')
+    .from('coin_transactions')
     .select('amount, created_at')
     .gte('created_at', thirtyDaysAgo)
     .order('created_at')
