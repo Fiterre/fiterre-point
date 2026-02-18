@@ -21,10 +21,6 @@ export async function getAllTransactions(
       profiles:user_id (
         display_name,
         email
-      ),
-      executor:executed_by (
-        display_name,
-        email
       )
     `, { count: 'exact' })
     .order('created_at', { ascending: false })
