@@ -38,8 +38,11 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
   const [time, setTime] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingMentors, setLoadingMentors] = useState(false)
+  const [loadingSlots, setLoadingSlots] = useState(false)
   const [availableMentors, setAvailableMentors] = useState<Mentor[]>([])
   const [selectedDayLabel, setSelectedDayLabel] = useState('')
+  const [timeSlots, setTimeSlots] = useState<string[]>([])
+  const [closedReason, setClosedReason] = useState<string | null>(null)
   const router = useRouter()
   const { toast } = useToast()
 
@@ -58,6 +61,19 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
     : new Date(now.getFullYear(), now.getMonth() + 1, 0) // 今月末
   const maxDateStr = maxDate.toISOString().split('T')[0]
 
+  // 日付変更時: 時間枠を再取得
+  useEffect(() => {
+    if (!date) {
+      setTimeSlots([])
+      setClosedReason(null)
+      setTime('')
+      setAvailableMentors([])
+      setMentorId('')
+      return
+    }
+    fetchTimeSlots()
+  }, [date])
+
   // 日付または時間が変更されたらメンターを再取得
   useEffect(() => {
     if (date && time) {
@@ -67,6 +83,33 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
       setMentorId('')
     }
   }, [date, time])
+
+  const fetchTimeSlots = async () => {
+    setLoadingSlots(true)
+    setTime('')
+    setClosedReason(null)
+    setAvailableMentors([])
+    setMentorId('')
+
+    try {
+      const response = await fetch(`/api/available-slots?date=${date}`)
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.error)
+
+      if (data.slots.length === 0) {
+        setClosedReason(data.reason === 'regular_holiday' ? '定休日' : '臨時休業')
+        setTimeSlots([])
+      } else {
+        setTimeSlots(data.slots)
+        setClosedReason(null)
+      }
+    } catch {
+      setTimeSlots([])
+    } finally {
+      setLoadingSlots(false)
+    }
+  }
 
   const fetchAvailableMentors = async () => {
     setLoadingMentors(true)
@@ -187,22 +230,30 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
         </div>
         <div className="space-y-2">
           <Label htmlFor="time">開始時間</Label>
-          <select
-            id="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="w-full h-10 px-3 border rounded-md bg-background"
-            required
-          >
-            <option value="">選択してください</option>
-            {Array.from({ length: 23 }, (_, i) => {
-              const h = Math.floor(i / 2) + 9
-              const m = i % 2 === 0 ? '00' : '30'
-              if (h > 20 || (h === 20 && m === '30')) return null
-              const val = `${String(h).padStart(2, '0')}:${m}`
-              return <option key={val} value={val}>{val}</option>
-            })}
-          </select>
+          {loadingSlots ? (
+            <div className="flex items-center h-10 px-3 border rounded-md text-sm text-muted-foreground gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              読み込み中...
+            </div>
+          ) : closedReason ? (
+            <div className="flex items-center h-10 px-3 border rounded-md text-sm text-red-600 bg-red-50">
+              {closedReason}のため予約不可
+            </div>
+          ) : (
+            <select
+              id="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full h-10 px-3 border rounded-md bg-background"
+              required
+              disabled={timeSlots.length === 0}
+            >
+              <option value="">{date ? '選択してください' : '日付を先に選択'}</option>
+              {timeSlots.map(slot => (
+                <option key={slot} value={slot}>{slot}</option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 

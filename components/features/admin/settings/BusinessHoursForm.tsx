@@ -123,10 +123,10 @@ export default function BusinessHoursForm({ initialHours, initialInterval, initi
         throw new Error(data.error || '追加に失敗しました')
       }
 
+      setClosures(prev => [...prev, data.closure])
       toast({ title: '追加完了', description: '臨時休業を追加しました' })
       setNewClosureDate('')
       setNewClosureReason('')
-      router.refresh()
     } catch (error) {
       toast({
         variant: 'destructive',

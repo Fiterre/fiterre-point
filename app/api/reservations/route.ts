@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { isValidDate, isValidTime, isValidUUID } from '@/lib/validation'
+import { getSetting } from '@/lib/queries/settings'
+
+const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
 export async function POST(request: Request) {
   try {
@@ -58,6 +61,64 @@ export async function POST(request: Request) {
 
     const adminClient = createAdminClient()
 
+    // ===== 営業時間・休業日・シフトのサーバーサイドバリデーション =====
+
+    const dayOfWeek = new Date(`${date}T00:00:00`).getDay()
+    const dayKey = DAY_KEYS[dayOfWeek]
+
+    // 営業時間チェック
+    const businessHours = await getSetting('business_hours') as Record<string, { open: string; close: string; is_open: boolean }> | null
+    const dayHours = businessHours?.[dayKey]
+
+    if (dayHours && !dayHours.is_open) {
+      return NextResponse.json({ error: '定休日のため予約できません' }, { status: 400 })
+    }
+
+    if (dayHours && (startTime < dayHours.open || startTime >= dayHours.close)) {
+      return NextResponse.json({ error: '営業時間外の時刻です' }, { status: 400 })
+    }
+
+    // 臨時休業日チェック
+    const { data: closureCheck } = await adminClient
+      .from('business_closures')
+      .select('id')
+      .eq('closure_date', date)
+      .limit(1)
+
+    if (closureCheck && closureCheck.length > 0) {
+      return NextResponse.json({ error: '臨時休業日のため予約できません' }, { status: 400 })
+    }
+
+    // メンターのシフト在籍チェック
+    const { data: shiftCheck } = await adminClient
+      .from('mentor_shifts')
+      .select('id')
+      .eq('mentor_id', mentorId)
+      .eq('day_of_week', dayOfWeek)
+      .eq('is_active', true)
+      .lte('start_time', startTime)
+      .gt('end_time', startTime)
+      .limit(1)
+
+    if (!shiftCheck || shiftCheck.length === 0) {
+      return NextResponse.json({ error: 'この時間帯にメンターのシフトがありません' }, { status: 400 })
+    }
+
+    // 同一メンター・同時刻の重複予約チェック
+    const reservedAtCheck = `${date}T${startTime}:00`
+    const { data: duplicateCheck } = await adminClient
+      .from('reservations')
+      .select('id')
+      .eq('mentor_id', mentorId)
+      .eq('reserved_at', reservedAtCheck)
+      .neq('status', 'cancelled')
+      .eq('is_blocked', false)
+      .limit(1)
+
+    if (duplicateCheck && duplicateCheck.length > 0) {
+      return NextResponse.json({ error: 'この時間帯は既に予約が入っています' }, { status: 400 })
+    }
+
     // セッション種別を取得
     const { data: sessionType, error: sessionError } = await adminClient
       .from('session_types')
@@ -81,23 +142,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'メンターが見つかりません' }, { status: 400 })
     }
 
-    // ブロック枠チェック
-    const reservedAtCheck = `${date}T${startTime}:00`
+    // ブロック枠チェック（時間指定ブロック）
     const { data: blockedSlots } = await adminClient
       .from('reservations')
       .select('id')
       .eq('is_blocked', true)
-      .or(`reserved_at.eq.${reservedAtCheck},is_all_day_block.eq.true`)
+      .eq('reserved_at', reservedAtCheck)
+      .limit(1)
 
-    const allDayBlocks = await adminClient
+    // 終日ブロックチェック
+    const { data: allDayBlocks } = await adminClient
       .from('reservations')
       .select('id')
       .eq('is_blocked', true)
       .eq('is_all_day_block', true)
       .gte('reserved_at', `${date}T00:00:00`)
       .lt('reserved_at', `${date}T23:59:59`)
+      .limit(1)
 
-    if ((blockedSlots && blockedSlots.length > 0) || (allDayBlocks.data && allDayBlocks.data.length > 0)) {
+    if ((blockedSlots && blockedSlots.length > 0) || (allDayBlocks && allDayBlocks.length > 0)) {
       return NextResponse.json({ error: 'この時間帯は予約できません' }, { status: 400 })
     }
 
@@ -135,8 +198,6 @@ export async function POST(request: Request) {
     }
 
     // 2. 予約作成（training_sessionのIDを関連付け）
-    const reservedAtTimestamp = `${date}T${startTime}:00`
-
     const { data: reservation, error: reservationError } = await adminClient
       .from('reservations')
       .insert({
@@ -144,7 +205,7 @@ export async function POST(request: Request) {
         mentor_id: mentorId,
         session_id: trainingSession.id,
         coins_used: sessionType.coin_cost,
-        reserved_at: reservedAtTimestamp,
+        reserved_at: reservedAtCheck,
         status: 'pending',
       })
       .select()

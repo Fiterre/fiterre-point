@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getSetting } from '@/lib/queries/settings'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
 export async function GET(request: Request) {
   try {
@@ -12,8 +16,27 @@ export async function GET(request: Request) {
     }
 
     // 曜日を計算（0=日曜, 1=月曜, ...）
-    // UTC誤差を防ぐためローカル時間として解釈
     const dayOfWeek = new Date(date + 'T00:00:00').getDay()
+    const dayKey = DAY_KEYS[dayOfWeek]
+
+    // 営業時間チェック（定休日ならメンター不要）
+    const businessHours = await getSetting('business_hours') as Record<string, { open: string; close: string; is_open: boolean }> | null
+    const dayHours = businessHours?.[dayKey]
+    if (dayHours && !dayHours.is_open) {
+      return NextResponse.json({ mentors: [], dayOfWeek })
+    }
+
+    // 臨時休業日チェック
+    const adminClient = createAdminClient()
+    const { data: closureCheck } = await adminClient
+      .from('business_closures')
+      .select('id')
+      .eq('closure_date', date)
+      .limit(1)
+
+    if (closureCheck && closureCheck.length > 0) {
+      return NextResponse.json({ mentors: [], dayOfWeek })
+    }
 
     const supabase = await createClient()
 

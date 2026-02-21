@@ -54,7 +54,7 @@ export async function getAvailableMentors(dayOfWeek: number, time: string) {
     .eq('day_of_week', dayOfWeek)
     .eq('is_active', true)
     .lte('start_time', time)
-    .gte('end_time', time)
+    .gt('end_time', time)
 
   if (error) {
     console.error('Error fetching available mentors:', error)

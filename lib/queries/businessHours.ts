@@ -30,13 +30,15 @@ export async function getClosures(fromDate?: string) {
 export async function addClosure(date: string, reason: string | null, userId: string) {
   const supabase = createAdminClient()
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('business_closures')
     .insert({
       closure_date: date,
       reason,
       created_by: userId
     })
+    .select('id, closure_date, reason')
+    .single()
 
   if (error) {
     if (error.code === '23505') {
@@ -44,6 +46,8 @@ export async function addClosure(date: string, reason: string | null, userId: st
     }
     throw new Error('臨時休業の追加に失敗しました')
   }
+
+  return data
 }
 
 export async function removeClosure(id: string) {

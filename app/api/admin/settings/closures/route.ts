@@ -20,9 +20,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '日付が必要です' }, { status: 400 })
     }
 
-    await addClosure(date, reason, user.id)
+    const closure = await addClosure(date, reason, user.id)
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, closure })
   } catch (error) {
     console.error('Add closure error:', error)
     return NextResponse.json({

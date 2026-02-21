@@ -2,6 +2,44 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 
+export async function DELETE(request: Request) {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+    }
+
+    const admin = await isAdmin(user.id)
+    if (!admin) {
+      return NextResponse.json({ error: '権限がありません' }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'IDが必要です' }, { status: 400 })
+    }
+
+    const supabase = createAdminClient()
+
+    const { error } = await supabase
+      .from('mentor_shifts')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Shift deletion error:', error)
+      return NextResponse.json({ error: 'シフト削除に失敗しました' }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Shift DELETE API error:', error)
+    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser()

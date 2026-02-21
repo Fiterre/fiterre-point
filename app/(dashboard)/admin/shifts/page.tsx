@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
+import ShiftDeleteButton from '@/components/features/admin/ShiftDeleteButton'
 
 export default async function AdminShiftsPage() {
   const [shifts, mentors] = await Promise.all([
@@ -60,8 +61,9 @@ export default async function AdminShiftsPage() {
                         <div className="text-muted-foreground/50 text-sm">−</div>
                       ) : (
                         dayShifts.map(shift => (
-                          <div key={shift.id} className="text-xs bg-primary/10 text-primary rounded px-1 py-0.5 mb-1">
-                            {shift.start_time.slice(0, 5)}〜{shift.end_time.slice(0, 5)}
+                          <div key={shift.id} className="text-xs bg-primary/10 text-primary rounded px-1 py-0.5 mb-1 flex items-center justify-between gap-1">
+                            <span>{shift.start_time.slice(0, 5)}〜{shift.end_time.slice(0, 5)}</span>
+                            <ShiftDeleteButton shiftId={shift.id} />
                           </div>
                         ))
                       )}
