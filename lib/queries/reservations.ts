@@ -121,3 +121,52 @@ export async function getUpcomingReservations(userId: string) {
 
   return data ?? []
 }
+
+// 管理者向け: 本日の予約件数
+export async function getTodayReservationCount() {
+  const supabase = createAdminClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  const { count, error } = await supabase
+    .from('reservations')
+    .select('*', { count: 'exact', head: true })
+    .gte('reserved_at', `${today}T00:00:00`)
+    .lt('reserved_at', `${today}T23:59:59`)
+    .in('status', ['pending', 'confirmed'])
+    .eq('is_blocked', false)
+
+  if (error) {
+    console.error('Error fetching today reservation count:', error)
+    return 0
+  }
+
+  return count ?? 0
+}
+
+// メンター向け: 本日の自分の予約一覧
+export async function getMentorTodayReservations(mentorId: string) {
+  const supabase = createAdminClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  const { data, error } = await supabase
+    .from('reservations')
+    .select(`
+      *,
+      profiles:user_id (
+        display_name
+      )
+    `)
+    .eq('mentor_id', mentorId)
+    .gte('reserved_at', `${today}T00:00:00`)
+    .lt('reserved_at', `${today}T23:59:59`)
+    .in('status', ['pending', 'confirmed'])
+    .eq('is_blocked', false)
+    .order('reserved_at')
+
+  if (error) {
+    console.error('Error fetching mentor today reservations:', error)
+    return []
+  }
+
+  return data ?? []
+}

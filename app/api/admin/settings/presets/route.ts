@@ -1,21 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-
-async function checkAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('tier_level')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.tier_level > 2) return null
-  return user
-}
+import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 
 const DEFAULT_PRESETS = [
   { id: '1', label: 'ライト', amount: 19000 },
@@ -25,8 +10,11 @@ const DEFAULT_PRESETS = [
 ]
 
 export async function GET() {
-  const user = await checkAdmin()
-  if (!user) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+
+  const admin = await isAdmin(user.id)
+  if (!admin) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
 
   try {
     const supabase = createAdminClient()

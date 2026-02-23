@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
+import { getSetting } from '@/lib/queries/settings'
+
+const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
 export async function POST(request: Request) {
   try {
@@ -76,12 +79,71 @@ export async function POST(request: Request) {
     let skipped = 0
     const errors: string[] = []
 
+    // 営業時間・休業日を事前取得
+    const businessHours = await getSetting('business_hours') as Record<string, { open: string; close: string; is_open: boolean }> | null
+    const monthStart = `${targetYear}-${String(targetMonthNum).padStart(2, '0')}-01`
+    const monthEnd = `${targetYear}-${String(targetMonthNum).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`
+    const { data: closures } = await supabase
+      .from('business_closures')
+      .select('closure_date')
+      .gte('closure_date', monthStart)
+      .lte('closure_date', monthEnd)
+    const closureDates = new Set(closures?.map(c => c.closure_date) ?? [])
+
     // 各固定予約について処理
     for (const recurring of recurringReservations) {
       const dates = datesInMonth[recurring.day_of_week]
 
       for (const targetDate of dates) {
         try {
+          // 定休日チェック
+          const dayKey = DAY_KEYS[recurring.day_of_week]
+          const dayHours = businessHours?.[dayKey]
+          if (dayHours && !dayHours.is_open) {
+            await supabase.from('recurring_reservation_logs').insert({
+              recurring_reservation_id: recurring.id,
+              target_date: targetDate,
+              status: 'skipped',
+              error_message: '定休日のためスキップ',
+            })
+            skipped++
+            continue
+          }
+
+          // 臨時休業日チェック
+          if (closureDates.has(targetDate)) {
+            await supabase.from('recurring_reservation_logs').insert({
+              recurring_reservation_id: recurring.id,
+              target_date: targetDate,
+              status: 'skipped',
+              error_message: '臨時休業日のためスキップ',
+            })
+            skipped++
+            continue
+          }
+
+          // メンターのシフトチェック
+          const { data: shiftCheck } = await supabase
+            .from('mentor_shifts')
+            .select('id')
+            .eq('mentor_id', recurring.mentor_id)
+            .eq('day_of_week', recurring.day_of_week)
+            .eq('is_active', true)
+            .lte('start_time', recurring.start_time)
+            .gt('end_time', recurring.start_time)
+            .limit(1)
+
+          if (!shiftCheck || shiftCheck.length === 0) {
+            await supabase.from('recurring_reservation_logs').insert({
+              recurring_reservation_id: recurring.id,
+              target_date: targetDate,
+              status: 'skipped',
+              error_message: 'メンターのシフトがないためスキップ',
+            })
+            skipped++
+            continue
+          }
+
           // 既存の予約をチェック（重複防止）
           const { data: existing } = await supabase
             .from('reservations')

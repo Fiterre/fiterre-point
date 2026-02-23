@@ -40,6 +40,14 @@ export async function PATCH(
       throw new Error(`メンター更新に失敗: ${error.message}`)
     }
 
+    // メンター無効化時はシフトも無効化
+    if (!isActive) {
+      await supabase
+        .from('mentor_shifts')
+        .update({ is_active: false })
+        .eq('mentor_id', mentorId)
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Mentor update error:', error)
@@ -91,6 +99,12 @@ export async function DELETE(
     if (updateError) {
       throw new Error(`メンター無効化に失敗: ${updateError.message}`)
     }
+
+    // シフトも無効化
+    await supabase
+      .from('mentor_shifts')
+      .update({ is_active: false })
+      .eq('mentor_id', mentorId)
 
     // メンターロールを削除（ユーザーロールに戻す）
     const { error: roleError } = await supabase

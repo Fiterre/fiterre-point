@@ -45,6 +45,25 @@ export async function PATCH(
       throw new Error(`ステータス更新に失敗: ${error.message}`)
     }
 
+    // 停止・削除時は未来の予約を自動キャンセル
+    if (status !== 'active') {
+      const today = new Date().toISOString().split('T')[0]
+      await supabase
+        .from('reservations')
+        .update({ status: 'cancelled' })
+        .eq('user_id', targetUserId)
+        .in('status', ['pending', 'confirmed'])
+        .gte('reserved_at', `${today}T00:00:00`)
+        .eq('is_blocked', false)
+
+      // 固定予約も無効化
+      await supabase
+        .from('recurring_reservations')
+        .update({ is_active: false })
+        .eq('user_id', targetUserId)
+        .eq('is_active', true)
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('User status update error:', error)

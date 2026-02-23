@@ -98,7 +98,13 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
       if (!response.ok) throw new Error(data.error)
 
       if (data.slots.length === 0) {
-        setClosedReason(data.reason === 'regular_holiday' ? '定休日' : '臨時休業')
+        const reasonMap: Record<string, string> = {
+          regular_holiday: '定休日',
+          closed_holiday: '臨時休業',
+          blocked: 'ブロック',
+          invalid_hours: '営業時間設定エラー',
+        }
+        setClosedReason(reasonMap[data.reason] ?? '休業')
         setTimeSlots([])
       } else {
         setTimeSlots(data.slots)
@@ -106,6 +112,11 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
       }
     } catch {
       setTimeSlots([])
+      toast({
+        variant: 'destructive',
+        title: 'エラー',
+        description: '時間枠の取得に失敗しました',
+      })
     } finally {
       setLoadingSlots(false)
     }
@@ -128,6 +139,11 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
     } catch (error) {
       console.error('Error fetching mentors:', error)
       setAvailableMentors([])
+      toast({
+        variant: 'destructive',
+        title: 'エラー',
+        description: 'メンター取得に失敗しました',
+      })
     } finally {
       setLoadingMentors(false)
     }

@@ -16,6 +16,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
+    // ユーザーステータスチェック（suspended/locked は予約不可）
+    const adminClient = createAdminClient()
+    const { data: profile } = await adminClient
+      .from('profiles')
+      .select('status')
+      .eq('id', user.id)
+      .single()
+
+    if (profile && profile.status !== 'active') {
+      return NextResponse.json({ error: 'アカウントが制限されています。管理者にお問い合わせください' }, { status: 403 })
+    }
+
     // リクエストボディ
     const { sessionTypeId, mentorId, date, startTime } = await request.json()
 
@@ -58,8 +70,6 @@ export async function POST(request: Request) {
         error: `${maxStr} までの予約が可能です`
       }, { status: 400 })
     }
-
-    const adminClient = createAdminClient()
 
     // ===== 営業時間・休業日・シフトのサーバーサイドバリデーション =====
 

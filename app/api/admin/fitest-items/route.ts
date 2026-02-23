@@ -1,27 +1,14 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-
-// 権限チェック共通
-async function checkAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('tier_level')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.tier_level > 2) return null
-  return user
-}
+import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 
 // 全項目取得
 export async function GET() {
-  const user = await checkAdmin()
-  if (!user) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+
+  const admin = await isAdmin(user.id)
+  if (!admin) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
 
   const supabase = createAdminClient()
   const { data, error } = await supabase
@@ -35,8 +22,11 @@ export async function GET() {
 
 // 新規作成
 export async function POST(request: Request) {
-  const user = await checkAdmin()
-  if (!user) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+
+  const admin = await isAdmin(user.id)
+  if (!admin) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
 
   const body = await request.json()
   const { name, description, icon, input_type, unit, scoring_method, max_score, display_order } = body

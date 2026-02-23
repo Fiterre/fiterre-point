@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { getAllUsers } from '@/lib/queries/users'
+import { getTodayReservationCount } from '@/lib/queries/reservations'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Coins, Calendar, TrendingUp } from 'lucide-react'
 import { getCoinRankings } from '@/lib/queries/rankings'
@@ -8,7 +9,10 @@ import CoinRankingCard from '@/components/features/dashboard/CoinRankingCard'
 
 export default async function AdminDashboardPage() {
   const users = await getAllUsers()
-  const rankings = await getCoinRankings(5)
+  const [rankings, todayCount] = await Promise.all([
+    getCoinRankings(5),
+    getTodayReservationCount(),
+  ])
 
   const stats = [
     {
@@ -39,7 +43,7 @@ export default async function AdminDashboardPage() {
     },
     {
       label: '本日の予約',
-      value: 0,
+      value: todayCount,
       icon: Coins,
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/10'

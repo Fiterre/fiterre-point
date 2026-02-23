@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { getRecurringReservations, getNextTriggerDate, getTriggerStatus, DAY_OF_WEEK_LABELS } from '@/lib/queries/shifts'
 import ExecuteRecurringButton from '@/components/features/admin/ExecuteRecurringButton'
+import RecurringDeleteButton from '@/components/features/admin/RecurringDeleteButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -152,9 +153,12 @@ export default async function AdminRecurringPage() {
                           <span className="font-medium">
                             {res.start_time.slice(0, 5)}〜{res.end_time.slice(0, 5)}
                           </span>
-                          <Badge className="bg-primary/10 text-primary text-xs">
-                            {res.session_types?.coin_cost?.toLocaleString()} SC
-                          </Badge>
+                          <div className="flex items-center gap-1">
+                            <Badge className="bg-primary/10 text-primary text-xs">
+                              {res.session_types?.coin_cost?.toLocaleString()} SC
+                            </Badge>
+                            <RecurringDeleteButton recurringId={res.id} />
+                          </div>
                         </div>
                         <p className="text-muted-foreground mt-1">
                           {res.profiles?.display_name || res.profiles?.email || '顧客'}

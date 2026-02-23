@@ -24,6 +24,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: '日付が必要です' }, { status: 400 })
     }
 
+    // 日付フォーマット検証
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return NextResponse.json({ error: '日付フォーマットが不正です (YYYY-MM-DD)' }, { status: 400 })
+    }
+
     // 曜日を取得
     const dayOfWeek = new Date(date + 'T00:00:00').getDay()
     const dayKey = DAY_KEYS[dayOfWeek]
@@ -51,12 +56,16 @@ export async function GET(request: Request) {
     }
 
     // 有効な時間枠を生成
-    const interval = slotInterval ?? 30
+    const interval = (slotInterval && slotInterval > 0) ? slotInterval : 30
     const slots: string[] = []
     const [openH, openM] = dayHours.open.split(':').map(Number)
     const [closeH, closeM] = dayHours.close.split(':').map(Number)
     const openMinutes = openH * 60 + openM
     const closeMinutes = closeH * 60 + closeM
+
+    if (openMinutes >= closeMinutes) {
+      return NextResponse.json({ slots: [], reason: 'invalid_hours' })
+    }
 
     for (let m = openMinutes; m < closeMinutes; m += interval) {
       const h = Math.floor(m / 60)

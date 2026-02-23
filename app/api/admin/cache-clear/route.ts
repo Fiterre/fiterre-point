@@ -1,21 +1,13 @@
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 
 export async function POST() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('tier_level')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.tier_level > 2) {
-    return NextResponse.json({ error: '権限がありません' }, { status: 403 })
-  }
+  const admin = await isAdmin(user.id)
+  if (!admin) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
 
   // 全ページのキャッシュを無効化
   const paths = [
@@ -30,6 +22,8 @@ export async function POST() {
     '/admin/settings',
     '/admin/coins',
     '/admin/analytics',
+    '/admin/fitest-items',
+    '/mentor',
   ]
   paths.forEach(p => revalidatePath(p))
   revalidatePath('/', 'layout')

@@ -7,6 +7,7 @@ import { Calendar, History, Award, QrCode, Settings } from 'lucide-react'
 import BalanceCard from '@/components/features/dashboard/BalanceCard'
 import GradeCard3D from '@/components/features/dashboard/GradeCard3D'
 import { getCoinRankings, getUserRankPosition } from '@/lib/queries/rankings'
+import { getUpcomingReservations } from '@/lib/queries/reservations'
 import CoinRankingCard from '@/components/features/dashboard/CoinRankingCard'
 import Link from 'next/link'
 import type { MemberRank } from '@/types/database'
@@ -26,6 +27,7 @@ export default async function DashboardPage() {
       : Promise.resolve({ data: null }),
   ])
   const profile = profileRes.data
+  const upcomingReservations = user ? await getUpcomingReservations(user.id) : []
 
   return (
     <div className="space-y-8">
@@ -129,9 +131,36 @@ export default async function DashboardPage() {
           <CardTitle>直近の予約</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-8">
-            予約がありません
-          </p>
+          {upcomingReservations.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">
+              予約がありません
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {upcomingReservations.map((res) => {
+                const mentorProfile = (res.mentors as unknown as { id: string; user_id: string; profiles: { display_name: string }[] } | null)
+                const mentorName = mentorProfile?.profiles?.[0]?.display_name ?? 'メンター'
+                const reservedAt = new Date(res.reserved_at)
+                return (
+                  <div key={res.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                    <div>
+                      <p className="font-medium">
+                        {reservedAt.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', weekday: 'short' })}
+                        {' '}
+                        {reservedAt.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <p className="text-sm text-muted-foreground">担当: {mentorName}</p>
+                    </div>
+                    <div className="text-sm">
+                      <span className={`px-2 py-1 rounded text-xs ${res.status === 'confirmed' ? 'bg-green-500/10 text-green-700' : 'bg-yellow-500/10 text-yellow-700'}`}>
+                        {res.status === 'confirmed' ? '確定' : '未確定'}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
