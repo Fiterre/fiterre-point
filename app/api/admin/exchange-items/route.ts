@@ -106,10 +106,10 @@ export async function POST(request: Request) {
         .eq('is_active', true)
     }
 
-    // upsert
+    // upsert（主キーでの競合解決を明示）
     const { error } = await adminClient
       .from('exchange_items')
-      .upsert(upsertItems)
+      .upsert(upsertItems, { onConflict: 'id' })
 
     if (error) {
       console.error('Exchange items upsert error:', error)
