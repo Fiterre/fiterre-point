@@ -369,6 +369,8 @@ export default function FitestForm({ users, milestones, fitestItems = [], presel
                 onChange={(e) => setBenchPress(e.target.value)}
                 placeholder="80"
                 step="0.5"
+                min="0"
+                max="500"
               />
             </div>
             <div className="space-y-2">
@@ -379,6 +381,8 @@ export default function FitestForm({ users, milestones, fitestItems = [], presel
                 onChange={(e) => setSquat(e.target.value)}
                 placeholder="120"
                 step="0.5"
+                min="0"
+                max="500"
               />
             </div>
             <div className="space-y-2">
@@ -389,6 +393,8 @@ export default function FitestForm({ users, milestones, fitestItems = [], presel
                 onChange={(e) => setDeadlift(e.target.value)}
                 placeholder="140"
                 step="0.5"
+                min="0"
+                max="500"
               />
             </div>
           </div>

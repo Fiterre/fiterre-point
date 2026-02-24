@@ -13,12 +13,19 @@ export type TransactionType =
   | 'reservation_lock'
   | 'reservation_confirm'
   | 'reservation_cancel'
+  | 'exchange_lock'
+  | 'exchange_complete'
+  | 'exchange_cancel'
   | 'expire'
   | 'admin_adjust'
   | 'migration'
   | 'undo'
   | 'referral_reward'
 export type ReservationStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+
+// 交換機能
+export type ExchangeItemCategory = 'discount' | 'goods'
+export type ExchangeRequestStatus = 'requested' | 'ordering' | 'completed' | 'cancelled'
 
 // ========================================
 // Database Tables
@@ -149,6 +156,44 @@ export interface BusinessClosure {
   reason: string | null
   created_by: string | null
   created_at: string
+}
+
+// 交換アイテム（マスタ）
+export interface ExchangeItem {
+  id: string
+  category: ExchangeItemCategory
+  name: string
+  coin_cost: number
+  is_active: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
+// 交換申請
+export interface ExchangeRequest {
+  id: string
+  user_id: string
+  exchange_item_id: string
+  coins_locked: number
+  status: ExchangeRequestStatus
+  processed_by: string | null
+  completed_at: string | null
+  cancelled_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+// 交換申請（リレーション付き）
+export interface ExchangeRequestWithDetails extends ExchangeRequest {
+  exchange_items: ExchangeItem
+  profiles: {
+    display_name: string | null
+    email: string
+  }
+  processor?: {
+    display_name: string | null
+  }
 }
 
 // ========================================
@@ -306,6 +351,7 @@ export interface TierPermissions {
   recurring: { view: boolean; edit: boolean; execute: boolean }
   fitest: { view: boolean; input: boolean; manage: boolean }
   records: { view_all?: boolean; view_own?: boolean; edit_all?: boolean; edit_own?: boolean }
+  exchanges: { view: boolean; request: boolean; manage: boolean }
   settings: { view: boolean; edit: boolean }
   analytics: { view: boolean }
 }

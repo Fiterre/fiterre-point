@@ -10,6 +10,7 @@ import {
   ClipboardList,
   Award,
   QrCode,
+  ArrowLeftRight,
   Settings,
   LogOut
 } from 'lucide-react'
@@ -18,6 +19,7 @@ const navItems = [
   { href: '/dashboard', label: 'ホーム', icon: Home },
   { href: '/dashboard/reservations', label: '予約', icon: Calendar },
   { href: '/dashboard/history', label: 'コイン', icon: Coins },
+  { href: '/dashboard/exchanges', label: '交換', icon: ArrowLeftRight },
   { href: '/dashboard/records', label: '記録', icon: ClipboardList },
   { href: '/dashboard/fitest', label: 'Fitest', icon: Award },
   { href: '/dashboard/checkin', label: 'チェックイン', icon: QrCode },

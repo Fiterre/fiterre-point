@@ -90,6 +90,45 @@ export async function checkIn(
 ): Promise<{ success: boolean; bonusCoins: number; message: string }> {
   const supabase = createAdminClient()
 
+  // 冪等性チェック: 同一予約の二重チェックイン防止
+  if (reservationId) {
+    const { data: existingCheckIn } = await supabase
+      .from('check_in_logs')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('reservation_id', reservationId)
+      .limit(1)
+
+    if (existingCheckIn && existingCheckIn.length > 0) {
+      return {
+        success: false,
+        bonusCoins: 0,
+        message: 'この予約は既にチェックイン済みです'
+      }
+    }
+  }
+
+  // 同一ユーザーの当日チェックイン重複防止（予約なしの場合）
+  if (!reservationId) {
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const { data: todayCheckIn } = await supabase
+      .from('check_in_logs')
+      .select('id')
+      .eq('user_id', userId)
+      .is('reservation_id', null)
+      .gte('check_in_at', todayStart.toISOString())
+      .limit(1)
+
+    if (todayCheckIn && todayCheckIn.length > 0) {
+      return {
+        success: false,
+        bonusCoins: 0,
+        message: '本日は既にチェックイン済みです'
+      }
+    }
+  }
+
   // 来店ポイントを取得
   const bonusCoins = await getSetting('checkin_bonus_coins') || 100
 
@@ -109,6 +148,14 @@ export async function checkIn(
       .single()
 
     if (logError) {
+      // UNIQUE制約違反 = 同時リクエストによる二重チェックイン
+      if (logError.code === '23505') {
+        return {
+          success: false,
+          bonusCoins: 0,
+          message: 'この予約は既にチェックイン済みです'
+        }
+      }
       throw new Error('チェックインログの作成に失敗しました')
     }
 

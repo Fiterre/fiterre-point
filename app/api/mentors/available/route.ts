@@ -7,6 +7,13 @@ const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'frida
 
 export async function GET(request: Request) {
   try {
+    // 認証チェック
+    const authClient = await createClient()
+    const { data: { user } } = await authClient.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
     const time = searchParams.get('time')
@@ -38,11 +45,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ mentors: [], dayOfWeek })
     }
 
-    const supabase = await createClient()
-
     // その曜日・時間にシフトがあるメンターを取得
     // start_time <= 選択時刻 かつ end_time > 選択時刻（終了時刻ちょうどは含まない）
-    const { data: shifts, error } = await supabase
+    const { data: shifts, error } = await authClient
       .from('mentor_shifts')
       .select(`
         mentor_id,

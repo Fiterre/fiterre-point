@@ -1,14 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { useToast } from '@/hooks/use-toast'
-import { Search, Users } from 'lucide-react'
+import { Search, Users, Loader2 } from 'lucide-react'
 
 interface User {
   id: string
@@ -40,7 +50,9 @@ export default function BulkGrantForm({ users }: Props) {
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [loading, setLoading] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [presets, setPresets] = useState<CoinPreset[]>(FALLBACK_PRESETS)
   const router = useRouter()
   const { toast } = useToast()
@@ -57,15 +69,21 @@ export default function BulkGrantForm({ users }: Props) {
       .catch(() => {})
   }, [])
 
-  // アクティブユーザーのみ
-  const activeUsers = users.filter(u => u.status === 'active')
+  // 検索デバウンス（300ms）
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
-  // 検索フィルター
-  const filteredUsers = activeUsers.filter(user =>
-    searchQuery === '' ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.display_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // アクティブユーザーのみ
+  const activeUsers = useMemo(() => users.filter(u => u.status === 'active'), [users])
+
+  // 検索フィルター（デバウンス済みクエリを使用）
+  const filteredUsers = useMemo(() => activeUsers.filter(user =>
+    debouncedQuery === '' ||
+    user.email.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+    user.display_name?.toLowerCase().includes(debouncedQuery.toLowerCase())
+  ), [activeUsers, debouncedQuery])
 
   const toggleUser = (userId: string) => {
     setSelectedUserIds(prev =>
@@ -83,7 +101,7 @@ export default function BulkGrantForm({ users }: Props) {
     setSelectedUserIds([])
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (selectedUserIds.length === 0) {
@@ -104,9 +122,11 @@ export default function BulkGrantForm({ users }: Props) {
       return
     }
 
-    const confirmMessage = `${selectedUserIds.length}名に ${parseInt(amount).toLocaleString()} SC を付与しますか？`
-    if (!confirm(confirmMessage)) return
+    setConfirmOpen(true)
+  }
 
+  const executeGrant = async () => {
+    setConfirmOpen(false)
     setLoading(true)
 
     try {
@@ -276,8 +296,34 @@ export default function BulkGrantForm({ users }: Props) {
         className="w-full"
         disabled={loading || selectedUserIds.length === 0 || !amount}
       >
-        {loading ? '処理中...' : `${selectedUserIds.length}名に一括付与する`}
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            処理中...
+          </>
+        ) : (
+          `${selectedUserIds.length}名に一括付与する`
+        )}
       </Button>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>コインを一括付与しますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedUserIds.length}名に {amount ? parseInt(amount).toLocaleString() : 0} SC を付与します
+              （合計 {amount ? (selectedUserIds.length * parseInt(amount)).toLocaleString() : 0} SC）。
+              この操作は取り消せません。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction onClick={executeGrant}>
+              付与する
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   )
 }

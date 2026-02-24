@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { getSetting } from '@/lib/queries/settings'
 import { isValidUUID, isPositiveInteger } from '@/lib/validation'
+import { revalidatePath } from 'next/cache'
+import { writeAuditLog } from '@/lib/queries/auditLog'
 
 export async function POST(request: Request) {
   try {
@@ -17,8 +19,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '権限がありません' }, { status: 403 })
     }
 
-    // リクエストボディ
-    const { userId, amount, description } = await request.json()
+    // リクエストボディ（JSON解析エラーハンドリング）
+    let body: { userId?: string; amount?: number; description?: string }
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: '無効なリクエスト形式です' }, { status: 400 })
+    }
+    const { userId, amount, description } = body
 
     if (!userId || !amount || amount <= 0) {
       return NextResponse.json({ error: '無効なパラメータです' }, { status: 400 })
@@ -37,12 +45,16 @@ export async function POST(request: Request) {
     // ユーザー存在確認
     const { data: targetUser } = await supabase
       .from('profiles')
-      .select('id')
+      .select('id, status')
       .eq('id', userId)
       .maybeSingle()
 
     if (!targetUser) {
       return NextResponse.json({ error: '対象ユーザーが見つかりません' }, { status: 404 })
+    }
+
+    if (targetUser.status && targetUser.status !== 'active') {
+      return NextResponse.json({ error: '対象ユーザーは現在利用停止中です' }, { status: 400 })
     }
 
     // 有効期限をsystem_settingsから取得（デフォルト90日）
@@ -95,8 +107,24 @@ export async function POST(request: Request) {
       })
 
     if (txError) {
-      console.error('Transaction error:', txError)
+      // 取引履歴の記録失敗はコイン付与を無効化すべき重大エラー
+      console.error('Transaction record error:', txError)
+      // ledgerを削除してロールバック
+      await supabase.from('coin_ledgers').delete().eq('id', ledger.id)
+      return NextResponse.json({ error: '取引履歴の記録に失敗しました。コイン付与を取り消しました' }, { status: 500 })
     }
+
+    // 監査ログ
+    await writeAuditLog({
+      actor_id: user.id,
+      action: 'coins_granted',
+      resource_type: 'coin_ledger',
+      resource_id: ledger.id,
+      changes: { userId, amount, description },
+    })
+
+    revalidatePath('/admin')
+    revalidatePath('/dashboard')
 
     return NextResponse.json({
       success: true,

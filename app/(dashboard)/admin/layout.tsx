@@ -14,6 +14,7 @@ import {
   Calendar,
   CalendarClock,
   CalendarOff,
+  ArrowLeftRight,
   LogOut,
   ArrowLeft
 } from 'lucide-react'
@@ -27,6 +28,7 @@ const navItems = [
   { href: '/admin/shifts', label: 'シフト管理', icon: Calendar },
   { href: '/admin/schedule', label: 'スケジュール', icon: CalendarOff },
   { href: '/admin/recurring', label: '固定予約', icon: CalendarClock },
+  { href: '/admin/exchanges', label: '交換管理', icon: ArrowLeftRight },
   { href: '/admin/analytics', label: '分析', icon: BarChart3 },
   { href: '/admin/settings', label: '設定', icon: Settings },
 ]

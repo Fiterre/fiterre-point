@@ -136,11 +136,13 @@ export default function ShiftForm({ mentors }: Props) {
       {/* 時間選択 */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>開始時間</Label>
+          <Label htmlFor="shift-start-time">開始時間</Label>
           <select
+            id="shift-start-time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             className="w-full h-10 px-3 border rounded-md"
+            aria-label="シフト開始時間"
           >
             {TIME_OPTIONS.map(time => (
               <option key={time} value={time}>{time}</option>
@@ -148,11 +150,13 @@ export default function ShiftForm({ mentors }: Props) {
           </select>
         </div>
         <div className="space-y-2">
-          <Label>終了時間</Label>
+          <Label htmlFor="shift-end-time">終了時間</Label>
           <select
+            id="shift-end-time"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
             className="w-full h-10 px-3 border rounded-md"
+            aria-label="シフト終了時間"
           >
             {TIME_OPTIONS.map(time => (
               <option key={time} value={time}>{time}</option>

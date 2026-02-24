@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
+import { revalidatePath } from 'next/cache'
 
 export async function POST(request: Request) {
   try {
@@ -98,6 +99,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '登録に失敗しました' }, { status: 500 })
     }
 
+    revalidatePath('/admin/recurring')
     return NextResponse.json({ success: true, id: data.id })
   } catch (error) {
     console.error('Recurring API error:', error)
@@ -136,6 +138,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: '無効化に失敗しました' }, { status: 500 })
     }
 
+    revalidatePath('/admin/recurring')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Recurring DELETE API error:', error)

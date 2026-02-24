@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { getSetting } from '@/lib/queries/settings'
+import { revalidatePath } from 'next/cache'
 
 const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
@@ -90,8 +91,53 @@ export async function POST(request: Request) {
       .lte('closure_date', monthEnd)
     const closureDates = new Set(closures?.map(c => c.closure_date) ?? [])
 
+    // メンター・ユーザーのステータスを事前取得
+    const mentorIds = [...new Set(recurringReservations.map(r => r.mentor_id))]
+    const userIds = [...new Set(recurringReservations.map(r => r.user_id))]
+
+    const { data: mentorStatuses } = await supabase
+      .from('mentors')
+      .select('id, is_active')
+      .in('id', mentorIds)
+
+    const { data: userStatuses } = await supabase
+      .from('profiles')
+      .select('id, status')
+      .in('id', userIds)
+
+    const mentorActiveMap = new Map(mentorStatuses?.map(m => [m.id, m.is_active]) ?? [])
+    const userStatusMap = new Map(userStatuses?.map(u => [u.id, u.status]) ?? [])
+
     // 各固定予約について処理
     for (const recurring of recurringReservations) {
+      // メンターがアクティブか検査
+      if (!mentorActiveMap.get(recurring.mentor_id)) {
+        for (const d of datesInMonth[recurring.day_of_week]) {
+          await supabase.from('recurring_reservation_logs').insert({
+            recurring_reservation_id: recurring.id,
+            target_date: d,
+            status: 'skipped',
+            error_message: 'メンターが無効のためスキップ',
+          })
+          skipped++
+        }
+        continue
+      }
+
+      // ユーザーがアクティブか検査
+      if (userStatusMap.get(recurring.user_id) !== 'active') {
+        for (const d of datesInMonth[recurring.day_of_week]) {
+          await supabase.from('recurring_reservation_logs').insert({
+            recurring_reservation_id: recurring.id,
+            target_date: d,
+            status: 'skipped',
+            error_message: 'ユーザーが無効のためスキップ',
+          })
+          skipped++
+        }
+        continue
+      }
+
       const dates = datesInMonth[recurring.day_of_week]
 
       for (const targetDate of dates) {
@@ -157,12 +203,14 @@ export async function POST(request: Request) {
             continue
           }
 
-          // ユーザーの残高確認
+          // ユーザーの残高確認（期限切れコインを除外）
+          const nowISO = new Date().toISOString()
           const { data: ledgers } = await supabase
             .from('coin_ledgers')
             .select('amount_current')
             .eq('user_id', recurring.user_id)
             .eq('status', 'active')
+            .gt('expires_at', nowISO)
 
           const availableBalance = ledgers?.reduce((sum, l) => sum + l.amount_current, 0) ?? 0
           const coinCost = recurring.session_types?.coin_cost ?? 0
@@ -216,14 +264,16 @@ export async function POST(request: Request) {
             throw new Error(`Reservation作成エラー: ${reservationError.message}`)
           }
 
-          // コインをロック（FIFO）
+          // コインをロック（FIFO・期限切れ除外）
           let remainingToLock = coinCost
+          const lockNow = new Date().toISOString()
           const { data: activeLedgers } = await supabase
             .from('coin_ledgers')
             .select('*')
             .eq('user_id', recurring.user_id)
             .eq('status', 'active')
             .gt('amount_current', 0)
+            .gt('expires_at', lockNow)
             .order('expires_at', { ascending: true })
 
           for (const ledger of activeLedgers || []) {
@@ -289,9 +339,11 @@ export async function POST(request: Request) {
       }
     }
 
+    revalidatePath('/admin/recurring')
+    revalidatePath('/admin')
+    revalidatePath('/dashboard')
+
     return NextResponse.json({
-      success: true,
-      targetMonth: `${targetYear}-${String(targetMonthNum).padStart(2, '0')}`,
       created,
       skipped,
       errors: errors.length > 0 ? errors : undefined,

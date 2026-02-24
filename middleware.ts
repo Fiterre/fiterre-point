@@ -46,22 +46,48 @@ export async function middleware(request: NextRequest) {
 
   // 認証済みユーザーがログインページにアクセスした場合、ダッシュボードへ
   if (user && isPublicPath) {
-    // user_rolesをチェックして管理者なら/adminへ
-    const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
-    const adminClient = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-    const { data: roleData } = await adminClient
+    // anon keyのSupabaseクライアントでuser_rolesを取得（RLSポリシーで本人のロールのみ参照可能）
+    const { data: roleData } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
     const url = request.nextUrl.clone()
-    url.pathname = roleData?.role === 'admin' || roleData?.role === 'manager' ? '/admin' : '/dashboard'
+    const role = roleData?.role
+    if (role === 'admin' || role === 'manager') {
+      url.pathname = '/admin'
+    } else if (role === 'mentor') {
+      url.pathname = '/mentor'
+    } else {
+      url.pathname = '/dashboard'
+    }
     return NextResponse.redirect(url)
+  }
+
+  // ロールベースのルート保護
+  if (user && (pathname.startsWith('/admin') || pathname.startsWith('/mentor'))) {
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const role = roleData?.role
+
+    // /admin/* は admin/manager のみ
+    if (pathname.startsWith('/admin') && role !== 'admin' && role !== 'manager') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+
+    // /mentor/* は mentor/admin/manager のみ
+    if (pathname.startsWith('/mentor') && role !== 'mentor' && role !== 'admin' && role !== 'manager') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

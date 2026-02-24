@@ -210,11 +210,13 @@ export default function RecurringReservationForm({ mentors, sessionTypes, users 
       {/* 時間 */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>開始時間</Label>
+          <Label htmlFor="recurring-start-time">開始時間</Label>
           <select
+            id="recurring-start-time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             className="w-full h-10 px-3 border rounded-md"
+            aria-label="固定予約の開始時間"
             required
           >
             <option value="">選択</option>

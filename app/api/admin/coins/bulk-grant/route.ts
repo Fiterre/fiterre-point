@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { getSetting } from '@/lib/queries/settings'
-import { isPositiveInteger } from '@/lib/validation'
+import { isPositiveInteger, isValidUUID } from '@/lib/validation'
+import { revalidatePath } from 'next/cache'
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +17,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '権限がありません' }, { status: 403 })
     }
 
-    const { userIds, amount, description } = await request.json()
+    let body: { userIds?: string[]; amount?: number; description?: string }
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: '無効なリクエスト形式です' }, { status: 400 })
+    }
+    const { userIds, amount, description } = body
 
     if (!userIds || !Array.isArray(userIds) || userIds.length === 0 || !amount || amount <= 0) {
       return NextResponse.json({ error: '無効なパラメータです' }, { status: 400 })
@@ -24,6 +31,12 @@ export async function POST(request: Request) {
 
     if (!isPositiveInteger(amount) || amount > 100000) {
       return NextResponse.json({ error: '無効なコイン数です' }, { status: 400 })
+    }
+
+    // 全userIdのUUID形式を検証
+    const invalidIds = userIds.filter(id => !isValidUUID(id))
+    if (invalidIds.length > 0) {
+      return NextResponse.json({ error: `無効なユーザーID形式が含まれています: ${invalidIds.length}件` }, { status: 400 })
     }
 
     const supabase = createAdminClient()
@@ -38,6 +51,23 @@ export async function POST(request: Request) {
 
     for (const userId of userIds) {
       try {
+        // ユーザーステータス確認
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('status')
+          .eq('id', userId)
+          .maybeSingle()
+
+        if (!profile) {
+          errors.push(`${userId}: ユーザーが見つかりません`)
+          continue
+        }
+
+        if (profile.status !== 'active') {
+          errors.push(`${userId}: ユーザーが利用停止中です`)
+          continue
+        }
+
         // コイン台帳に追加
         const { data: ledger, error: ledgerError } = await supabase
           .from('coin_ledgers')
@@ -84,6 +114,9 @@ export async function POST(request: Request) {
         errors.push(`${userId}: ${error instanceof Error ? error.message : '不明なエラー'}`)
       }
     }
+
+    revalidatePath('/admin')
+    revalidatePath('/dashboard')
 
     return NextResponse.json({
       success: true,

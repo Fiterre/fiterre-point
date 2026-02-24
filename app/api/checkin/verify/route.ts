@@ -25,9 +25,24 @@ export async function POST(request: Request) {
       const adminClient = createAdminClient()
       const { data: profile } = await adminClient
         .from('profiles')
-        .select('display_name, email')
+        .select('display_name, email, status')
         .eq('id', result.userId)
         .single()
+
+      // ユーザーが見つからない、または停止中のチェックインを拒否
+      if (!profile) {
+        return NextResponse.json({
+          valid: false,
+          message: 'ユーザー情報が取得できません',
+        })
+      }
+
+      if (profile.status !== 'active') {
+        return NextResponse.json({
+          valid: false,
+          message: 'このユーザーは現在利用停止中です',
+        })
+      }
 
       return NextResponse.json({
         ...result,

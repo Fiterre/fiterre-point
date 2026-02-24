@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic'
 
-import { getCurrentUser, isMentor } from '@/lib/queries/auth'
+import { getCurrentUser, isMentor, isAdmin } from '@/lib/queries/auth'
 import { getUserTier } from '@/lib/queries/permissions'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -9,6 +10,7 @@ import {
   ClipboardList,
   Award,
   UserCheck,
+  ArrowLeftRight,
   Users,
   LogOut
 } from 'lucide-react'
@@ -19,6 +21,7 @@ const navItems = [
   { href: '/mentor/records', label: 'トレーニング記録', icon: ClipboardList },
   { href: '/mentor/fitest', label: 'Fitest', icon: Award },
   { href: '/mentor/checkin', label: 'チェックイン', icon: UserCheck },
+  { href: '/mentor/exchanges', label: '交換', icon: ArrowLeftRight },
 ]
 
 export default async function MentorLayout({
@@ -36,6 +39,23 @@ export default async function MentorLayout({
 
   if (!mentor) {
     redirect('/dashboard')
+  }
+
+  // admin/managerはメンター画面にアクセス可能（is_activeチェック不要）
+  const admin = await isAdmin(user.id)
+  if (!admin) {
+    // mentorロールの場合のみ、mentorsテーブルのis_activeをチェック
+    const supabase = createAdminClient()
+    const { data: mentorRecord } = await supabase
+      .from('mentors')
+      .select('is_active')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .maybeSingle()
+
+    if (!mentorRecord) {
+      redirect('/dashboard')
+    }
   }
 
   const tierData = await getUserTier(user.id)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,6 +37,7 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [loading, setLoading] = useState(false)
+  const submittingRef = useRef(false)
   const [loadingMentors, setLoadingMentors] = useState(false)
   const [loadingSlots, setLoadingSlots] = useState(false)
   const [availableMentors, setAvailableMentors] = useState<Mentor[]>([])
@@ -103,6 +104,7 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
           closed_holiday: '臨時休業',
           blocked: 'ブロック',
           invalid_hours: '営業時間設定エラー',
+          no_mentors: 'メンター不在',
         }
         setClosedReason(reasonMap[data.reason] ?? '休業')
         setTimeSlots([])
@@ -152,12 +154,16 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (submittingRef.current) return
+    submittingRef.current = true
+
     if (!canAfford) {
       toast({
         variant: 'destructive',
         title: 'コイン不足',
         description: 'コインが足りません',
       })
+      submittingRef.current = false
       return
     }
 
@@ -196,6 +202,7 @@ export default function ReservationForm({ sessionTypes, availableBalance }: Prop
       })
     } finally {
       setLoading(false)
+      submittingRef.current = false
     }
   }
 

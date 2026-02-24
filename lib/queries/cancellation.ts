@@ -42,12 +42,21 @@ export async function canCancelReservation(reservationId: string, userId: string
     return { canCancel: false, isWithinDeadline: false, reason: '過去の予約はキャンセルできません' }
   }
 
-  // キャンセル期限: セッション前日の23:59 JST
-  // 予約日の日付部分を取得（YYYY-MM-DD）
+  // キャンセル期限: セッション前日の23:59:59 JST
+  // まずJST基準の予約日を構築し、そこから1日引く（月跨ぎ対応）
   const reservedDateStr = reservation.reserved_at.split('T')[0]
   const [year, month, day] = reservedDateStr.split('-').map(Number)
-  // 前日23:59:59 JST = 前日14:59:59 UTC
-  const deadlineUTC = new Date(Date.UTC(year, month - 1, day - 1, 23 - 9, 59, 59, 999))
+  // JST基準の予約日 00:00:00 をUTCで表現
+  const reservedDateUTC = new Date(Date.UTC(year, month - 1, day, 0, 0, 0))
+  // 前日 = 予約日から24時間引く（月跨ぎも自動処理）
+  const previousDayUTC = new Date(reservedDateUTC.getTime() - 24 * 60 * 60 * 1000)
+  // 前日23:59:59 JST = 前日14:59:59 UTC（JST = UTC+9）
+  const deadlineUTC = new Date(Date.UTC(
+    previousDayUTC.getUTCFullYear(),
+    previousDayUTC.getUTCMonth(),
+    previousDayUTC.getUTCDate(),
+    14, 59, 59, 999
+  ))
   const isWithinDeadline = now <= deadlineUTC
 
   return { canCancel: true, isWithinDeadline }

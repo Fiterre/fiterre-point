@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { checkIn } from '@/lib/queries/checkIn'
 
 export async function POST(request: Request) {
@@ -15,6 +16,22 @@ export async function POST(request: Request) {
 
     if (!userId) {
       return NextResponse.json({ error: 'ユーザーIDが必要です' }, { status: 400 })
+    }
+
+    // チェックイン対象ユーザーのステータス確認
+    const adminClient = createAdminClient()
+    const { data: profile } = await adminClient
+      .from('profiles')
+      .select('status')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (!profile) {
+      return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 })
+    }
+
+    if (profile.status !== 'active') {
+      return NextResponse.json({ error: 'このユーザーは現在利用停止中です' }, { status: 403 })
     }
 
     const result = await checkIn(

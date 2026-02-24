@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSetting } from '@/lib/queries/settings'
 import { getClosures } from '@/lib/queries/businessHours'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
@@ -17,6 +18,13 @@ interface BusinessHours {
 
 export async function GET(request: Request) {
   try {
+    // 認証チェック
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
 
@@ -74,13 +82,15 @@ export async function GET(request: Request) {
     }
 
     // ブロック枠を除外
-    const supabase = createAdminClient()
-    const { data: blocks } = await supabase
+    const adminClient = createAdminClient()
+    const { data: blocks } = await adminClient
       .from('reservations')
       .select('reserved_at, is_all_day_block')
       .eq('is_blocked', true)
       .gte('reserved_at', `${date}T00:00:00`)
       .lte('reserved_at', `${date}T23:59:59`)
+
+    let availableSlots = slots
 
     if (blocks && blocks.length > 0) {
       const isAllDayBlocked = blocks.some(b => b.is_all_day_block)
@@ -91,11 +101,26 @@ export async function GET(request: Request) {
       const blockedTimes = new Set(
         blocks.map(b => b.reserved_at?.substring(11, 16))
       )
-      const filteredSlots = slots.filter(slot => !blockedTimes.has(slot))
-      return NextResponse.json({ slots: filteredSlots, interval })
+      availableSlots = availableSlots.filter(slot => !blockedTimes.has(slot))
     }
 
-    return NextResponse.json({ slots, interval })
+    // メンターシフトがある時間枠のみに絞り込む
+    const { data: shiftsForDay } = await adminClient
+      .from('mentor_shifts')
+      .select('start_time, end_time')
+      .eq('day_of_week', dayOfWeek)
+      .eq('is_active', true)
+
+    if (shiftsForDay && shiftsForDay.length > 0) {
+      availableSlots = availableSlots.filter(slot =>
+        shiftsForDay.some(shift => slot >= shift.start_time && slot < shift.end_time)
+      )
+    } else {
+      // アクティブなシフトが一件もない場合は空を返す
+      return NextResponse.json({ slots: [], reason: 'no_mentors' })
+    }
+
+    return NextResponse.json({ slots: availableSlots, interval, dayOfWeek })
   } catch (error) {
     console.error('Available slots API error:', error)
     return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })

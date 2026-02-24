@@ -61,6 +61,7 @@ export async function getUserPermissions(userId: string): Promise<TierPermission
       recurring: { view: true, edit: true, execute: true },
       fitest: { view: true, input: true, manage: true },
       records: { view_all: true, edit_all: true },
+      exchanges: { view: true, request: true, manage: true },
       settings: { view: true, edit: true },
       analytics: { view: true }
     }
@@ -82,6 +83,7 @@ export async function getUserPermissions(userId: string): Promise<TierPermission
     recurring: { view: false, edit: false, execute: false },
     fitest: { view: false, input: false, manage: false },
     records: { view_own: true, edit_own: false },
+    exchanges: { view: false, request: false, manage: false },
     settings: { view: false, edit: false },
     analytics: { view: false }
   }

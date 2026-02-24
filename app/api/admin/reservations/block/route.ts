@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
+import { revalidatePath } from 'next/cache'
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +15,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '権限がありません' }, { status: 403 })
     }
 
-    const { start_at, end_at, is_all_day_block, block_reason, mentor_id } = await request.json()
+    let body: { start_at?: string; is_all_day_block?: boolean; block_reason?: string; mentor_id?: string }
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: '無効なリクエスト形式です' }, { status: 400 })
+    }
+    const { start_at, is_all_day_block, block_reason, mentor_id } = body
 
     if (!start_at) {
       return NextResponse.json({ error: '開始日時は必須です' }, { status: 400 })
@@ -40,6 +47,9 @@ export async function POST(request: Request) {
     if (error) {
       throw new Error(`ブロック作成に失敗しました: ${error.message}`)
     }
+
+    revalidatePath('/admin')
+    revalidatePath('/dashboard')
 
     return NextResponse.json({ success: true, data })
   } catch (error) {

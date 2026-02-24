@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cancelReservation, canCancelReservation } from '@/lib/queries/cancellation'
+import { revalidatePath } from 'next/cache'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -26,6 +27,10 @@ export async function POST(request: Request, { params }: Props) {
     if (!result.success) {
       return NextResponse.json({ error: result.message }, { status: 400 })
     }
+
+    revalidatePath('/dashboard')
+    revalidatePath('/admin')
+    revalidatePath('/mentor')
 
     return NextResponse.json(result)
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { bulkExtendExpiry } from '@/lib/queries/coins'
+import { revalidatePath } from 'next/cache'
 
 export async function POST(request: Request) {
   try {
@@ -14,13 +15,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '権限がありません' }, { status: 403 })
     }
 
-    const { ledgerIds, additionalDays } = await request.json()
+    let body: { ledgerIds?: string[]; additionalDays?: number }
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: '無効なリクエスト形式です' }, { status: 400 })
+    }
+    const { ledgerIds, additionalDays } = body
 
     if (!ledgerIds || ledgerIds.length === 0 || !additionalDays) {
       return NextResponse.json({ error: '無効なパラメータです' }, { status: 400 })
     }
 
     const results = await bulkExtendExpiry(ledgerIds, additionalDays)
+
+    revalidatePath('/admin')
+    revalidatePath('/dashboard')
 
     return NextResponse.json({
       success: results.success,

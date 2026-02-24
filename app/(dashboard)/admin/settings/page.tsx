@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Settings, Clock, Shield, Palette, Building, Zap, Coins, FlaskConical } from 'lucide-react'
+import { Settings, Clock, Shield, Palette, Building, Zap, Coins, FlaskConical, ArrowLeftRight } from 'lucide-react'
 import SystemSettingsTab from '@/components/features/admin/settings/SystemSettingsTab'
 import BusinessHoursTab from '@/components/features/admin/settings/BusinessHoursTab'
 import PermissionsTab from '@/components/features/admin/settings/PermissionsTab'
@@ -10,6 +10,7 @@ import GymInfoTab from '@/components/features/admin/settings/GymInfoTab'
 import TriggerSettingsTab from '@/components/features/admin/settings/TriggerSettingsTab'
 import CoinPresetsTab from '@/components/features/admin/settings/CoinPresetsTab'
 import FitestTab from '@/components/features/admin/settings/FitestTab'
+import ExchangeItemsTab from '@/components/features/admin/settings/ExchangeItemsTab'
 
 export default function AdminSettingsPage() {
   return (
@@ -49,6 +50,10 @@ export default function AdminSettingsPage() {
             <FlaskConical className="h-4 w-4" />
             <span className="hidden sm:inline">Fitest</span>
           </TabsTrigger>
+          <TabsTrigger value="exchange" className="flex items-center gap-2">
+            <ArrowLeftRight className="h-4 w-4" />
+            <span className="hidden sm:inline">交換</span>
+          </TabsTrigger>
           <TabsTrigger value="gym" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
             <span className="hidden sm:inline">ジム情報</span>
@@ -81,6 +86,10 @@ export default function AdminSettingsPage() {
 
         <TabsContent value="fitest" className="mt-6">
           <FitestTab />
+        </TabsContent>
+
+        <TabsContent value="exchange" className="mt-6">
+          <ExchangeItemsTab />
         </TabsContent>
 
         <TabsContent value="gym" className="mt-6">
