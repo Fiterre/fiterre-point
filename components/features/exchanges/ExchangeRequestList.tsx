@@ -165,7 +165,7 @@ export default function ExchangeRequestList({ requests, canManage, showUserInfo 
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleStatusChange(req.id, 'ordering', req.exchange_items.name, req.coins_locked)}
+                              onClick={() => handleStatusChange(req.id, 'ordering', req.exchange_items?.name ?? '', req.coins_locked)}
                             >
                               発注中へ
                             </Button>
@@ -173,7 +173,7 @@ export default function ExchangeRequestList({ requests, canManage, showUserInfo 
                           {req.status === 'ordering' && (
                             <Button
                               size="sm"
-                              onClick={() => handleStatusChange(req.id, 'completed', req.exchange_items.name, req.coins_locked)}
+                              onClick={() => handleStatusChange(req.id, 'completed', req.exchange_items?.name ?? '', req.coins_locked)}
                             >
                               対応済みへ
                             </Button>
@@ -182,7 +182,7 @@ export default function ExchangeRequestList({ requests, canManage, showUserInfo 
                             size="sm"
                             variant="ghost"
                             className="text-destructive hover:text-destructive"
-                            onClick={() => handleStatusChange(req.id, 'cancelled', req.exchange_items.name, req.coins_locked)}
+                            onClick={() => handleStatusChange(req.id, 'cancelled', req.exchange_items?.name ?? '', req.coins_locked)}
                           >
                             取消
                           </Button>
