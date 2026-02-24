@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/queries/auth'
 import { isValidUUID } from '@/lib/validation'
+import { revalidatePath } from 'next/cache'
 
 export async function GET() {
   try {
@@ -27,13 +28,13 @@ export async function GET() {
 
     if (error) {
       console.error('Exchange items fetch error:', error)
-      return NextResponse.json({ error: '取得に失敗しました' }, { status: 500 })
+      return NextResponse.json({ error: `取得に失敗しました: ${error.message}` }, { status: 500 })
     }
 
     return NextResponse.json({ items: data ?? [] })
   } catch (error) {
     console.error('Exchange items API error:', error)
-    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'サーバーエラー' }, { status: 500 })
   }
 }
 
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '管理者権限が必要です' }, { status: 403 })
     }
 
-    let body: { items?: { id?: string; category: string; name: string; coin_cost: number; is_active?: boolean; display_order?: number }[] }
+    let body: { items?: { id?: string; category: string; name: string; coin_cost: number }[] }
     try {
       body = await request.json()
     } catch {
@@ -77,48 +78,63 @@ export async function POST(request: Request) {
     }
 
     const adminClient = createAdminClient()
+    const now = new Date().toISOString()
 
-    // 既存アイテムを全て無効化し、送信されたアイテムで上書き
-    // 既存のIDがある場合はupsert、ないものは新規作成
-    const upsertItems = items.map((item, index) => ({
-      ...(item.id ? { id: item.id } : {}),
-      category: item.category,
-      name: item.name.trim(),
-      coin_cost: item.coin_cost,
-      is_active: item.is_active !== false,
-      display_order: index,
-      updated_at: new Date().toISOString(),
-    }))
-
-    // 送信されたIDリストにないものを無効化（UUIDバリデーション）
-    const existingIds = items.filter(i => i.id && isValidUUID(i.id)).map(i => i.id)
-
-    if (existingIds.length > 0) {
-      await adminClient
-        .from('exchange_items')
-        .update({ is_active: false, updated_at: new Date().toISOString() })
-        .not('id', 'in', `(${existingIds.join(',')})`)
-    } else {
-      // 全部新規の場合、既存を全無効化
-      await adminClient
-        .from('exchange_items')
-        .update({ is_active: false, updated_at: new Date().toISOString() })
-        .eq('is_active', true)
-    }
-
-    // upsert（主キーでの競合解決を明示）
-    const { error } = await adminClient
+    // Step 1: 現在アクティブなアイテムを全て無効化
+    const { error: deactivateError } = await adminClient
       .from('exchange_items')
-      .upsert(upsertItems, { onConflict: 'id' })
+      .update({ is_active: false, updated_at: now })
+      .eq('is_active', true)
 
-    if (error) {
-      console.error('Exchange items upsert error:', error)
-      return NextResponse.json({ error: '保存に失敗しました' }, { status: 500 })
+    if (deactivateError) {
+      console.error('Exchange items deactivate error:', deactivateError)
+      return NextResponse.json({ error: `無効化に失敗: ${deactivateError.message}` }, { status: 500 })
     }
+
+    // Step 2: 送信されたアイテムを INSERT（新規）または UPDATE（既存）で保存
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      const itemData = {
+        category: item.category,
+        name: item.name.trim(),
+        coin_cost: item.coin_cost,
+        is_active: true,
+        display_order: i,
+        updated_at: now,
+      }
+
+      if (item.id && isValidUUID(item.id)) {
+        // 既存アイテムを更新
+        const { error } = await adminClient
+          .from('exchange_items')
+          .update(itemData)
+          .eq('id', item.id)
+
+        if (error) {
+          console.error('Exchange item update error:', error)
+          return NextResponse.json({ error: `更新に失敗: ${error.message}` }, { status: 500 })
+        }
+      } else {
+        // 新規アイテムを挿入
+        const { error } = await adminClient
+          .from('exchange_items')
+          .insert(itemData)
+
+        if (error) {
+          console.error('Exchange item insert error:', error)
+          return NextResponse.json({ error: `追加に失敗: ${error.message}` }, { status: 500 })
+        }
+      }
+    }
+
+    revalidatePath('/admin/settings')
+    revalidatePath('/dashboard/exchanges')
+    revalidatePath('/mentor/exchanges')
+    revalidatePath('/admin/exchanges')
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Exchange items API error:', error)
-    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'サーバーエラー' }, { status: 500 })
   }
 }
