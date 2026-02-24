@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { isValidUUID } from '@/lib/validation'
+import { revalidatePath } from 'next/cache'
 
 export async function POST(request: Request) {
   try {
@@ -72,6 +73,8 @@ export async function POST(request: Request) {
       throw new Error('Tier更新に失敗しました')
     }
 
+    revalidatePath('/admin')
+    revalidatePath('/mentor')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Mentor tier update error:', error)

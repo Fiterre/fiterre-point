@@ -38,9 +38,23 @@ export async function PATCH(
 
     const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
     if (typeof body.is_active === 'boolean') updateData.is_active = body.is_active
-    if (typeof body.name === 'string') updateData.name = body.name.trim()
-    if (typeof body.category === 'string') updateData.category = body.category
-    if (typeof body.coin_cost === 'number') updateData.coin_cost = body.coin_cost
+    if (typeof body.name === 'string') {
+      const trimmed = body.name.trim()
+      if (!trimmed) return NextResponse.json({ error: '名前は空にできません' }, { status: 400 })
+      updateData.name = trimmed
+    }
+    if (typeof body.category === 'string') {
+      if (!['discount', 'goods'].includes(body.category)) {
+        return NextResponse.json({ error: '無効なカテゴリです' }, { status: 400 })
+      }
+      updateData.category = body.category
+    }
+    if (body.coin_cost !== undefined) {
+      if (typeof body.coin_cost !== 'number' || !Number.isInteger(body.coin_cost) || body.coin_cost <= 0) {
+        return NextResponse.json({ error: 'coin_costは正の整数である必要があります' }, { status: 400 })
+      }
+      updateData.coin_cost = body.coin_cost
+    }
 
     const { error } = await adminClient
       .from('exchange_items')
@@ -60,7 +74,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { revalidatePath } from 'next/cache'
+import { isValidUUID } from '@/lib/validation'
 
 export async function POST(request: Request) {
   try {
@@ -124,6 +125,10 @@ export async function DELETE(request: Request) {
 
     if (!id) {
       return NextResponse.json({ error: 'IDが必要です' }, { status: 400 })
+    }
+
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: '無効なIDです' }, { status: 400 })
     }
 
     const supabase = createAdminClient()

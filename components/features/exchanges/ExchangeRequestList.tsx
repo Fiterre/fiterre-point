@@ -120,7 +120,7 @@ export default function ExchangeRequestList({ requests, canManage, showUserInfo 
       <div className="space-y-3">
         {requests.map((req) => {
           const statusConfig = STATUS_CONFIG[req.status]
-          const CatIcon = CATEGORY_ICON[req.exchange_items.category]
+          const CatIcon = req.exchange_items?.category ? CATEGORY_ICON[req.exchange_items.category] : Package
           const isActive = req.status === 'requested' || req.status === 'ordering'
           const isUpdating = updatingId === req.id
 
@@ -131,7 +131,7 @@ export default function ExchangeRequestList({ requests, canManage, showUserInfo 
                   <div className="flex items-start gap-3 min-w-0">
                     <CatIcon className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                     <div className="min-w-0">
-                      <p className="font-medium truncate">{req.exchange_items.name}</p>
+                      <p className="font-medium truncate">{req.exchange_items?.name ?? '（削除済みアイテム）'}</p>
                       {showUserInfo && (
                         <p className="text-sm text-muted-foreground truncate">
                           {req.profiles.display_name || '名前未設定'} ({req.profiles.email})

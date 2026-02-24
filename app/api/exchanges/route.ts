@@ -35,11 +35,15 @@ export async function GET(request: Request) {
     const { url } = request
     const { searchParams } = new URL(url)
     const status = searchParams.get('status')
+    const VALID_STATUSES = ['requested', 'ordering', 'completed', 'cancelled']
     if (status) {
+      if (!VALID_STATUSES.includes(status)) {
+        return NextResponse.json({ error: '無効なステータスです' }, { status: 400 })
+      }
       query = query.eq('status', status)
     }
 
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 200)
     query = query.limit(limit)
 
     const { data, error } = await query
