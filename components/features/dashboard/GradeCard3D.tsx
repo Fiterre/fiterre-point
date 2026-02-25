@@ -68,47 +68,67 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
 
   const isHoveredRef = useRef(false)
   const isDraggingRef = useRef(false)
-  const autoAngleRef = useRef(0)
   const rotationRef = useRef({ x: 0, y: 0 })
-  const velocityRef = useRef({ x: 0, y: 0 })
+  const hoverTargetRef = useRef({ x: 0, y: 0 })
+  const angularVelocityRef = useRef({ x: 0, y: 0 })
   const lastPosRef = useRef({ x: 0, y: 0 })
-  const lastTimeRef = useRef(Date.now())
+  const lastTimeRef = useRef(0)
+  const lastFrameRef = useRef(0)
   const animFrameRef = useRef<number>(0)
 
   const cfg = RANK_CONFIG[rank]
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
 
   // 統合アニメーションループ（依存なし・ref経由でアクセス）
   useEffect(() => {
     const card = cardRef.current
     if (!card) return
 
+    lastFrameRef.current = performance.now()
+
+    const applyTransform = () => {
+      card.style.transform = `rotateX(${rotationRef.current.x}deg) rotateY(${rotationRef.current.y}deg)`
+    }
+
     const animate = () => {
+      const now = performance.now()
+      const dt = Math.min((now - lastFrameRef.current) / 16.6667, 2.2)
+      lastFrameRef.current = now
+
       if (isDraggingRef.current) {
+        applyTransform()
         animFrameRef.current = requestAnimationFrame(animate)
         return
       }
 
-      const vx = velocityRef.current.x
-      const vy = velocityRef.current.y
-      const speed = Math.sqrt(vx * vx + vy * vy)
+      const baseAutoSpinY = 0.14
 
-      if (speed > 0.05) {
-        // 慣性フェーズ: 摩擦係数0.92で減速
-        const friction = 0.92
-        velocityRef.current.x *= friction
-        velocityRef.current.y *= friction
-        rotationRef.current.x += velocityRef.current.y * 0.3
-        rotationRef.current.y += velocityRef.current.x * 0.3
-        card.style.transform = `rotateX(${rotationRef.current.x}deg) rotateY(${rotationRef.current.y}deg)`
-      } else if (!isHoveredRef.current) {
-        // 自動回転フェーズ
-        velocityRef.current = { x: 0, y: 0 }
-        autoAngleRef.current = (autoAngleRef.current + 0.3) % 360
-        const y = autoAngleRef.current
-        const x = Math.sin((y * Math.PI) / 180) * 8
-        rotationRef.current = { x, y: y % 60 - 30 }
-        card.style.transform = `rotateY(${rotationRef.current.y}deg) rotateX(${rotationRef.current.x}deg)`
+      if (isHoveredRef.current) {
+        rotationRef.current.x += (hoverTargetRef.current.x - rotationRef.current.x) * (0.13 * dt)
+        rotationRef.current.y += (hoverTargetRef.current.y - rotationRef.current.y) * (0.13 * dt)
+        angularVelocityRef.current.x *= 0.94
+        angularVelocityRef.current.y *= 0.94
+      } else {
+        const dragDamping = Math.pow(0.992, dt)
+        angularVelocityRef.current.x *= dragDamping
+        angularVelocityRef.current.y *= dragDamping
+
+        if (Math.abs(angularVelocityRef.current.y) < baseAutoSpinY) {
+          angularVelocityRef.current.y += (baseAutoSpinY - angularVelocityRef.current.y) * (0.03 * dt)
+        }
+
+        angularVelocityRef.current.x += (0 - angularVelocityRef.current.x) * (0.022 * dt)
+
+        rotationRef.current.x += angularVelocityRef.current.x * dt
+        rotationRef.current.y += angularVelocityRef.current.y * dt
+
+        rotationRef.current.x = clamp(rotationRef.current.x, -58, 58)
+        if (rotationRef.current.y > 360 || rotationRef.current.y < -360) {
+          rotationRef.current.y %= 360
+        }
       }
+
+      applyTransform()
 
       animFrameRef.current = requestAnimationFrame(animate)
     }
@@ -139,10 +159,11 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     isDraggingRef.current = true
+    isHoveredRef.current = false
     setIsDragging(true)
     lastPosRef.current = { x: e.clientX, y: e.clientY }
-    lastTimeRef.current = Date.now()
-    velocityRef.current = { x: 0, y: 0 }
+    lastTimeRef.current = performance.now()
+    angularVelocityRef.current = { x: 0, y: 0 }
     ;(e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId)
   }
 
@@ -152,19 +173,19 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
     if (!card) return
 
     if (isDraggingRef.current) {
-      const now = Date.now()
+      const now = performance.now()
       const dt = Math.max(now - lastTimeRef.current, 1)
       const dx = e.clientX - lastPosRef.current.x
       const dy = e.clientY - lastPosRef.current.y
 
-      velocityRef.current = {
-        x: (dx / dt) * 16,
-        y: (dy / dt) * 16,
+      angularVelocityRef.current = {
+        x: clamp((-(dy / dt) * 8.4), -10, 10),
+        y: clamp(((dx / dt) * 8.4), -10, 10),
       }
 
-      rotationRef.current.y += dx * 0.5
-      rotationRef.current.x -= dy * 0.5
-      rotationRef.current.x = Math.max(-50, Math.min(50, rotationRef.current.x))
+      rotationRef.current.y += dx * 0.56
+      rotationRef.current.x -= dy * 0.56
+      rotationRef.current.x = clamp(rotationRef.current.x, -58, 58)
       card.style.transform = `rotateX(${rotationRef.current.x}deg) rotateY(${rotationRef.current.y}deg)`
 
       lastPosRef.current = { x: e.clientX, y: e.clientY }
@@ -173,10 +194,9 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
       const rect = card.getBoundingClientRect()
       const dx = e.clientX - (rect.left + rect.width / 2)
       const dy = e.clientY - (rect.top + rect.height / 2)
-      const rotX = -(dy / (rect.height / 2)) * 25
-      const rotY = (dx / (rect.width / 2)) * 25
-      rotationRef.current = { x: rotX, y: rotY }
-      card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`
+      const rotX = -(dy / (rect.height / 2)) * 22
+      const rotY = (dx / (rect.width / 2)) * 22
+      hoverTargetRef.current = { x: rotX, y: rotY }
     }
 
     if (shimmer && card) {
@@ -188,9 +208,18 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
     }
   }
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     isDraggingRef.current = false
     setIsDragging(false)
+    try {
+      ;(e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId)
+    } catch {
+      // noop
+    }
+
+    const spinBoost = 1.32
+    angularVelocityRef.current.x = clamp(angularVelocityRef.current.x * spinBoost, -12, 12)
+    angularVelocityRef.current.y = clamp(angularVelocityRef.current.y * spinBoost, -12, 12)
   }
 
   const handleMouseEnter = () => {
@@ -200,6 +229,7 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
   const handleMouseLeave = () => {
     if (!isDraggingRef.current) {
       isHoveredRef.current = false
+      hoverTargetRef.current = { x: 0, y: 0 }
       const shimmer = shimmerRef.current
       if (shimmer) shimmer.style.opacity = '0'
     }
@@ -250,7 +280,7 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
 
       <div
         className="flex justify-center items-center py-4"
-        style={{ perspective: '900px' }}
+        style={{ perspective: '1200px' }}
       >
         <div
           ref={cardRef}
@@ -265,6 +295,7 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
             height: 210,
             borderRadius: 14,
             background: cfg.bg,
+            border: '1px solid rgba(255,255,255,0.16)',
             boxShadow: cfg.glow,
             position: 'relative',
             cursor: isDragging ? 'grabbing' : 'grab',
@@ -272,14 +303,32 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
             userSelect: 'none',
             overflow: 'hidden',
             touchAction: 'none',
+            willChange: 'transform',
           }}
         >
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: 14,
+            background: 'linear-gradient(160deg, rgba(0,0,0,0.7), rgba(0,0,0,0.25) 42%, rgba(255,255,255,0.05) 100%)',
+            transform: 'translateZ(-14px)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08), 0 20px 36px rgba(0,0,0,0.58)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }} />
+
+          <div style={{ position: 'absolute', top: -2, left: 8, right: 8, height: 10, background: 'linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.02))', borderRadius: 10, transform: 'translateZ(-7px) rotateX(85deg)', pointerEvents: 'none', zIndex: 1 }} />
+          <div style={{ position: 'absolute', bottom: -2, left: 8, right: 8, height: 10, background: 'linear-gradient(0deg, rgba(0,0,0,0.52), rgba(0,0,0,0.08))', borderRadius: 10, transform: 'translateZ(-7px) rotateX(-85deg)', pointerEvents: 'none', zIndex: 1 }} />
+          <div style={{ position: 'absolute', top: 8, bottom: 8, left: -2, width: 10, background: 'linear-gradient(90deg, rgba(255,255,255,0.15), rgba(0,0,0,0.28))', borderRadius: 10, transform: 'translateZ(-7px) rotateY(-85deg)', pointerEvents: 'none', zIndex: 1 }} />
+          <div style={{ position: 'absolute', top: 8, bottom: 8, right: -2, width: 10, background: 'linear-gradient(270deg, rgba(255,255,255,0.18), rgba(0,0,0,0.24))', borderRadius: 10, transform: 'translateZ(-7px) rotateY(85deg)', pointerEvents: 'none', zIndex: 1 }} />
+
           {/* ホログラフィックシマーレイヤー */}
           <div
             ref={shimmerRef}
             style={{
               position: 'absolute', inset: 0, borderRadius: 14,
               opacity: 0, transition: 'opacity 0.15s',
+              transform: 'translateZ(12px)',
               pointerEvents: 'none', zIndex: 5,
             }}
           />
@@ -288,6 +337,7 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
           <div style={{
             position: 'absolute', inset: 0, borderRadius: 14,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.11'/%3E%3C/svg%3E")`,
+            transform: 'translateZ(6px)',
             pointerEvents: 'none', zIndex: 1,
           }} />
 
@@ -295,6 +345,7 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
           <div style={{
             position: 'absolute', inset: 0, borderRadius: 14,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.01 0.85' numOctaves='3' seed='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)' opacity='0.08'/%3E%3C/svg%3E")`,
+            transform: 'translateZ(7px)',
             pointerEvents: 'none', zIndex: 2,
           }} />
 
@@ -302,6 +353,7 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
           <div style={{
             position: 'absolute', inset: 0, borderRadius: 14,
             background: 'radial-gradient(ellipse at 50% 50%, transparent 44%, rgba(0,0,0,0.58) 100%)',
+            transform: 'translateZ(8px)',
             pointerEvents: 'none', zIndex: 3,
           }} />
 
@@ -309,11 +361,12 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: 1,
             background: 'linear-gradient(90deg, transparent 6%, rgba(255,255,255,0.22) 30%, rgba(255,255,255,0.42) 50%, rgba(255,255,255,0.22) 70%, transparent 94%)',
+            transform: 'translateZ(10px)',
             pointerEvents: 'none', zIndex: 4,
           }} />
 
           {/* カード内コンテンツ */}
-          <div style={{ position: 'relative', zIndex: 6, padding: '18px 22px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ position: 'relative', zIndex: 6, padding: '18px 22px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transform: 'translateZ(20px)' }}>
 
             {/* 上段: ブランド名・ランク | 装飾サークル */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -369,7 +422,7 @@ export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey 
           <div style={{
             position: 'absolute', top: -40, right: -20, width: 80, height: 180,
             background: 'linear-gradient(135deg, rgba(255,255,255,0.05), transparent)',
-            transform: 'rotate(20deg)', pointerEvents: 'none', zIndex: 4,
+            transform: 'rotate(20deg) translateZ(16px)', pointerEvents: 'none', zIndex: 4,
           }} />
         </div>
       </div>
