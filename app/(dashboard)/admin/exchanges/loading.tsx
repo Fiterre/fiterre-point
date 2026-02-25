@@ -9,8 +9,6 @@ export default function ExchangesLoading() {
         <Skeleton className="h-5 w-64" />
       </div>
 
-      <Skeleton className="h-10 w-48" />
-
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <Card key={i}>

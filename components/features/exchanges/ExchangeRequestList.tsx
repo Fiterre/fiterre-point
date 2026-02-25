@@ -40,6 +40,7 @@ interface ExchangeRequestItem {
 interface Props {
   requests: ExchangeRequestItem[]
   canManage: boolean // admin/mentor can update status
+  canComplete?: boolean // admin only - mentor cannot change to 'completed'
   showUserInfo?: boolean // admin/mentor see user info
 }
 
@@ -55,7 +56,7 @@ const CATEGORY_ICON: Record<ExchangeItemCategory, typeof Tag> = {
   goods: Package,
 }
 
-export default function ExchangeRequestList({ requests, canManage, showUserInfo }: Props) {
+export default function ExchangeRequestList({ requests, canManage, canComplete = true, showUserInfo }: Props) {
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [confirmData, setConfirmData] = useState<{
     id: string
@@ -134,7 +135,7 @@ export default function ExchangeRequestList({ requests, canManage, showUserInfo 
                       <p className="font-medium truncate">{req.exchange_items?.name ?? '（削除済みアイテム）'}</p>
                       {showUserInfo && (
                         <p className="text-sm text-muted-foreground truncate">
-                          {req.profiles.display_name || '名前未設定'} ({req.profiles.email})
+                          {req.profiles?.display_name || '名前未設定'} ({req.profiles?.email || '不明'})
                         </p>
                       )}
                       <div className="flex items-center gap-2 mt-1">
@@ -170,7 +171,7 @@ export default function ExchangeRequestList({ requests, canManage, showUserInfo 
                               発注中へ
                             </Button>
                           )}
-                          {req.status === 'ordering' && (
+                          {req.status === 'ordering' && canComplete && (
                             <Button
                               size="sm"
                               onClick={() => handleStatusChange(req.id, 'completed', req.exchange_items?.name ?? '', req.coins_locked)}
