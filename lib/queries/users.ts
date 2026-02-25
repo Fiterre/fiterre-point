@@ -47,6 +47,7 @@ export async function getUserBalanceAdmin(userId: string) {
     .select('amount_current, amount_locked')
     .eq('user_id', userId)
     .eq('status', 'active')
+    .gt('expires_at', new Date().toISOString())
 
   if (error) {
     console.error('Error fetching balance:', error)

@@ -1,43 +1,72 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-
-async function checkAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('tier_level')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.tier_level > 2) return null
-  return user
-}
+import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
+import { isValidUUID } from '@/lib/validation'
 
 // 更新
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = await checkAdmin()
-  if (!user) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
+  try {
+    const user = await getCurrentUser()
+    if (!user) return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
 
-  const { id } = await params
-  const body = await request.json()
+    const admin = await isAdmin(user.id)
+    if (!admin) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
 
-  const supabase = createAdminClient()
-  const { data, error } = await supabase
-    .from('fitest_items')
-    .update(body)
-    .eq('id', id)
-    .select()
-    .single()
+    const { id } = await params
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: '無効なIDです' }, { status: 400 })
+    }
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+    let body: Record<string, unknown>
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: '無効なリクエスト形式です' }, { status: 400 })
+    }
+
+    // ホワイトリストで許可フィールドのみ更新（マス代入防止）
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
+    if (typeof body.name === 'string' && body.name.trim() !== '') {
+      updateData.name = body.name.trim()
+    }
+    if (typeof body.description === 'string') {
+      updateData.description = body.description
+    }
+    if (typeof body.is_active === 'boolean') {
+      updateData.is_active = body.is_active
+    }
+    if (typeof body.display_order === 'number' && Number.isInteger(body.display_order) && body.display_order >= 0) {
+      updateData.display_order = body.display_order
+    }
+    if (typeof body.coin_cost === 'number' && Number.isInteger(body.coin_cost) && body.coin_cost > 0 && body.coin_cost <= 999999) {
+      updateData.coin_cost = body.coin_cost
+    }
+
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('fitest_items')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .maybeSingle()
+
+    if (error) {
+      console.error('Fitest item update error:', error)
+      return NextResponse.json({ error: '更新に失敗しました' }, { status: 500 })
+    }
+    if (!data) {
+      return NextResponse.json({ error: 'アイテムが見つかりません' }, { status: 404 })
+    }
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Fitest item PATCH error:', error)
+    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })
+  }
 }
 
 // 削除（論理削除: is_active = false）
@@ -45,17 +74,31 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = await checkAdmin()
-  if (!user) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
+  try {
+    const user = await getCurrentUser()
+    if (!user) return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
 
-  const { id } = await params
+    const admin = await isAdmin(user.id)
+    if (!admin) return NextResponse.json({ error: '権限がありません' }, { status: 403 })
 
-  const supabase = createAdminClient()
-  const { error } = await supabase
-    .from('fitest_items')
-    .update({ is_active: false })
-    .eq('id', id)
+    const { id } = await params
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: '無効なIDです' }, { status: 400 })
+    }
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true })
+    const supabase = createAdminClient()
+    const { error } = await supabase
+      .from('fitest_items')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) {
+      console.error('Fitest item delete error:', error)
+      return NextResponse.json({ error: '削除に失敗しました' }, { status: 500 })
+    }
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Fitest item DELETE error:', error)
+    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })
+  }
 }

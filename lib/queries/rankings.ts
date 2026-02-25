@@ -12,7 +12,7 @@ export interface CoinRanking {
 export async function getCoinRankings(limit: number = 10): Promise<CoinRanking[]> {
   const supabase = createAdminClient()
 
-  // 全ユーザーのコイン残高を取得
+  // 全ユーザーのコイン残高を取得（アクティブなレジャーのみ、期限切れ除外）
   const { data: ledgers, error } = await supabase
     .from('coin_ledgers')
     .select(`
@@ -22,17 +22,19 @@ export async function getCoinRankings(limit: number = 10): Promise<CoinRanking[]
       profiles:user_id (
         display_name,
         email,
-        rank
+        rank,
+        status
       )
     `)
     .eq('status', 'active')
+    .gt('expires_at', new Date().toISOString())
 
   if (error) {
     console.error('Error fetching rankings:', error)
     return []
   }
 
-  // ユーザーごとに集計
+  // ユーザーごとに集計（非アクティブアカウントを除外）
   const userTotals: Record<string, {
     displayName: string
     email: string
@@ -43,6 +45,9 @@ export async function getCoinRankings(limit: number = 10): Promise<CoinRanking[]
   ledgers?.forEach(ledger => {
     const userId = ledger.user_id
     const profile = ledger.profiles as any
+
+    // アカウント停止・削除済みユーザーをランキングから除外
+    if (profile?.status && profile.status !== 'active') return
 
     if (!userTotals[userId]) {
       userTotals[userId] = {
@@ -73,7 +78,7 @@ export async function getCoinRankings(limit: number = 10): Promise<CoinRanking[]
 }
 
 export async function getUserRankPosition(userId: string): Promise<number | null> {
-  const rankings = await getCoinRankings(100)
+  const rankings = await getCoinRankings(10000)
   const userRank = rankings.find(r => r.userId === userId)
   return userRank?.position || null
 }

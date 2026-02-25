@@ -43,7 +43,8 @@ export async function GET(request: Request) {
       query = query.eq('status', status)
     }
 
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 200)
+    const rawLimit = parseInt(searchParams.get('limit') || '50', 10)
+    const limit = Math.min(Number.isNaN(rawLimit) || rawLimit <= 0 ? 50 : rawLimit, 200)
     query = query.limit(limit)
 
     const { data, error } = await query
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
       .from('profiles')
       .select('status')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (profile && profile.status !== 'active') {
       return NextResponse.json({ error: 'アカウントが制限されています' }, { status: 403 })
@@ -212,12 +213,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'コインのロックに失敗しました。もう一度お試しください' }, { status: 409 })
     }
 
-    // 3. 残高再計算
+    // 3. 残高再計算（期限切れコインを除外）
     const { data: newLedgers } = await adminClient
       .from('coin_ledgers')
       .select('amount_current')
       .eq('user_id', user.id)
       .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString())
 
     const newBalance = newLedgers?.reduce((sum, l) => sum + l.amount_current, 0) ?? 0
 

@@ -84,15 +84,16 @@ export async function POST(request: Request) {
 
         if (ledgerError) throw ledgerError
 
-        // 残高計算
+        // 残高計算（期限切れコインを除外、ロック済みは含まない）
         const { data: ledgers } = await supabase
           .from('coin_ledgers')
-          .select('amount_current, amount_locked')
+          .select('amount_current')
           .eq('user_id', userId)
           .eq('status', 'active')
+          .gt('expires_at', new Date().toISOString())
 
         const totalBalance = ledgers?.reduce(
-          (sum, l) => sum + l.amount_current + l.amount_locked,
+          (sum, l) => sum + l.amount_current,
           0
         ) ?? amount
 

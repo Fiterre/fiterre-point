@@ -21,11 +21,19 @@ export async function POST(request: Request) {
     const adminClient = createAdminClient()
 
     // メンターIDを取得
-    const { data: mentor } = await adminClient
+    const { data: mentor, error: mentorError } = await adminClient
       .from('mentors')
       .select('id')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
+
+    if (mentorError) {
+      console.error('Mentor fetch error:', mentorError)
+      return NextResponse.json({ error: 'メンター情報の取得に失敗しました' }, { status: 500 })
+    }
+    if (!mentor) {
+      return NextResponse.json({ error: 'メンター資格がありません' }, { status: 403 })
+    }
 
     const body = await request.json()
 
@@ -52,7 +60,7 @@ export async function POST(request: Request) {
       .from('fitest_results')
       .insert({
         user_id: body.userId,
-        mentor_id: mentor?.id || null,
+        mentor_id: mentor.id,
         test_date: body.testDate,
         current_level: body.currentLevel,
         target_level: body.targetLevel,

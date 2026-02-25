@@ -28,13 +28,13 @@ export async function GET() {
 
     if (error) {
       console.error('Exchange items fetch error:', error)
-      return NextResponse.json({ error: `取得に失敗しました: ${error.message}` }, { status: 500 })
+      return NextResponse.json({ error: '取得に失敗しました' }, { status: 500 })
     }
 
     return NextResponse.json({ items: data ?? [] })
   } catch (error) {
     console.error('Exchange items API error:', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'サーバーエラー' }, { status: 500 })
+    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })
   }
 }
 
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     if (deactivateError) {
       console.error('Exchange items deactivate error:', deactivateError)
-      return NextResponse.json({ error: `無効化に失敗: ${deactivateError.message}` }, { status: 500 })
+      return NextResponse.json({ error: '無効化に失敗しました' }, { status: 500 })
     }
 
     // Step 2: 送信されたアイテムを INSERT（新規）または UPDATE（既存）で保存
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 
         if (error) {
           console.error('Exchange item update error:', error)
-          return NextResponse.json({ error: `更新に失敗: ${error.message}` }, { status: 500 })
+          return NextResponse.json({ error: '更新に失敗しました' }, { status: 500 })
         }
       } else {
         // 新規アイテムを挿入
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
 
         if (error) {
           console.error('Exchange item insert error:', error)
-          return NextResponse.json({ error: `追加に失敗: ${error.message}` }, { status: 500 })
+          return NextResponse.json({ error: '追加に失敗しました' }, { status: 500 })
         }
       }
     }
@@ -135,6 +135,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Exchange items API error:', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'サーバーエラー' }, { status: 500 })
+    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 })
   }
 }

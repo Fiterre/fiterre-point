@@ -192,7 +192,7 @@ export async function checkIn(
       expiresAt.setDate(expiresAt.getDate() + 90)
 
       // コイン台帳に追加
-      const { data: ledger } = await supabase
+      const { data: ledger, error: ledgerError } = await supabase
         .from('coin_ledgers')
         .insert({
           user_id: userId,
@@ -205,12 +205,18 @@ export async function checkIn(
         .select()
         .single()
 
-      // 残高計算
+      if (ledgerError || !ledger) {
+        throw new Error('コイン台帳への追加に失敗しました')
+      }
+
+      // 残高計算（期限切れコインを除外）
+      const nowISO = new Date().toISOString()
       const { data: ledgers } = await supabase
         .from('coin_ledgers')
         .select('amount_current')
         .eq('user_id', userId)
         .eq('status', 'active')
+        .gt('expires_at', nowISO)
 
       const totalBalance = ledgers?.reduce((sum, l) => sum + l.amount_current, 0) || bonusCoins
 

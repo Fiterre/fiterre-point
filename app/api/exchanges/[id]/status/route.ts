@@ -69,6 +69,14 @@ export async function PATCH(
       }, { status: 400 })
     }
 
+    // メンターは自分の申請を自己承認不可（管理者のみ completed/cancelled 可能）
+    if (!admin && exchangeRequest.user_id === user.id) {
+      return NextResponse.json({ error: '自分の申請を処理することはできません' }, { status: 403 })
+    }
+    if (!admin && newStatus === 'completed') {
+      return NextResponse.json({ error: '対応済みへの変更は管理者のみ可能です' }, { status: 403 })
+    }
+
     const now = new Date().toISOString()
     const updateData: Record<string, unknown> = {
       status: newStatus,
@@ -112,7 +120,7 @@ export async function PATCH(
 
         const consumeAmount = Math.min(ledger.amount_locked, remainingToConsume)
 
-        await adminClient
+        const { error: consumeError } = await adminClient
           .from('coin_ledgers')
           .update({
             amount_locked: ledger.amount_locked - consumeAmount,
@@ -120,15 +128,18 @@ export async function PATCH(
           })
           .eq('id', ledger.id)
 
+        if (consumeError) throw new Error(`コイン消費に失敗しました: ${consumeError.message}`)
+
         remainingToConsume -= consumeAmount
       }
 
-      // 残高再計算
+      // 残高再計算（期限切れコインを除外）
       const { data: newLedgers } = await adminClient
         .from('coin_ledgers')
         .select('amount_current')
         .eq('user_id', exchangeRequest.user_id)
         .eq('status', 'active')
+        .gt('expires_at', now)
 
       const newBalance = newLedgers?.reduce((sum, l) => sum + l.amount_current, 0) ?? 0
 
@@ -162,7 +173,7 @@ export async function PATCH(
 
         const unlockAmount = Math.min(ledger.amount_locked, remainingToUnlock)
 
-        await adminClient
+        const { error: unlockError } = await adminClient
           .from('coin_ledgers')
           .update({
             amount_current: ledger.amount_current + unlockAmount,
@@ -171,15 +182,18 @@ export async function PATCH(
           })
           .eq('id', ledger.id)
 
+        if (unlockError) throw new Error(`コイン返還に失敗しました: ${unlockError.message}`)
+
         remainingToUnlock -= unlockAmount
       }
 
-      // 残高再計算
+      // 残高再計算（期限切れコインを除外）
       const { data: newLedgers } = await adminClient
         .from('coin_ledgers')
         .select('amount_current')
         .eq('user_id', exchangeRequest.user_id)
         .eq('status', 'active')
+        .gt('expires_at', now)
 
       const newBalance = newLedgers?.reduce((sum, l) => sum + l.amount_current, 0) ?? 0
 

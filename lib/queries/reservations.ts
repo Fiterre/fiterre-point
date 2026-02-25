@@ -18,7 +18,7 @@ export async function getSessionTypes() {
   return data ?? []
 }
 
-// ユーザー向け: アクティブメンターのみ
+// ユーザー向け: アクティブメンターのみ（アカウント停止プロファイルを除外）
 export async function getMentors() {
   const supabase = createAdminClient()
 
@@ -27,7 +27,8 @@ export async function getMentors() {
     .select(`
       *,
       profiles:user_id (
-        display_name
+        display_name,
+        status
       )
     `)
     .eq('is_active', true)
@@ -38,7 +39,11 @@ export async function getMentors() {
     return []
   }
 
-  return data ?? []
+  // アカウント停止・削除済みプロファイルのメンターを除外
+  return (data ?? []).filter(m => {
+    const profile = m.profiles as { display_name: string; status: string } | null
+    return profile?.status === 'active'
+  })
 }
 
 // 管理者向け: 全メンター（active/inactive）
@@ -131,7 +136,7 @@ export async function getTodayReservationCount() {
     .from('reservations')
     .select('*', { count: 'exact', head: true })
     .gte('reserved_at', `${today}T00:00:00`)
-    .lt('reserved_at', `${today}T23:59:59`)
+    .lte('reserved_at', `${today}T23:59:59`)
     .in('status', ['pending', 'confirmed'])
     .eq('is_blocked', false)
 
@@ -158,7 +163,7 @@ export async function getMentorTodayReservations(mentorId: string) {
     `)
     .eq('mentor_id', mentorId)
     .gte('reserved_at', `${today}T00:00:00`)
-    .lt('reserved_at', `${today}T23:59:59`)
+    .lte('reserved_at', `${today}T23:59:59`)
     .in('status', ['pending', 'confirmed'])
     .eq('is_blocked', false)
     .order('reserved_at')

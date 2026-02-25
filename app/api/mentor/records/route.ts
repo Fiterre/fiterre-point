@@ -22,11 +22,19 @@ export async function POST(request: Request) {
     const adminClient = createAdminClient()
 
     // メンターIDを取得
-    const { data: mentor } = await adminClient
+    const { data: mentor, error: mentorError } = await adminClient
       .from('mentors')
       .select('id')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
+
+    if (mentorError) {
+      console.error('Mentor fetch error:', mentorError)
+      return NextResponse.json({ error: 'メンター情報の取得に失敗しました' }, { status: 500 })
+    }
+    if (!mentor) {
+      return NextResponse.json({ error: 'メンター資格がありません' }, { status: 403 })
+    }
 
     const { userId, recordDate, recordType, title, content, exercises, notes } = await request.json()
 
@@ -58,7 +66,7 @@ export async function POST(request: Request) {
 
     const record = await createRecord(
       userId,
-      mentor?.id || null,
+      mentor.id,
       null,
       recordDate,
       recordType,

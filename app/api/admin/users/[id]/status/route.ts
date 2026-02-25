@@ -94,12 +94,13 @@ export async function PATCH(
             remainingToUnlock -= unlockAmount
           }
 
-          // 返還取引履歴を記録
+          // 返還取引履歴を記録（期限切れコインを除外）
           const { data: newLedgers } = await supabase
             .from('coin_ledgers')
             .select('amount_current')
             .eq('user_id', targetUserId)
             .eq('status', 'active')
+            .gt('expires_at', new Date().toISOString())
           const newBalance = newLedgers?.reduce((sum, l) => sum + l.amount_current, 0) ?? 0
 
           await supabase

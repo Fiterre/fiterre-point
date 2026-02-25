@@ -28,7 +28,7 @@ export default async function MentorDashboardPage() {
         .from('check_in_logs')
         .select(`
           id,
-          checked_in_at,
+          check_in_at,
           method,
           profiles:user_id (
             display_name,
@@ -36,7 +36,7 @@ export default async function MentorDashboardPage() {
           )
         `)
         .eq('verified_by', user!.id)
-        .order('checked_in_at', { ascending: false })
+        .order('check_in_at', { ascending: false })
         .limit(5)
     : { data: [] }
 
@@ -151,7 +151,7 @@ export default async function MentorDashboardPage() {
           ) : (
             <div className="space-y-3">
               {recentCheckIns.map((log) => {
-                const checkedAt = new Date(log.checked_in_at)
+                const checkedAt = new Date(log.check_in_at)
                 const profile = log.profiles as unknown as { display_name: string; email: string } | null
                 return (
                   <div key={log.id} className="flex items-center justify-between py-2 border-b last:border-0">

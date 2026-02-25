@@ -22,6 +22,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 })
     }
 
+    // バリデーション: UUIDフォーマット
+    if (!isValidUUID(userId) || !isValidUUID(mentorId) || !isValidUUID(sessionTypeId)) {
+      return NextResponse.json({ error: 'IDのフォーマットが不正です' }, { status: 400 })
+    }
+
     // バリデーション: 曜日範囲
     if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
       return NextResponse.json({ error: '曜日の値が不正です (0-6)' }, { status: 400 })

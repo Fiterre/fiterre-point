@@ -28,7 +28,6 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const now = new Date()
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString()
-  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0).toISOString()
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
   // 今月の予約数
@@ -193,7 +192,15 @@ function aggregateCoinFlow(data: { amount: number; created_at: string }[]) {
   return Object.entries(flow).map(([date, values]) => ({ date, ...values }))
 }
 
-function aggregateMentorStats(data: any[]): MentorStat[] {
+interface ReservationRow {
+  mentor_id: string | null
+  coins_used: number | null
+  user_id: string | null
+  // Supabase は nested join を配列型として推論するため配列で定義
+  mentors: { profiles: { display_name: string }[] }[] | null
+}
+
+function aggregateMentorStats(data: ReservationRow[]): MentorStat[] {
   const stats: Record<string, MentorStat> = {}
 
   data.forEach(item => {
@@ -203,7 +210,7 @@ function aggregateMentorStats(data: any[]): MentorStat[] {
     if (!stats[mentorId]) {
       stats[mentorId] = {
         mentorId,
-        mentorName: item.mentors?.profiles?.display_name || '名前未設定',
+        mentorName: item.mentors?.[0]?.profiles?.[0]?.display_name || '名前未設定',
         totalSessions: 0,
         totalCustomers: 0,
         totalCoins: 0
@@ -222,7 +229,7 @@ function aggregateMentorStats(data: any[]): MentorStat[] {
     if (!customersByMentor[mentorId]) {
       customersByMentor[mentorId] = new Set()
     }
-    customersByMentor[mentorId].add(item.user_id)
+    customersByMentor[mentorId].add(item.user_id ?? '')
   })
 
   Object.keys(stats).forEach(mentorId => {

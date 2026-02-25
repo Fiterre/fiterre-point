@@ -80,10 +80,14 @@ export async function POST(request: Request) {
     let skipped = 0
     const errors: string[] = []
 
-    // 営業時間・休業日を事前取得
-    const businessHours = await getSetting('business_hours') as Record<string, { open: string; close: string; is_open: boolean }> | null
     const monthStart = `${targetYear}-${String(targetMonthNum).padStart(2, '0')}-01`
     const monthEnd = `${targetYear}-${String(targetMonthNum).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`
+
+    // ============================================================
+    // 一括事前取得（N+1クエリ防止）
+    // ============================================================
+    const businessHours = await getSetting('business_hours') as Record<string, { open: string; close: string; is_open: boolean }> | null
+
     const { data: closures } = await supabase
       .from('business_closures')
       .select('closure_date')
@@ -91,7 +95,13 @@ export async function POST(request: Request) {
       .lte('closure_date', monthEnd)
     const closureDates = new Set(closures?.map(c => c.closure_date) ?? [])
 
-    // メンター・ユーザーのステータスを事前取得
+    const { data: blockedSlots } = await supabase
+      .from('reservations')
+      .select('reserved_at, is_all_day_block')
+      .eq('is_blocked', true)
+      .gte('reserved_at', `${monthStart}T00:00:00`)
+      .lte('reserved_at', `${monthEnd}T23:59:59`)
+
     const mentorIds = [...new Set(recurringReservations.map(r => r.mentor_id))]
     const userIds = [...new Set(recurringReservations.map(r => r.user_id))]
 
@@ -105,10 +115,87 @@ export async function POST(request: Request) {
       .select('id, status')
       .in('id', userIds)
 
+    // メンターシフト（全曜日・全メンターを一括取得）
+    const { data: allMentorShifts } = await supabase
+      .from('mentor_shifts')
+      .select('mentor_id, day_of_week, start_time, end_time')
+      .in('mentor_id', mentorIds)
+      .eq('is_active', true)
+
+    // 対象月の既存予約（重複チェック用）
+    const { data: existingReservationsData } = await supabase
+      .from('reservations')
+      .select('user_id, reserved_at')
+      .in('user_id', userIds)
+      .gte('reserved_at', `${monthStart}T00:00:00`)
+      .lte('reserved_at', `${monthEnd}T23:59:59`)
+
+    // コイン台帳（インメモリで更新しながら使用・FIFO順）
+    const nowISO = new Date().toISOString()
+    const { data: allActiveLedgers } = await supabase
+      .from('coin_ledgers')
+      .select('*')
+      .in('user_id', userIds)
+      .eq('status', 'active')
+      .gt('amount_current', 0)
+      .gt('expires_at', nowISO)
+      .order('expires_at', { ascending: true })
+
+    // ============================================================
+    // インメモリ検索用データ構造
+    // ============================================================
     const mentorActiveMap = new Map(mentorStatuses?.map(m => [m.id, m.is_active]) ?? [])
     const userStatusMap = new Map(userStatuses?.map(u => [u.id, u.status]) ?? [])
 
+    // 既存予約セット: "userId:YYYY-MM-DDTHH:MM" 形式
+    const existingReservationSet = new Set(
+      existingReservationsData?.map(r => `${r.user_id}:${r.reserved_at.slice(0, 16)}`) ?? []
+    )
+
+    // コイン台帳マップ: userId → ミュータブルな台帳配列
+    const userLedgerMap = new Map<string, Array<{
+      id: string
+      amount_current: number
+      amount_locked: number
+    }>>()
+    for (const ledger of allActiveLedgers ?? []) {
+      if (!userLedgerMap.has(ledger.user_id)) {
+        userLedgerMap.set(ledger.user_id, [])
+      }
+      userLedgerMap.get(ledger.user_id)!.push({
+        id: ledger.id,
+        amount_current: ledger.amount_current,
+        amount_locked: ledger.amount_locked,
+      })
+    }
+
+    // インメモリ残高取得
+    const getInMemoryBalance = (userId: string) =>
+      (userLedgerMap.get(userId) ?? []).reduce((sum, l) => sum + l.amount_current, 0)
+
+    // コインロック（インメモリ更新 + DB更新）
+    const lockCoinsInMemory = async (userId: string, coinCost: number) => {
+      const ledgers = userLedgerMap.get(userId) ?? []
+      let remaining = coinCost
+      for (const ledger of ledgers) {
+        if (remaining <= 0) break
+        const lockAmount = Math.min(ledger.amount_current, remaining)
+        ledger.amount_current -= lockAmount
+        ledger.amount_locked += lockAmount
+        remaining -= lockAmount
+        await supabase
+          .from('coin_ledgers')
+          .update({
+            amount_current: ledger.amount_current,
+            amount_locked: ledger.amount_locked,
+          })
+          .eq('id', ledger.id)
+      }
+    }
+
+    // ============================================================
     // 各固定予約について処理
+    // ============================================================
     for (const recurring of recurringReservations) {
       // メンターがアクティブか検査
       if (!mentorActiveMap.get(recurring.mentor_id)) {
@@ -168,18 +255,31 @@ export async function POST(request: Request) {
             continue
           }
 
-          // メンターのシフトチェック
-          const { data: shiftCheck } = await supabase
-            .from('mentor_shifts')
-            .select('id')
-            .eq('mentor_id', recurring.mentor_id)
-            .eq('day_of_week', recurring.day_of_week)
-            .eq('is_active', true)
-            .lte('start_time', recurring.start_time)
-            .gt('end_time', recurring.start_time)
-            .limit(1)
+          // スケジュールブロックチェック（全日ブロック or 時間帯一致ブロック）
+          const isScheduleBlocked = blockedSlots?.some(b => {
+            const blockDate = b.reserved_at.split('T')[0]
+            if (blockDate !== targetDate) return false
+            return b.is_all_day_block || b.reserved_at.startsWith(`${targetDate}T${recurring.start_time}`)
+          })
+          if (isScheduleBlocked) {
+            await supabase.from('recurring_reservation_logs').insert({
+              recurring_reservation_id: recurring.id,
+              target_date: targetDate,
+              status: 'skipped',
+              error_message: 'スケジュールブロックのためスキップ',
+            })
+            skipped++
+            continue
+          }
 
-          if (!shiftCheck || shiftCheck.length === 0) {
+          // メンターシフトチェック（インメモリ）
+          const hasShift = allMentorShifts?.some(s =>
+            s.mentor_id === recurring.mentor_id &&
+            s.day_of_week === recurring.day_of_week &&
+            s.start_time <= recurring.start_time &&
+            s.end_time > recurring.start_time
+          ) ?? false
+          if (!hasShift) {
             await supabase.from('recurring_reservation_logs').insert({
               recurring_reservation_id: recurring.id,
               target_date: targetDate,
@@ -190,41 +290,24 @@ export async function POST(request: Request) {
             continue
           }
 
-          // 既存の予約をチェック（重複防止）
-          const { data: existing } = await supabase
-            .from('reservations')
-            .select('id')
-            .eq('user_id', recurring.user_id)
-            .eq('reserved_at', `${targetDate}T${recurring.start_time}:00`)
-            .maybeSingle()
-
-          if (existing) {
+          // 既存予約チェック（インメモリ）
+          const existKey = `${recurring.user_id}:${targetDate}T${recurring.start_time}`
+          if (existingReservationSet.has(existKey)) {
             skipped++
             continue
           }
 
-          // ユーザーの残高確認（期限切れコインを除外）
-          const nowISO = new Date().toISOString()
-          const { data: ledgers } = await supabase
-            .from('coin_ledgers')
-            .select('amount_current')
-            .eq('user_id', recurring.user_id)
-            .eq('status', 'active')
-            .gt('expires_at', nowISO)
-
-          const availableBalance = ledgers?.reduce((sum, l) => sum + l.amount_current, 0) ?? 0
+          // 残高チェック（インメモリ）
+          const availableBalance = getInMemoryBalance(recurring.user_id)
           const coinCost = recurring.session_types?.coin_cost ?? 0
 
           if (availableBalance < coinCost) {
-            // 残高不足の場合はログに記録してスキップ
-            await supabase
-              .from('recurring_reservation_logs')
-              .insert({
-                recurring_reservation_id: recurring.id,
-                target_date: targetDate,
-                status: 'skipped',
-                error_message: `残高不足: 必要=${coinCost}, 残高=${availableBalance}`,
-              })
+            await supabase.from('recurring_reservation_logs').insert({
+              recurring_reservation_id: recurring.id,
+              target_date: targetDate,
+              status: 'skipped',
+              error_message: `残高不足: 必要=${coinCost}, 残高=${availableBalance}`,
+            })
             skipped++
             continue
           }
@@ -264,77 +347,44 @@ export async function POST(request: Request) {
             throw new Error(`Reservation作成エラー: ${reservationError.message}`)
           }
 
-          // コインをロック（FIFO・期限切れ除外）
-          let remainingToLock = coinCost
-          const lockNow = new Date().toISOString()
-          const { data: activeLedgers } = await supabase
-            .from('coin_ledgers')
-            .select('*')
-            .eq('user_id', recurring.user_id)
-            .eq('status', 'active')
-            .gt('amount_current', 0)
-            .gt('expires_at', lockNow)
-            .order('expires_at', { ascending: true })
+          // 既存予約セットに追加（同一実行内の重複防止）
+          existingReservationSet.add(existKey)
 
-          for (const ledger of activeLedgers || []) {
-            if (remainingToLock <= 0) break
-            const lockAmount = Math.min(ledger.amount_current, remainingToLock)
+          // コインをロック（インメモリ更新 + DB更新）
+          await lockCoinsInMemory(recurring.user_id, coinCost)
 
-            await supabase
-              .from('coin_ledgers')
-              .update({
-                amount_current: ledger.amount_current - lockAmount,
-                amount_locked: ledger.amount_locked + lockAmount,
-              })
-              .eq('id', ledger.id)
-
-            remainingToLock -= lockAmount
-          }
-
-          // 残高再計算
-          const { data: newLedgers } = await supabase
-            .from('coin_ledgers')
-            .select('amount_current')
-            .eq('user_id', recurring.user_id)
-            .eq('status', 'active')
-
-          const newBalance = newLedgers?.reduce((sum, l) => sum + l.amount_current, 0) ?? 0
+          // balance_after: インメモリの更新済み残高を使用（期限切れ除外済み）
+          const balanceAfter = getInMemoryBalance(recurring.user_id)
 
           // 取引履歴
-          await supabase
-            .from('coin_transactions')
-            .insert({
-              user_id: recurring.user_id,
-              amount: -coinCost,
-              balance_after: newBalance,
-              type: 'reservation_lock',
-              description: `固定予約: ${targetDate} ${recurring.start_time}〜`,
-              reservation_id: reservation.id,
-            })
+          await supabase.from('coin_transactions').insert({
+            user_id: recurring.user_id,
+            amount: -coinCost,
+            balance_after: balanceAfter,
+            type: 'reservation_lock',
+            description: `固定予約: ${targetDate} ${recurring.start_time}〜`,
+            reservation_id: reservation.id,
+          })
 
           // ログ記録
-          await supabase
-            .from('recurring_reservation_logs')
-            .insert({
-              recurring_reservation_id: recurring.id,
-              reservation_id: reservation.id,
-              target_date: targetDate,
-              status: 'created',
-            })
+          await supabase.from('recurring_reservation_logs').insert({
+            recurring_reservation_id: recurring.id,
+            reservation_id: reservation.id,
+            target_date: targetDate,
+            status: 'created',
+          })
 
           created++
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : '不明なエラー'
           errors.push(`${targetDate}: ${errorMessage}`)
 
-          await supabase
-            .from('recurring_reservation_logs')
-            .insert({
-              recurring_reservation_id: recurring.id,
-              target_date: targetDate,
-              status: 'failed',
-              error_message: errorMessage,
-            })
+          await supabase.from('recurring_reservation_logs').insert({
+            recurring_reservation_id: recurring.id,
+            target_date: targetDate,
+            status: 'failed',
+            error_message: errorMessage,
+          })
         }
       }
     }
