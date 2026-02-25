@@ -7,6 +7,7 @@ interface Props {
   rank: MemberRank
   displayName: string | null
   memberSince?: string
+  rankUpKey?: string
 }
 
 const RANK_CONFIG: Record<MemberRank, {
@@ -19,52 +20,52 @@ const RANK_CONFIG: Record<MemberRank, {
 }> = {
   bronze: {
     label: 'BRONZE',
-    bg: 'linear-gradient(135deg, #6B3A1F 0%, #CD7F32 45%, #DAA520 70%, #8B4513 100%)',
-    shimmer: 'rgba(218,165,32,0.35)',
-    text: '#FFF8E7',
-    accent: '#FFD580',
-    glow: '0 0 32px 6px rgba(205,127,50,0.45)',
+    bg: 'linear-gradient(155deg, #1C0D00 0%, #6B3010 18%, #B86B28 36%, #D48840 50%, #9B5018 65%, #4A1E06 84%, #1A0A00 100%)',
+    shimmer: 'rgba(200,120,48,0.45)',
+    text: '#FFE8C0',
+    accent: '#D9A86A',
+    glow: '0 14px 52px rgba(100,40,5,0.9), 0 4px 16px rgba(0,0,0,0.95)',
   },
   silver: {
     label: 'SILVER',
-    bg: 'linear-gradient(135deg, #5A5A5A 0%, #C0C0C0 45%, #E8E8E8 70%, #808080 100%)',
-    shimmer: 'rgba(232,232,232,0.4)',
-    text: '#1A1A1A',
-    accent: '#FFFFFF',
-    glow: '0 0 32px 6px rgba(192,192,192,0.5)',
+    bg: 'linear-gradient(155deg, #141414 0%, #3E3E3E 18%, #868686 35%, #C2C2C2 50%, #DADADA 58%, #888888 74%, #3A3A3A 90%, #0F0F0F 100%)',
+    shimmer: 'rgba(198,198,198,0.5)',
+    text: '#111111',
+    accent: '#CECECE',
+    glow: '0 14px 52px rgba(40,40,40,0.88), 0 4px 16px rgba(0,0,0,0.95)',
   },
   gold: {
     label: 'GOLD',
-    bg: 'linear-gradient(135deg, #7B5800 0%, #FFD700 45%, #FFF176 70%, #B8860B 100%)',
-    shimmer: 'rgba(255,241,118,0.45)',
-    text: '#2A1A00',
-    accent: '#FFFDE0',
-    glow: '0 0 40px 8px rgba(255,215,0,0.55)',
+    bg: 'linear-gradient(155deg, #150B00 0%, #583800 18%, #AE7E00 35%, #D2A600 50%, #EEC000 58%, #9E7600 74%, #482C00 90%, #150B00 100%)',
+    shimmer: 'rgba(238,192,0,0.45)',
+    text: '#1A0E00',
+    accent: '#EECA40',
+    glow: '0 14px 56px rgba(160,118,0,0.9), 0 4px 16px rgba(0,0,0,0.95)',
   },
   platinum: {
     label: 'PLATINUM',
-    bg: 'linear-gradient(135deg, #7A7A7A 0%, #D8D8D8 40%, #FFFFFF 60%, #9E9E9E 100%)',
-    shimmer: 'rgba(255,255,255,0.5)',
-    text: '#1A1A1A',
-    accent: '#FFFFFF',
-    glow: '0 0 40px 8px rgba(220,220,220,0.6)',
+    bg: 'linear-gradient(155deg, #0C0C0C 0%, #363636 18%, #666666 35%, #B2B2B2 50%, #E6E6E6 58%, #AEAEAE 70%, #464646 88%, #0C0C0C 100%)',
+    shimmer: 'rgba(238,238,238,0.6)',
+    text: '#080808',
+    accent: '#E6E6E6',
+    glow: '0 14px 56px rgba(158,158,158,0.85), 0 4px 16px rgba(0,0,0,0.95)',
   },
   diamond: {
     label: 'DIAMOND',
-    bg: 'linear-gradient(135deg, #006064 0%, #00BCD4 35%, #B9F2FF 60%, #00ACC1 100%)',
-    shimmer: 'rgba(185,242,255,0.5)',
-    text: '#001A2E',
-    accent: '#E0FBFF',
-    glow: '0 0 48px 10px rgba(0,188,212,0.6)',
+    bg: 'linear-gradient(155deg, #00060E 0%, #001A2E 18%, #003650 35%, #006680 48%, #009EC0 58%, #005E78 70%, #001A2E 88%, #00060E 100%)',
+    shimmer: 'rgba(0,178,218,0.5)',
+    text: '#C0F0FF',
+    accent: '#3ED6F6',
+    glow: '0 14px 60px rgba(0,118,178,0.9), 0 4px 16px rgba(0,0,0,0.95)',
   },
 }
 
-export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
+export default function GradeCard3D({ rank, displayName, memberSince, rankUpKey }: Props) {
   const cardRef = useRef<HTMLDivElement>(null)
   const shimmerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
 
-  // アニメーション状態はすべてrefで管理（stale closure回避）
   const isHoveredRef = useRef(false)
   const isDraggingRef = useRef(false)
   const autoAngleRef = useRef(0)
@@ -116,6 +117,26 @@ export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
     return () => cancelAnimationFrame(animFrameRef.current)
   }, [])
 
+  // 昇格アニメーション: 未表示の rankUpKey であれば 700ms 後に表示
+  useEffect(() => {
+    if (!rankUpKey) return
+    const key = `rankup_seen_${rankUpKey}`
+    if (!localStorage.getItem(key)) {
+      const t = setTimeout(() => {
+        setShowCelebration(true)
+        localStorage.setItem(key, '1')
+      }, 700)
+      return () => clearTimeout(t)
+    }
+  }, [rankUpKey])
+
+  // 4.5秒後に自動クローズ
+  useEffect(() => {
+    if (!showCelebration) return
+    const t = setTimeout(() => setShowCelebration(false), 4500)
+    return () => clearTimeout(t)
+  }, [showCelebration])
+
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     isDraggingRef.current = true
     setIsDragging(true)
@@ -136,7 +157,6 @@ export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
       const dx = e.clientX - lastPosRef.current.x
       const dy = e.clientY - lastPosRef.current.y
 
-      // 速度 = 移動量/時間 × フレーム係数(16ms)
       velocityRef.current = {
         x: (dx / dt) * 16,
         y: (dy / dt) * 16,
@@ -150,7 +170,6 @@ export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
       lastPosRef.current = { x: e.clientX, y: e.clientY }
       lastTimeRef.current = now
     } else if (isHoveredRef.current) {
-      // ホバー時マウス追従
       const rect = card.getBoundingClientRect()
       const dx = e.clientX - (rect.left + rect.width / 2)
       const dy = e.clientY - (rect.top + rect.height / 2)
@@ -160,7 +179,6 @@ export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
       card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`
     }
 
-    // ホログラフィックシマー
     if (shimmer && card) {
       const rect = card.getBoundingClientRect()
       const pctX = ((e.clientX - rect.left) / rect.width) * 100
@@ -173,7 +191,6 @@ export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
   const handlePointerUp = () => {
     isDraggingRef.current = false
     setIsDragging(false)
-    // velocityRef は保持して慣性フェーズへ引き継ぐ
   }
 
   const handleMouseEnter = () => {
@@ -191,98 +208,171 @@ export default function GradeCard3D({ rank, displayName, memberSince }: Props) {
   const year = memberSince ? new Date(memberSince).getFullYear() : new Date().getFullYear()
 
   return (
-    <div
-      className="flex justify-center items-center py-4"
-      style={{ perspective: '900px' }}
-    >
-      <div
-        ref={cardRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          width: 340,
-          height: 200,
-          borderRadius: 16,
-          background: cfg.bg,
-          boxShadow: cfg.glow,
-          position: 'relative',
-          cursor: isDragging ? 'grabbing' : 'grab',
-          transformStyle: 'preserve-3d',
-          userSelect: 'none',
-          overflow: 'hidden',
-          touchAction: 'none',
-        }}
-      >
-        {/* ホログラフィックシマーレイヤー */}
+    <>
+      {/* ブラックアウト昇格演出オーバーレイ */}
+      {showCelebration && (
         <div
-          ref={shimmerRef}
-          style={{
-            position: 'absolute', inset: 0, borderRadius: 16,
-            opacity: 0, transition: 'opacity 0.15s',
-            pointerEvents: 'none', zIndex: 2,
-          }}
-        />
-
-        {/* ノイズ質感レイヤー */}
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: 16,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E")`,
-          pointerEvents: 'none', zIndex: 1,
-        }} />
-
-        {/* カード内コンテンツ */}
-        <div style={{ position: 'relative', zIndex: 3, padding: '20px 24px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          {/* ランクロゴ + ラベル */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: 11, letterSpacing: '0.2em', color: cfg.accent, opacity: 0.8 }}>
-                STELLA COIN
-              </div>
-              <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '0.15em', color: cfg.accent, textShadow: `0 1px 4px rgba(0,0,0,0.3)` }}>
-                {cfg.label}
-              </div>
+          className="fixed inset-0 z-[9999] flex items-center justify-center animate-in fade-in duration-500"
+          style={{ background: 'rgba(0,0,0,0.78)', cursor: 'pointer' }}
+          onClick={() => setShowCelebration(false)}
+        >
+          <div className="text-center animate-in zoom-in-95 duration-700 select-none px-10">
+            <div style={{ fontSize: 56, marginBottom: 16 }}>🏆</div>
+            <div style={{
+              fontSize: 10, letterSpacing: '0.42em',
+              color: 'rgba(255,255,255,0.44)', marginBottom: 10,
+            }}>
+              RANK UP
             </div>
-            {/* 装飾円 */}
-            <div style={{ display: 'flex', gap: -8 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: cfg.accent, opacity: 0.25 }} />
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: cfg.accent, opacity: 0.15, marginLeft: -16 }} />
+            <div style={{
+              fontSize: 38, fontWeight: 900, letterSpacing: '0.18em',
+              color: cfg.accent,
+              textShadow: `0 0 48px ${cfg.shimmer}, 0 0 80px ${cfg.shimmer}`,
+              marginBottom: 6,
+            }}>
+              {cfg.label}
             </div>
-          </div>
-
-          {/* 中段: カード番号風デコレーション */}
-          <div style={{ display: 'flex', gap: 12 }}>
-            {['••••', '••••', '••••', String(year)].map((seg, i) => (
-              <span key={i} style={{ fontSize: 14, letterSpacing: '0.12em', color: cfg.text, opacity: 0.7, fontFamily: 'monospace' }}>
-                {seg}
-              </span>
-            ))}
-          </div>
-
-          {/* 下段: 名前 */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <div>
-              <div style={{ fontSize: 9, letterSpacing: '0.15em', color: cfg.text, opacity: 0.6 }}>MEMBER</div>
-              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '0.06em', color: cfg.text, textShadow: `0 1px 3px rgba(0,0,0,0.2)` }}>
-                {displayName || 'MEMBER'}
-              </div>
+            <div style={{
+              fontSize: 17, color: 'rgba(255,255,255,0.85)',
+              marginBottom: 38,
+            }}>
+              おめでとうございます！
             </div>
-            <div style={{ fontSize: 11, color: cfg.text, opacity: 0.5, fontStyle: 'italic' }}>
-              SC
+            <div style={{
+              fontSize: 11, color: 'rgba(255,255,255,0.32)',
+              letterSpacing: '0.12em',
+            }}>
+              タップして閉じる
             </div>
           </div>
         </div>
+      )}
 
-        {/* 右上光沢ストリーク */}
-        <div style={{
-          position: 'absolute', top: -40, right: -20, width: 80, height: 160,
-          background: `linear-gradient(135deg, ${cfg.accent}22, transparent)`,
-          transform: 'rotate(20deg)', pointerEvents: 'none', zIndex: 2,
-        }} />
+      <div
+        className="flex justify-center items-center py-4"
+        style={{ perspective: '900px' }}
+      >
+        <div
+          ref={cardRef}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            width: 340,
+            height: 210,
+            borderRadius: 14,
+            background: cfg.bg,
+            boxShadow: cfg.glow,
+            position: 'relative',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            transformStyle: 'preserve-3d',
+            userSelect: 'none',
+            overflow: 'hidden',
+            touchAction: 'none',
+          }}
+        >
+          {/* ホログラフィックシマーレイヤー */}
+          <div
+            ref={shimmerRef}
+            style={{
+              position: 'absolute', inset: 0, borderRadius: 14,
+              opacity: 0, transition: 'opacity 0.15s',
+              pointerEvents: 'none', zIndex: 5,
+            }}
+          />
+
+          {/* 細粒ノイズ質感 */}
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: 14,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.11'/%3E%3C/svg%3E")`,
+            pointerEvents: 'none', zIndex: 1,
+          }} />
+
+          {/* 異方性ブラッシュメタルテクスチャ（横方向） */}
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: 14,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.01 0.85' numOctaves='3' seed='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)' opacity='0.08'/%3E%3C/svg%3E")`,
+            pointerEvents: 'none', zIndex: 2,
+          }} />
+
+          {/* ビネット（周辺減光・重厚感） */}
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: 14,
+            background: 'radial-gradient(ellipse at 50% 50%, transparent 44%, rgba(0,0,0,0.58) 100%)',
+            pointerEvents: 'none', zIndex: 3,
+          }} />
+
+          {/* 上端リムハイライト（金属エッジ感） */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+            background: 'linear-gradient(90deg, transparent 6%, rgba(255,255,255,0.22) 30%, rgba(255,255,255,0.42) 50%, rgba(255,255,255,0.22) 70%, transparent 94%)',
+            pointerEvents: 'none', zIndex: 4,
+          }} />
+
+          {/* カード内コンテンツ */}
+          <div style={{ position: 'relative', zIndex: 6, padding: '18px 22px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+
+            {/* 上段: ブランド名・ランク | 装飾サークル */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: '0.22em', color: cfg.accent, opacity: 0.72, marginBottom: 3 }}>
+                  STELLA COIN
+                </div>
+                <div style={{ fontSize: 21, fontWeight: 900, letterSpacing: '0.18em', color: cfg.accent, textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}>
+                  {cfg.label}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: cfg.accent, opacity: 0.20 }} />
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: cfg.accent, opacity: 0.13, marginLeft: -13 }} />
+              </div>
+            </div>
+
+            {/* 中段: EMVチップ + カード番号 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <svg width="34" height="26" viewBox="0 0 34 26" style={{ flexShrink: 0, opacity: 0.70 }}>
+                <rect x="0.5" y="0.5" width="33" height="25" rx="3"
+                  fill={cfg.accent} fillOpacity="0.15"
+                  stroke={cfg.accent} strokeWidth="0.5" strokeOpacity="0.5" />
+                <line x1="0.5" y1="9" x2="33.5" y2="9" stroke={cfg.accent} strokeWidth="0.4" strokeOpacity="0.44" />
+                <line x1="0.5" y1="17" x2="33.5" y2="17" stroke={cfg.accent} strokeWidth="0.4" strokeOpacity="0.44" />
+                <line x1="11" y1="0.5" x2="11" y2="25.5" stroke={cfg.accent} strokeWidth="0.4" strokeOpacity="0.44" />
+                <line x1="23" y1="0.5" x2="23" y2="25.5" stroke={cfg.accent} strokeWidth="0.4" strokeOpacity="0.44" />
+              </svg>
+              <div style={{ display: 'flex', gap: 10 }}>
+                {['••••', '••••', '••••', String(year)].map((seg, i) => (
+                  <span key={i} style={{ fontSize: 12, letterSpacing: '0.12em', color: cfg.text, opacity: 0.62, fontFamily: 'monospace' }}>
+                    {seg}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* 下段: 名前 | SC */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+              <div>
+                <div style={{ fontSize: 8, letterSpacing: '0.20em', color: cfg.text, opacity: 0.50, marginBottom: 2 }}>MEMBER</div>
+                <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.07em', color: cfg.text, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+                  {displayName || 'MEMBER'}
+                </div>
+              </div>
+              <div style={{ fontSize: 10, color: cfg.text, opacity: 0.42, fontStyle: 'italic', letterSpacing: '0.04em' }}>
+                SC
+              </div>
+            </div>
+          </div>
+
+          {/* 右上光沢ストリーク */}
+          <div style={{
+            position: 'absolute', top: -40, right: -20, width: 80, height: 180,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.05), transparent)',
+            transform: 'rotate(20deg)', pointerEvents: 'none', zIndex: 4,
+          }} />
+        </div>
       </div>
-    </div>
+    </>
   )
 }

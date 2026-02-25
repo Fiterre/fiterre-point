@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getUserBalance } from '@/lib/queries/balance'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, History, Award, QrCode, Settings } from 'lucide-react'
@@ -29,6 +30,30 @@ export default async function DashboardPage() {
   const profile = profileRes.data
   const upcomingReservations = user ? await getUpcomingReservations(user.id) : []
 
+  // 直近48h以内に合格した Fitest があれば rankUpKey を渡す（昇格アニメーション用）
+  let rankUpKey: string | undefined
+  if (user && profile?.rank && profile.rank !== 'bronze') {
+    const adminClient = createAdminClient()
+    const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+    const RANK_FROM_LEVEL: Record<string, string> = {
+      intermediate: 'silver',
+      advanced: 'gold',
+      master: 'diamond',
+    }
+    const { data: recentPromotion } = await adminClient
+      .from('fitest_results')
+      .select('id, target_level')
+      .eq('user_id', user.id)
+      .eq('passed', true)
+      .gt('created_at', cutoff)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (recentPromotion && RANK_FROM_LEVEL[recentPromotion.target_level] === profile.rank) {
+      rankUpKey = recentPromotion.id
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -42,6 +67,7 @@ export default async function DashboardPage() {
           rank={(profile.rank as MemberRank) ?? 'bronze'}
           displayName={profile.display_name}
           memberSince={profile.created_at}
+          rankUpKey={rankUpKey}
         />
       )}
 
