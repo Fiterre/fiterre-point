@@ -3,6 +3,7 @@ import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { writeAuditLog } from '@/lib/queries/auditLog'
+import { isValidUUID } from '@/lib/validation'
 
 export async function PATCH(
   request: Request,
@@ -20,6 +21,11 @@ export async function PATCH(
     }
 
     const { id: targetUserId } = await params
+
+    if (!isValidUUID(targetUserId)) {
+      return NextResponse.json({ error: '無効なユーザーIDです' }, { status: 400 })
+    }
+
     const body = await request.json()
     const status = typeof body.status === 'string' ? body.status : ''
 

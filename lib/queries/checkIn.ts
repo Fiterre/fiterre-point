@@ -1,11 +1,12 @@
+import { randomInt } from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { VerificationCode, CheckInLogWithRelations } from '@/types/database'
 import { getSetting } from './settings'
 
-// 6桁のランダムコードを生成
+// 6桁のランダムコードを生成（暗号論的乱数）
 function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString()
+  return randomInt(100000, 1000000).toString()
 }
 
 export async function createVerificationCode(

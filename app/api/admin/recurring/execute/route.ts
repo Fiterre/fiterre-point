@@ -33,7 +33,17 @@ export async function POST(request: Request) {
         targetMonthNum = 1
       }
     } else {
-      [targetYear, targetMonthNum] = targetMonth.split('-').map(Number)
+      const parts = typeof targetMonth === 'string' ? targetMonth.split('-').map(Number) : []
+      targetYear = parts[0]
+      targetMonthNum = parts[1]
+      if (
+        !Number.isFinite(targetYear) ||
+        !Number.isFinite(targetMonthNum) ||
+        targetMonthNum < 1 ||
+        targetMonthNum > 12
+      ) {
+        return NextResponse.json({ error: '月の形式が不正です (YYYY-MM または next)' }, { status: 400 })
+      }
     }
 
     const supabase = createAdminClient()

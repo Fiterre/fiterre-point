@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { bulkExtendExpiry } from '@/lib/queries/coins'
 import { revalidatePath } from 'next/cache'
+import { isPositiveInteger } from '@/lib/validation'
 
 export async function POST(request: Request) {
   try {
@@ -26,6 +27,10 @@ export async function POST(request: Request) {
 
     if (!ledgerIds || ledgerIds.length === 0 || !additionalDays) {
       return NextResponse.json({ error: '無効なパラメータです' }, { status: 400 })
+    }
+
+    if (!isPositiveInteger(additionalDays) || additionalDays > 365) {
+      return NextResponse.json({ error: '延長日数は1〜365の整数で指定してください' }, { status: 400 })
     }
 
     // 対象レジャーの所有者ロールを一括確認（管理者・メンター所有分は除外）
