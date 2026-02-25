@@ -71,6 +71,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
     }
 
+    // 管理者・メンターは交換申請不可（顧客のみ）
+    const [admin, mentor] = await Promise.all([isAdmin(user.id), isMentor(user.id)])
+    if (admin || mentor) {
+      return NextResponse.json({ error: '管理者・メンターは交換申請できません' }, { status: 403 })
+    }
+
     // ユーザーステータスチェック
     const adminClient = createAdminClient()
     const { data: profile } = await adminClient
