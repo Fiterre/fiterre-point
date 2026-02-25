@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkIn } from '@/lib/queries/checkIn'
-import { isMentor } from '@/lib/queries/auth'
+import { isAdmin, isMentor } from '@/lib/queries/auth'
 import { isValidUUID } from '@/lib/validation'
 
 export async function POST(request: Request) {
@@ -48,12 +48,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'このユーザーは現在利用停止中です' }, { status: 403 })
     }
 
+    // 管理者・メンターには来店SCを付与しない
+    const [targetIsAdmin, targetIsMentor] = await Promise.all([isAdmin(userId), isMentor(userId)])
+    const grantBonus = !targetIsAdmin && !targetIsMentor
+
     const result = await checkIn(
       userId,
       user.id,
       method || 'manual',
       reservationId,
-      codeId
+      codeId,
+      grantBonus
     )
 
     if (!result.success) {

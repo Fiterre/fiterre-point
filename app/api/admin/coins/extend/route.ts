@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
 import { bulkExtendExpiry } from '@/lib/queries/coins'
 import { revalidatePath } from 'next/cache'
@@ -27,7 +28,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '無効なパラメータです' }, { status: 400 })
     }
 
-    const results = await bulkExtendExpiry(ledgerIds, additionalDays)
+    // 対象レジャーの所有者ロールを一括確認（管理者・メンター所有分は除外）
+    const supabase = createAdminClient()
+    const { data: ledgerOwners } = await supabase
+      .from('coin_ledgers')
+      .select('id, user_id')
+      .in('id', ledgerIds)
+
+    const ownerUserIds = [...new Set((ledgerOwners ?? []).map(l => l.user_id))]
+    const { data: nonCustomerRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .in('user_id', ownerUserIds)
+      .in('role', ['admin', 'manager', 'mentor'])
+
+    const nonCustomerSet = new Set((nonCustomerRoles ?? []).map(r => r.user_id))
+    const validLedgerIds = (ledgerOwners ?? [])
+      .filter(l => !nonCustomerSet.has(l.user_id))
+      .map(l => l.id)
+
+    if (validLedgerIds.length === 0) {
+      return NextResponse.json({ error: '有効な対象がありません（管理者・メンター所有のSCは延長できません）' }, { status: 400 })
+    }
+
+    const results = await bulkExtendExpiry(validLedgerIds, additionalDays)
 
     revalidatePath('/admin')
     revalidatePath('/dashboard')

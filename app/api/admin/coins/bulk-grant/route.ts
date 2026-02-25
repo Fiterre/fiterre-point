@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getCurrentUser, isAdmin } from '@/lib/queries/auth'
+import { getCurrentUser, isAdmin, isMentor } from '@/lib/queries/auth'
 import { getSetting } from '@/lib/queries/settings'
 import { isPositiveInteger, isValidUUID } from '@/lib/validation'
 import { revalidatePath } from 'next/cache'
@@ -65,6 +65,12 @@ export async function POST(request: Request) {
 
         if (profile.status !== 'active') {
           errors.push(`${userId}: ユーザーが利用停止中です`)
+          continue
+        }
+
+        // 管理者・メンターへはSC付与不可（顧客のみ）
+        if (await isMentor(userId)) {
+          errors.push(`${userId}: 管理者・メンターへはSCを付与できません`)
           continue
         }
 

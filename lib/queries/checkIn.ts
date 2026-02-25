@@ -86,7 +86,8 @@ export async function checkIn(
   verifiedBy: string,
   method: 'code' | 'qr' | 'manual',
   reservationId?: string,
-  codeId?: string
+  codeId?: string,
+  grantBonus: boolean = true
 ): Promise<{ success: boolean; bonusCoins: number; message: string }> {
   const supabase = createAdminClient()
 
@@ -186,8 +187,8 @@ export async function checkIn(
       }
     }
 
-    // 来店ポイントを付与
-    if (bonusCoins > 0) {
+    // 来店ポイントを付与（顧客のみ。管理者・メンターはスキップ）
+    if (bonusCoins > 0 && grantBonus) {
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + 90)
 
@@ -262,8 +263,10 @@ export async function checkIn(
 
     return {
       success: true,
-      bonusCoins,
-      message: `チェックイン完了！${bonusCoins} SCを付与しました`
+      bonusCoins: grantBonus ? bonusCoins : 0,
+      message: grantBonus
+        ? `チェックイン完了！${bonusCoins} SCを付与しました`
+        : 'チェックイン完了'
     }
   } catch (error) {
     console.error('Check-in error:', error)
